@@ -1,0 +1,82 @@
+# ============================================
+# .dockerignore — keep image small and secure
+# ============================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.circleci
+
+# Docs
+docs
+*.md
+LICENSE
+CONTRIBUTING.md
+
+# Dependencies (rebuilt in Docker)
+node_modules
+.pnp
+.pnp.js
+
+# Build artifacts
+.next
+out
+build
+dist
+coverage
+.nyc_output
+playwright-report
+test-results
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__
+**/__mocks__
+tests
+e2e
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+*.swp
+*.swo
+*.sublime-*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker / volumes
+docker-compose.override.yml
+docker-compose.*.yml
+backups
+certbot
+
+# Prisma dev migrations
+prisma/migrations/dev

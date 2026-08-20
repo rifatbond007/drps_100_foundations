@@ -1,0 +1,53 @@
+# CODEOWNERS — Auto-assign reviewers for the donation platform
+# All changes require review by riftbond007
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @riftbond007
+
+# Frontend
+/src/components/ @riftbond007
+/src/app/[locale]/ @riftbond007
+/messages/ @riftbond007
+
+# Backend
+/src/app/api/ @riftbond007
+/src/lib/ @riftbond007
+/src/middleware.ts @riftbond007
+
+# Database
+/prisma/ @riftbond007
+/src/lib/prisma.ts @riftbond007
+
+# Authentication & Security
+/src/lib/auth/ @riftbond007
+/src/lib/security/ @riftbond007
+
+# Payment
+/src/lib/payment/ @riftbond007
+
+# i18n
+/src/i18n.ts @riftbond007
+/messages/bn.json @riftbond007
+/messages/en.json @riftbond007
+
+# CI/CD & DevOps
+/.github/workflows/ @riftbond007
+/Dockerfile @riftbond007
+/docker-compose.yml @riftbond007
+/docker-compose.dev.yml @riftbond007
+/nginx/ @riftbond007
+/scripts/ @riftbond007
+
+# Configuration
+/package.json @riftbond007
+/pnpm-lock.yaml @riftbond007
+/tsconfig.json @riftbond007
+/next.config.js @riftbond007
+/.env.example @riftbond007
+
+# Documentation
+/docs/ @riftbond007
+/README.md @riftbond007
+/CHANGELOG.md @riftbond007
+/CONTRIBUTING.md @riftbond007

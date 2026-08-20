@@ -1,0 +1,199 @@
+{
+  "common": {
+    "appName": "Donation Platform",
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "search": "Search",
+    "yes": "Yes",
+    "no": "No",
+    "error": "An error occurred",
+    "retry": "Try again"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "dashboard": "Dashboard",
+    "donate": "Donate",
+    "history": "History",
+    "settings": "Settings",
+    "admin": "Admin",
+    "users": "Users",
+    "reports": "Reports",
+    "login": "Sign in",
+    "logout": "Sign out"
+  },
+  "landing": {
+    "heroTitle": "Your donation, real change",
+    "heroSubtitle": "Secure and transparent donations to verified charitable causes. Process easily via bKash.",
+    "donateCta": "Donate now",
+    "aboutCta": "Learn more"
+  },
+  "about": {
+    "title": "About us",
+    "subtitle": "Our mission and those we serve",
+    "body": "This platform is built for transparent, efficient, and secure charitable giving. Every transaction is processed through a secure payment gateway."
+  },
+  "auth": {
+    "loginTitle": "Welcome",
+    "loginSubtitle": "Sign in with your Google account to continue",
+    "loginWithGoogle": "Sign in with Google",
+    "loginTerms": "By signing in you agree to our terms of service",
+    "logout": "Sign out",
+    "profileCompletion": {
+      "title": "Complete your profile",
+      "subtitle": "Provide a few details to start donating",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "+8801XXXXXXXXX",
+      "languageLabel": "Preferred language",
+      "submit": "Save profile",
+      "errors": {
+        "invalidPhone": "Please enter a valid Bangladeshi phone number",
+        "submitFailed": "Failed to save profile"
+      }
+    },
+    "errors": {
+      "OAuthSignin": "Could not start sign in",
+      "OAuthCallback": "Could not process provider response",
+      "OAuthAccountNotLinked": "This email is already linked to another method",
+      "AccessDenied": "Access denied",
+      "Verification": "Verification link has expired",
+      "Default": "An error occurred"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Summary of your donations",
+    "totalDonated": "Total donated",
+    "last30Days": "Last 30 days",
+    "donationCount": "Donations",
+    "allTime": "All time",
+    "lastDonation": "Last donation",
+    "never": "No donations yet",
+    "donateCta": "Donate now"
+  },
+  "donation": {
+    "title": "Donate",
+    "customAmount": "Enter a custom amount",
+    "purpose": "Purpose",
+    "submit": "Continue donation",
+    "processing": "Processing…",
+    "recentDonations": "Recent donations",
+    "purposes": {
+      "GENERAL_FUND": "General fund",
+      "EDUCATION": "Education",
+      "MEDICAL": "Medical",
+      "EMERGENCY": "Emergency"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "SUCCESS": "Successful",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
+    },
+    "success": {
+      "title": "Thank you!",
+      "subtitle": "Your donation was accepted successfully.",
+      "viewReceipt": "View receipt",
+      "backToDashboard": "Back to dashboard"
+    },
+    "failed": {
+      "title": "Donation failed",
+      "subtitle": "Sorry, your donation could not be processed.",
+      "tryAgain": "Try again",
+      "backToDashboard": "Back to dashboard"
+    },
+    "errors": {
+      "minAmount": "Minimum donation is 10 BDT",
+      "maxAmount": "Maximum donation is 100,000 BDT",
+      "createFailed": "Failed to create donation",
+      "invalidPurpose": "Invalid purpose"
+    }
+  },
+  "history": {
+    "title": "Donation history",
+    "subtitle": "A list of all your donations",
+    "loading": "Loading…",
+    "loadingFailed": "Failed to load: {message}",
+    "noDonations": "No donations yet",
+    "viewAll": "View all",
+    "status": {
+      "PENDING": "Pending",
+      "SUCCESS": "Successful",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
+    },
+    "purposes": {
+      "GENERAL_FUND": "General fund",
+      "EDUCATION": "Education",
+      "MEDICAL": "Medical",
+      "EMERGENCY": "Emergency"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and preferences",
+    "profile": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "language": "Language",
+    "notifications": "Notifications",
+    "emailNotifications": "Email notifications",
+    "donationReceipts": "Donation receipts",
+    "security": "Security",
+    "changePassword": "Change password",
+    "deleteAccount": "Delete account",
+    "saveChanges": "Save changes",
+    "saved": "Settings saved"
+  },
+  "admin": {
+    "title": "Admin panel",
+    "users": {
+      "title": "User management",
+      "subtitle": "All registered users",
+      "search": "Search by email or name",
+      "ban": "Ban",
+      "unban": "Unban",
+      "makeAdmin": "Make admin",
+      "removeAdmin": "Remove admin",
+      "viewProfile": "View profile",
+      "actions": "Actions",
+      "role": "Role",
+      "status": "Status",
+      "joinedAt": "Joined on",
+      "lastLoginAt": "Last login",
+      "totalDonated": "Total donated",
+      "empty": "No users found"
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Donation statistics & analytics",
+      "totalRaised": "Total raised",
+      "totalDonors": "Total donors",
+      "successRate": "Success rate",
+      "byPurpose": "By purpose",
+      "byMonth": "By month",
+      "exportCsv": "Export CSV",
+      "exportPdf": "Export PDF"
+    }
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "unauthorized": "You must sign in",
+    "forbidden": "Access denied",
+    "rateLimit": "Rate limit exceeded",
+    "serverError": "Server error",
+    "validationFailed": "Validation failed"
+  },
+  "footer": {
+    "copyright": "© {year} {appName}. All rights reserved.",
+    "about": "About",
+    "privacy": "Privacy policy",
+    "terms": "Terms of service",
+    "contact": "Contact"
+  }
+}

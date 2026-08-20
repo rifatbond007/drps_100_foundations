@@ -1,0 +1,189 @@
+// ============================================
+// Donation Platform — Prisma Schema
+// ============================================
+// Per database-agent.md + README.md §5
+// Postgres 16, cuid() IDs, Decimal money,
+// proper cascade behavior, audit log, etc.
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Enums
+// ============================================
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum DonationStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum DonationPurpose {
+  GENERAL_FUND
+  EDUCATION
+  MEDICAL
+  EMERGENCY
+}
+
+enum Language {
+  BN
+  EN
+}
+
+enum AuditSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+// ============================================
+// NextAuth (Auth.js) required models
+// ============================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================
+// Domain models
+// ============================================
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  emailVerified    DateTime?
+  name             String
+  avatarUrl        String?
+  phone            String?
+  role             UserRole  @default(USER)
+  languagePref     Language  @default(BN)
+  isBanned         Boolean   @default(false)
+  bannedAt         DateTime?
+  bannedReason     String?
+  profileCompleted Boolean   @default(false)
+  lastLoginAt      DateTime?
+  // H6: soft-delete — admin can delete banned users without orphaning donations
+  deletedAt        DateTime?
+  // H2: bumped on forced logout-all-sessions; checked in JWT callback
+  tokenVersion     Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  accounts  Account[]
+  sessions  Session[]
+  donations Donation[]
+  auditLogs AuditLog[]
+  settings  UserSettings?
+
+  @@index([email])
+  @@index([role])
+  @@index([isBanned])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+model Donation {
+  id                 String          @id @default(cuid())
+  // H6: nullable userId; SetNull on delete preserves financial record
+  userId             String?
+  amount             Decimal         @db.Decimal(10, 2)
+  currency           String          @default("BDT")
+  purpose            DonationPurpose
+  status             DonationStatus  @default(PENDING)
+  isAnonymous        Boolean         @default(false)
+  bkashPaymentId     String?         @unique
+  bkashTransactionId String?         @unique
+  paymentMethod      String?         @default("bkash")
+  failureReason      String?
+  metadata           Json?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  completedAt        DateTime?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId, status, createdAt])
+  @@index([bkashPaymentId])
+}
+
+model AuditLog {
+  id            String        @id @default(cuid())
+  userId        String?
+  action        String
+  resource      String?
+  details       Json?
+  ipAddress     String?
+  userAgent     String?       @db.Text
+  status        String        @default("SUCCESS")
+  // H7: severity tier for triage; correlationId for tracing across requests
+  severity      AuditSeverity @default(INFO)
+  correlationId String?
+  createdAt     DateTime      @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([severity])
+  @@index([correlationId])
+}
+
+model UserSettings {
+  userId             String  @id
+  emailNotifications Boolean @default(true)
+  donationReceipts   Boolean @default(true)
+  theme              String  @default("system") // light | dark | system
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
