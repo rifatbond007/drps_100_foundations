@@ -36,6 +36,7 @@ export default async function CompleteProfilePage({
       <div className="rounded-lg border bg-card p-6 shadow-sm">
         <ProfileCompletionForm
           defaultLanguage={session.user.languagePref === 'EN' ? 'EN' : 'BN'}
+          redirectTo={`/${locale}/dashboard`}
         />
       </div>
     </div>
