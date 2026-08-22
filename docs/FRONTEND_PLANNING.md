@@ -10,20 +10,20 @@
 
 ### 1.1 Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Framework | Next.js 15 (App Router) | SSR, routing, API routes |
-| UI Library | React 19 | Component-based UI |
-| Language | TypeScript | Type safety |
-| Styling | Tailwind CSS | Utility-first CSS |
-| Components | shadcn/ui | Accessible, customizable components |
-| Forms | React Hook Form + Zod | Form validation |
-| State | Zustand / React Context | Client state management |
-| i18n | next-intl | Multi-language support |
-| Icons | Lucide React | Icon library |
-| Charts | Recharts | Dashboard analytics |
-| Date | date-fns | Date formatting |
-| HTTP | Fetch API | API calls |
+| Layer      | Technology              | Purpose                             |
+| ---------- | ----------------------- | ----------------------------------- |
+| Framework  | Next.js 15 (App Router) | SSR, routing, API routes            |
+| UI Library | React 19                | Component-based UI                  |
+| Language   | TypeScript              | Type safety                         |
+| Styling    | Tailwind CSS            | Utility-first CSS                   |
+| Components | shadcn/ui               | Accessible, customizable components |
+| Forms      | React Hook Form + Zod   | Form validation                     |
+| State      | Zustand / React Context | Client state management             |
+| i18n       | next-intl               | Multi-language support              |
+| Icons      | Lucide React            | Icon library                        |
+| Charts     | Recharts                | Dashboard analytics                 |
+| Date       | date-fns                | Date formatting                     |
+| HTTP       | Fetch API               | API calls                           |
 
 ---
 
@@ -101,9 +101,11 @@ src/
 ### 3.1 Public Pages
 
 #### Landing Page (`/`)
+
 **Purpose:** Introduce organization, encourage donations
 
 **Components:**
+
 - Hero section with organization logo
 - Mission statement (Bangla/English)
 - Recent donation stats
@@ -112,6 +114,7 @@ src/
 - Footer with contact info
 
 **Features:**
+
 - Language toggle (top-right)
 - Responsive design (mobile-first)
 - Smooth animations (Framer Motion)
@@ -120,15 +123,18 @@ src/
 ---
 
 #### Login Page (`/login`)
+
 **Purpose:** Authenticate users via Google
 
 **Components:**
+
 - Organization branding
 - "Login with Google" button (large, prominent)
 - Privacy policy link
 - Terms of service link
 
 **Flow:**
+
 1. User clicks Google login
 2. Redirect to Google OAuth
 3. Google redirects back to callback
@@ -140,9 +146,11 @@ src/
 ### 3.2 Authenticated Pages
 
 #### Dashboard (`/dashboard`)
+
 **Purpose:** User overview and quick actions
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────┐
 │  Header (Logo, Language, Profile)       │
@@ -165,6 +173,7 @@ src/
 ```
 
 **Components:**
+
 - Stats cards (total donated, this month, total donations)
 - Quick action buttons
 - Recent donations table (last 5)
@@ -173,9 +182,11 @@ src/
 ---
 
 #### Donate Page (`/donate`)
+
 **Purpose:** Initiate donation flow
 
 **Components:**
+
 - Amount selector (preset: 100, 500, 1000, 5000, custom)
 - Purpose selector (general fund, specific cause)
 - Anonymous donation toggle
@@ -183,11 +194,13 @@ src/
 - "Proceed to Payment" button
 
 **Form Validation:**
+
 - Amount: minimum 10 BDT, maximum 100,000 BDT
 - Purpose: required
 - Terms: must be checked
 
 **Flow:**
+
 1. User selects amount
 2. User clicks "Proceed to Payment"
 3. Frontend calls `/api/donations/create`
@@ -199,15 +212,18 @@ src/
 ---
 
 #### History Page (`/history`)
+
 **Purpose:** View all past donations
 
 **Components:**
+
 - Filter bar (date range, status, amount)
 - Donations table (paginated)
 - Export to CSV button
 - Search functionality
 
 **Table Columns:**
+
 - Date & Time
 - Amount
 - Transaction ID
@@ -218,9 +234,11 @@ src/
 ---
 
 #### Settings Page (`/settings`)
+
 **Purpose:** Manage user profile and preferences
 
 **Tabs:**
+
 1. **Profile**
    - Name (read-only from Google)
    - Email (read-only from Google)
@@ -241,15 +259,18 @@ src/
 ### 3.3 Admin Pages
 
 #### Admin Users (`/admin/users`)
+
 **Purpose:** View and manage users
 
 **Components:**
+
 - User table with search and filters
 - User details modal
 - Ban/unban actions
 - Export user list
 
 **Table Columns:**
+
 - Name
 - Email
 - Phone
@@ -261,9 +282,11 @@ src/
 ---
 
 #### Admin Reports (`/admin/reports`)
+
 **Purpose:** View donation statistics
 
 **Components:**
+
 - Date range selector
 - Key metrics:
   - Total donations
@@ -293,9 +316,9 @@ interface AmountSelectorProps {
   presets?: number[];
 }
 
-export function AmountSelector({ 
-  onSelect, 
-  presets = [100, 500, 1000, 5000] 
+export function AmountSelector({
+  onSelect,
+  presets = [100, 500, 1000, 5000]
 }: AmountSelectorProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const [custom, setCustom] = useState('');
@@ -419,10 +442,12 @@ export function useDonations() {
 ### 6.1 Language Configuration
 
 **Supported Languages:**
+
 - **Bangla (bn)** — Default
 - **English (en)**
 
 **URL Structure:**
+
 - `/bn/dashboard` — Bangla
 - `/en/dashboard` — English
 - Default redirect to `/bn`
@@ -436,6 +461,7 @@ messages/
 ```
 
 **Example (bn.json):**
+
 ```json
 {
   "common": {
@@ -604,27 +630,27 @@ test('complete donation flow', async ({ page }) => {
 
 ```css
 /* Primary */
---primary: #E2136E;        /* bKash pink */
---primary-dark: #B10E58;
---primary-light: #FF4B91;
+--primary: #e2136e; /* bKash pink */
+--primary-dark: #b10e58;
+--primary-light: #ff4b91;
 
 /* Secondary */
---secondary: #006A4E;      /* Bangladesh green */
---secondary-dark: #004D3A;
---secondary-light: #00876B;
+--secondary: #006a4e; /* Bangladesh green */
+--secondary-dark: #004d3a;
+--secondary-light: #00876b;
 
 /* Neutral */
---background: #FFFFFF;
---surface: #F9FAFB;
---border: #E5E7EB;
+--background: #ffffff;
+--surface: #f9fafb;
+--border: #e5e7eb;
 --text-primary: #111827;
---text-secondary: #6B7280;
+--text-secondary: #6b7280;
 
 /* Semantic */
---success: #10B981;
---warning: #F59E0B;
---error: #EF4444;
---info: #3B82F6;
+--success: #10b981;
+--warning: #f59e0b;
+--error: #ef4444;
+--info: #3b82f6;
 ```
 
 ### 11.2 Typography

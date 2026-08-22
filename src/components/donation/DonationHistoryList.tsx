@@ -16,11 +16,7 @@ export function DonationHistoryList({ userId }: { userId: string }) {
 
   if (isLoading) return <div className="text-muted-foreground">{t('loading')}</div>;
   if (error) {
-    return (
-      <div className="text-destructive">
-        {t('loadingFailed', { message: error.message })}
-      </div>
-    );
+    return <div className="text-destructive">{t('loadingFailed', { message: error.message })}</div>;
   }
 
   const donations: Donation[] = data?.donations ?? [];
@@ -42,9 +38,7 @@ export function DonationHistoryList({ userId }: { userId: string }) {
           <CardContent className="flex items-center justify-between py-4">
             <div>
               <div className="font-semibold">{formatBDT(d.amount)}</div>
-              <div className="text-sm text-muted-foreground">
-                {t(`purposes.${d.purpose}`)}
-              </div>
+              <div className="text-sm text-muted-foreground">{t(`purposes.${d.purpose}`)}</div>
             </div>
             <div className="text-right">
               <div className="text-sm font-medium">{t(`status.${d.status}`)}</div>

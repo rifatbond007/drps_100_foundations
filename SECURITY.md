@@ -3,9 +3,9 @@
 ## Supported Versions
 
 | Version | Supported |
-|---------|-----------|
-| 1.x.x   | ✅ |
-| < 1.0   | ❌ |
+| ------- | --------- |
+| 1.x.x   | ✅        |
+| < 1.0   | ❌        |
 
 ## Reporting a Vulnerability
 
@@ -18,6 +18,7 @@ If you discover a security vulnerability in this project, please email:
 (or open a [GitHub Security Advisory](https://github.com/riftbond007/donation-platform/security/advisories/new) privately)
 
 You should receive an acknowledgment within **48 hours**. We aim to:
+
 - Triage and confirm the issue within **3 business days**
 - Provide a fix timeline within **7 days** for critical issues
 - Credit reporters (if desired) in the fix release notes

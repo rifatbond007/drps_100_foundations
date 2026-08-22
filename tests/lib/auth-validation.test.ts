@@ -13,22 +13,19 @@ import { ConflictError, ValidationError } from '@/lib/errors';
 const PHONE_RE = /^(\+?880|0)1[3-9]\d{8}$/;
 
 describe('phone validation regex', () => {
-  it.each([
-    '+8801712345678',
-    '01712345678',
-    '8801712345678',
-    '+8801912345678',
-    '+8801512345678',
-  ])('accepts %s', (phone) => {
-    expect(PHONE_RE.test(phone)).toBe(true);
-  });
+  it.each(['+8801712345678', '01712345678', '8801712345678', '+8801912345678', '+8801512345678'])(
+    'accepts %s',
+    (phone) => {
+      expect(PHONE_RE.test(phone)).toBe(true);
+    }
+  );
 
   it.each([
     '1234',
-    '0171234',         // too short
-    '017123456789',    // too long (11 after 0)
-    '+8801212345678',  // 02 — not a mobile prefix
-    '+880171234567',   // 11 digits total after country
+    '0171234', // too short
+    '017123456789', // too long (11 after 0)
+    '+8801212345678', // 02 — not a mobile prefix
+    '+880171234567', // 11 digits total after country
     'abcdefghijk',
     '',
   ])('rejects %s', (phone) => {

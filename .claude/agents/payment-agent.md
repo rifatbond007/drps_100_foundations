@@ -48,14 +48,14 @@ This is the most important rule. Always verify.
 
 From bKash docs:
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/token/grant` | POST | Get access token |
-| `/payment/create` | POST | Create payment, get payment URL |
-| `/payment/execute` | POST | Execute payment after customer approval |
-| `/payment/query/{id}` | GET | Query payment status (independent verification) |
-| `/payment/search` | GET | Search transactions |
-| `/payment/refund` | POST | Refund payment (future) |
+| Endpoint              | Method | Purpose                                         |
+| --------------------- | ------ | ----------------------------------------------- |
+| `/token/grant`        | POST   | Get access token                                |
+| `/payment/create`     | POST   | Create payment, get payment URL                 |
+| `/payment/execute`    | POST   | Execute payment after customer approval         |
+| `/payment/query/{id}` | GET    | Query payment status (independent verification) |
+| `/payment/search`     | GET    | Search transactions                             |
+| `/payment/refund`     | POST   | Refund payment (future)                         |
 
 ## File Structure
 
@@ -161,8 +161,8 @@ class BKashClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'username': this.config.username,
-        'password': this.config.password,
+        username: this.config.username,
+        password: this.config.password,
       },
       body: JSON.stringify({
         app_key: this.config.appKey,
@@ -197,7 +197,7 @@ class BKashClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': token,
+        Authorization: token,
         'X-APP-Key': this.config.appKey,
       },
       body: JSON.stringify({
@@ -232,7 +232,7 @@ class BKashClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': token,
+        Authorization: token,
         'X-APP-Key': this.config.appKey,
       },
       body: JSON.stringify({ paymentID: paymentId }),
@@ -252,16 +252,13 @@ class BKashClient {
   async queryPayment(paymentId: string): Promise<BKashQueryResponse> {
     const token = await this.getToken();
 
-    const response = await fetch(
-      `${this.config.baseUrl}/payment/query/${paymentId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': token,
-          'X-APP-Key': this.config.appKey,
-        },
-      }
-    );
+    const response = await fetch(`${this.config.baseUrl}/payment/query/${paymentId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: token,
+        'X-APP-Key': this.config.appKey,
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`bKash query failed: ${response.status}`);
@@ -306,10 +303,7 @@ export async function POST(request: NextRequest) {
     // 2. Rate limit (3 donations per 5 minutes)
     const limit = await rateLimit(`donation:${userId}`, 3, 300);
     if (!limit.allowed) {
-      return NextResponse.json(
-        { error: 'Rate limit exceeded' },
-        { status: 429 }
-      );
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
     // 3. Validate input
@@ -393,10 +387,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     // ... error handling
-    return NextResponse.json(
-      { error: 'Payment initiation failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Payment initiation failed' }, { status: 500 });
   }
 }
 ```
@@ -461,9 +452,7 @@ export async function GET(request: NextRequest) {
 
       // TODO: Send confirmation email
 
-      return NextResponse.redirect(
-        new URL(`/donate/success?id=${donation.id}`, request.url)
-      );
+      return NextResponse.redirect(new URL(`/donate/success?id=${donation.id}`, request.url));
     } else {
       // Payment failed or cancelled
       await prisma.donation.update({
@@ -474,15 +463,11 @@ export async function GET(request: NextRequest) {
         },
       });
 
-      return NextResponse.redirect(
-        new URL(`/donate/failed?id=${donation.id}`, request.url)
-      );
+      return NextResponse.redirect(new URL(`/donate/failed?id=${donation.id}`, request.url));
     }
   } catch (error) {
     logger.error({ error, paymentID }, 'Callback verification failed');
-    return NextResponse.redirect(
-      new URL('/donate/failed?reason=verification_error', request.url)
-    );
+    return NextResponse.redirect(new URL('/donate/failed?reason=verification_error', request.url));
   }
 }
 ```
@@ -509,7 +494,10 @@ export async function POST(request: NextRequest) {
     const verification = await bkashClient.queryPayment(paymentID);
 
     if (verification.transactionStatus !== 'Completed') {
-      logger.warn({ paymentID, status: verification.transactionStatus }, 'Webhook for incomplete payment');
+      logger.warn(
+        { paymentID, status: verification.transactionStatus },
+        'Webhook for incomplete payment'
+      );
       return NextResponse.json({ received: true });
     }
 
@@ -566,6 +554,7 @@ PENDING ──(bKash callback, verified)──▶ SUCCESS
 ## Amount Limits
 
 From validation:
+
 - **Minimum:** ৳10 BDT
 - **Maximum:** ৳100,000 BDT
 - **Currency:** BDT only
@@ -573,16 +562,19 @@ From validation:
 ## Sandbox vs Production
 
 **Sandbox credentials (for testing):**
+
 ```
 BKASH_BASE_URL=https://tokenized.pay.bka.sh/v1.2.0-beta/sandbox
 ```
 
 **Production credentials:**
+
 ```
 BKASH_BASE_URL=https://tokenized.pay.bka.sh/v1.2.0-beta
 ```
 
 **Test card numbers (sandbox only):**
+
 - Success: Any valid test wallet
 - Failure: Use specific test scenarios
 
@@ -601,6 +593,7 @@ BKASH_BASE_URL=https://tokenized.pay.bka.sh/v1.2.0-beta
 ## Payment Flow Checklist
 
 For every donation:
+
 - [ ] User authenticated
 - [ ] User not banned
 - [ ] Profile completed (phone number present)
@@ -615,6 +608,7 @@ For every donation:
 - [ ] Audit log written
 
 On callback:
+
 - [ ] Independently verify via Query API
 - [ ] Find donation by bKash payment ID
 - [ ] Update donation status (SUCCESS/FAILED)
@@ -644,6 +638,7 @@ const BKASH_ERRORS = {
 ## Output to Project Orchestrator
 
 When done, report:
+
 ```
 ✅ Payment Integration: [Feature]
 
