@@ -123,6 +123,24 @@
       "tryAgain": "Try again",
       "backToDashboard": "Back to dashboard"
     },
+    "checkout": {
+      "title": "Confirm payment",
+      "subtitle": "Review your donation and click Pay to confirm.",
+      "testModeBadge": "Test mode",
+      "testModeNotice": "This is a test payment — no real money will be charged. Replace PAYMENT_PROVIDER=bkash in .env to use the real gateway.",
+      "loading": "Loading donation…",
+      "missingId": "Invalid checkout session — please return to the donate page.",
+      "notFound": "Donation not found.",
+      "amount": "Amount",
+      "donor": "Donor",
+      "purpose": "Purpose",
+      "paymentId": "Payment ID",
+      "pay": "Pay now",
+      "cancel": "Cancel",
+      "processing": "Processing…",
+      "backToDashboard": "Back to dashboard",
+      "profileRequired": "Please complete your profile before donating."
+    },
     "errors": {
       "minAmount": "Minimum donation is 10 BDT",
       "maxAmount": "Maximum donation is 100,000 BDT",

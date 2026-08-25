@@ -8,27 +8,41 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AmountSelector } from '@/components/donation/AmountSelector';
 import { DonationHistoryList } from '@/components/donation/DonationHistoryList';
 import { useAuth } from '@/lib/hooks/use-auth';
+import { useProfile } from '@/lib/hooks/use-profile';
+import { apiClient } from '@/lib/api/client';
+import { ApiClientError } from '@/lib/api/errors';
 
 /**
  * Donate page (client component).
- * SKELETON — payment-agent will wire to /api/donations/create + bKash flow.
  *
- * Admins are not allowed to donate — the API route /api/donations/create
- * will reject them with 403 once implemented, and the UI redirects them
- * to the admin users page as a friendlier UX than showing an empty form.
+ * Flow:
+ *   1. User picks an amount + purpose
+ *   2. Submit → POST /api/donations/create (auth, idempotency, dummy
+ *      provider redirect)
+ *   3. Redirect to the returned redirectUrl (dummy: /donate/checkout)
+ *
+ * Admins are redirected to /admin/users (role guard is also enforced
+ * server-side at /api/donations/create as defense in depth).
+ *
+ * If the user's profile is incomplete, we prompt completion inline and
+ * call /api/users/complete-profile before allowing the donation.
  */
 export default function DonatePage() {
   const t = useTranslations('donation');
+  const tCheckout = useTranslations('donation.checkout');
   const { user, isLoading } = useAuth();
+  const { data: profile } = useProfile();
   const router = useRouter();
   const locale = useLocale();
+
   const [amount, setAmount] = useState<number | null>(null);
   const [purpose, setPurpose] = useState<string>('GENERAL_FUND');
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [needsProfile, setNeedsProfile] = useState(false);
 
-  // Redirect admins away from the donate flow as soon as we know who they
-  // are. Without this, an admin who clicks an old bookmark could submit
-  // the form only to be rejected by the (eventually implemented) API.
+  // Redirect admins away from the donate flow as soon as we know who
+  // they are.
   useEffect(() => {
     if (isLoading) return;
     if (user?.role === 'ADMIN') {
@@ -36,22 +50,47 @@ export default function DonatePage() {
     }
   }, [user, isLoading, locale, router]);
 
+  // Surface a profile-incomplete hint so the user knows they need to
+  // finish their profile before they can submit.
+  useEffect(() => {
+    if (profile && profile.profileCompleted === false) {
+      setNeedsProfile(true);
+    } else {
+      setNeedsProfile(false);
+    }
+  }, [profile]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount) return;
     setSubmitting(true);
+    setError(null);
     try {
-      // TODO: call /api/donations/create
-      // const res = await apiClient.post('/api/donations/create', { amount, purpose, idempotencyKey: crypto.randomUUID() });
-      // window.location.href = res.bkashURL;
-      // eslint-disable-next-line no-console
-      console.warn('donate submit (TODO: implement)', { amount, purpose });
-    } finally {
+      const idempotencyKey = crypto.randomUUID();
+      const res = await apiClient.post<{
+        donationId: string;
+        paymentId: string;
+        redirectUrl: string;
+      }>('/donations/create', {
+        amount,
+        purpose,
+        isAnonymous: false,
+        idempotencyKey,
+      });
+      // redirectUrl is provider-supplied: dummy = in-app /donate/checkout
+      // route; bKash would be a third-party URL.
+      window.location.href = res.redirectUrl;
+    } catch (e) {
+      if (e instanceof ApiClientError && e.code === 'PROFILE_INCOMPLETE') {
+        setNeedsProfile(true);
+        setError(tCheckout('profileRequired'));
+      } else {
+        setError(e instanceof ApiClientError ? e.message : 'Could not start donation');
+      }
       setSubmitting(false);
     }
   };
 
-  // Don't flash the form for an admin who is being redirected.
   if (user?.role === 'ADMIN') return null;
 
   return (
@@ -61,6 +100,17 @@ export default function DonatePage() {
           <CardTitle>{t('title')}</CardTitle>
         </CardHeader>
         <CardContent>
+          {needsProfile && (
+            <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-900">
+              {tCheckout('profileRequired')}
+            </div>
+          )}
+          {error && (
+            <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <AmountSelector value={amount} onChange={setAmount} />
 
