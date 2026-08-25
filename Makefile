@@ -5,7 +5,7 @@
 #
 # Run `make help` for the available targets.
 
-.PHONY: help dev build start lint lint-fix format format-check type-check test test-watch test-ui test-cov test-e2e prisma-generate prisma-migrate prisma-studio prisma-seed docker-dev docker-dev-down docker-prod analyze
+.PHONY: help dev build start lint lint-fix format format-check type-check test test-watch test-ui test-cov test-e2e prisma-generate prisma-migrate prisma-studio prisma-seed docker-dev docker-dev-down docker-prod analyze ci-local
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -72,3 +72,19 @@ docker-prod: ## Start Docker Compose prod stack (detached)
 
 analyze: ## Build with bundle analyzer enabled
 	pnpm analyze
+
+ci-local: ## Run the exact CI step sequence locally (wipes .prisma first)
+	@echo "==> wiping stale prisma client (simulates fresh CI checkout)"
+	@rm -rf node_modules/.prisma
+	@echo "==> prisma generate"
+	@pnpm prisma generate
+	@echo "==> format check"
+	@pnpm format:check
+	@echo "==> lint"
+	@pnpm lint
+	@echo "==> type-check"
+	@pnpm type-check
+	@echo "==> unit tests"
+	@pnpm test
+	@echo ""
+	@echo "✅ all CI steps passed — safe to push"
