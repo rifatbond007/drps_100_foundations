@@ -4,18 +4,34 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
+  requireActiveUser: vi.fn(),
   requireAuth: vi.fn(),
   prisma: {
     userSettings: {
       upsert: vi.fn(),
     },
+    user: {
+      findUnique: vi.fn(),
+    },
   },
   logSecurityEvent: vi.fn().mockResolvedValue(undefined),
+  rateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 99, resetAt: new Date() }),
+  requireRateLimit: vi.fn(),
 }));
 
-vi.mock('@/lib/auth/session', () => ({ requireAuth: mocks.requireAuth }));
+vi.mock('@/lib/auth/session', () => ({
+  requireAuth: mocks.requireAuth,
+  requireActiveUser: mocks.requireActiveUser,
+}));
 vi.mock('@/lib/prisma', () => ({ prisma: mocks.prisma }));
 vi.mock('@/lib/audit', () => ({ logSecurityEvent: mocks.logSecurityEvent }));
+vi.mock('@/lib/rate-limit', () => ({
+  rateLimit: mocks.rateLimit,
+  requireRateLimit: mocks.requireRateLimit,
+  RATE_LIMITS: {
+    API_GENERAL: { max: 100, windowSeconds: 60 },
+  },
+}));
 
 import { PUT } from '@/app/api/users/settings/route';
 
@@ -25,8 +41,9 @@ beforeEach(() => {
 
 describe('PUT /api/users/settings', () => {
   it('updates settings and audits SETTINGS_UPDATED', async () => {
-    mocks.requireAuth.mockResolvedValueOnce({ user: { id: 'u1' } });
-    mocks.prisma.userSettings.upsert.mockResolvedValueOnce({
+    mocks.requireActiveUser.mockResolvedValue({ user: { id: 'u1' } });
+    mocks.prisma.user.findUnique.mockResolvedValue({ id: 'u1', deletedAt: null });
+    mocks.prisma.userSettings.upsert.mockResolvedValue({
       userId: 'u1',
       emailNotifications: false,
       donationReceipts: true,
@@ -50,7 +67,7 @@ describe('PUT /api/users/settings', () => {
   });
 
   it('rejects unknown theme value with 400', async () => {
-    mocks.requireAuth.mockResolvedValueOnce({ user: { id: 'u1' } });
+    mocks.requireActiveUser.mockResolvedValue({ user: { id: 'u1' } });
     const req = new Request('http://localhost/api/users/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -62,7 +79,7 @@ describe('PUT /api/users/settings', () => {
   });
 
   it('rejects malformed JSON with 400', async () => {
-    mocks.requireAuth.mockResolvedValueOnce({ user: { id: 'u1' } });
+    mocks.requireActiveUser.mockResolvedValue({ user: { id: 'u1' } });
     const req = new Request('http://localhost/api/users/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

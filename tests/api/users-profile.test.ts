@@ -5,7 +5,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  requireAuth: vi.fn(),
+  requireActiveUser: vi.fn(),
   prisma: {
     user: {
       findUnique: vi.fn(),
@@ -13,11 +13,23 @@ const mocks = vi.hoisted(() => ({
     },
   },
   logSecurityEvent: vi.fn().mockResolvedValue(undefined),
+  rateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 99, resetAt: new Date() }),
+  requireRateLimit: vi.fn(),
 }));
 
-vi.mock('@/lib/auth/session', () => ({ requireAuth: mocks.requireAuth }));
+vi.mock('@/lib/auth/session', () => ({
+  requireActiveUser: mocks.requireActiveUser,
+  requireAuth: mocks.requireActiveUser, // in case the route falls back
+}));
 vi.mock('@/lib/prisma', () => ({ prisma: mocks.prisma }));
 vi.mock('@/lib/audit', () => ({ logSecurityEvent: mocks.logSecurityEvent }));
+vi.mock('@/lib/rate-limit', () => ({
+  rateLimit: mocks.rateLimit,
+  requireRateLimit: mocks.requireRateLimit,
+  RATE_LIMITS: {
+    API_GENERAL: { max: 100, windowSeconds: 60 },
+  },
+}));
 
 import { PATCH } from '@/app/api/users/profile/route';
 import { UnauthorizedError } from '@/lib/errors';
@@ -28,8 +40,8 @@ beforeEach(() => {
 
 describe('PATCH /api/users/profile', () => {
   it('updates profile + audits PROFILE_UPDATED', async () => {
-    mocks.requireAuth.mockResolvedValueOnce({ user: { id: 'u1' } });
-    mocks.prisma.user.update.mockResolvedValueOnce({
+    mocks.requireActiveUser.mockResolvedValue({ user: { id: 'u1' } });
+    mocks.prisma.user.update.mockResolvedValue({
       id: 'u1',
       name: 'New Name',
       phone: '+8801712345678',
@@ -68,7 +80,7 @@ describe('PATCH /api/users/profile', () => {
   });
 
   it('rejects invalid Bangladesh phone with 400', async () => {
-    mocks.requireAuth.mockResolvedValueOnce({ user: { id: 'u1' } });
+    mocks.requireActiveUser.mockResolvedValue({ user: { id: 'u1' } });
     const req = new Request('http://localhost/api/users/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -81,7 +93,7 @@ describe('PATCH /api/users/profile', () => {
   });
 
   it('rejects invalid languagePref with 400', async () => {
-    mocks.requireAuth.mockResolvedValueOnce({ user: { id: 'u1' } });
+    mocks.requireActiveUser.mockResolvedValue({ user: { id: 'u1' } });
     const req = new Request('http://localhost/api/users/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -92,7 +104,7 @@ describe('PATCH /api/users/profile', () => {
   });
 
   it('returns 401 when unauthenticated', async () => {
-    mocks.requireAuth.mockRejectedValueOnce(new UnauthorizedError());
+    mocks.requireActiveUser.mockRejectedValueOnce(new UnauthorizedError());
 
     const req = new Request('http://localhost/api/users/profile', {
       method: 'PATCH',

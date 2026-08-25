@@ -5,6 +5,10 @@
  *   - cuid validation on the path id
  *   - "you cannot operate on yourself" guard (preventing self-lockout / self-demote)
  *   - "user not found" -> NotFoundError mapping
+ *
+ * IMPORTANT: callers must invoke `requireAdminTargetUser` BEFORE
+ * `rateLimit(...)` so that an attacker spamming their own id can't burn
+ * the admin's rate-limit quota before being rejected.
  */
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';

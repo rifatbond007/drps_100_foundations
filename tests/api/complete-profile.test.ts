@@ -4,6 +4,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
+  requireActiveUser: vi.fn(),
   requireAuth: vi.fn(),
   prisma: {
     user: {
@@ -12,11 +13,23 @@ const mocks = vi.hoisted(() => ({
     },
   },
   logSecurityEvent: vi.fn().mockResolvedValue(undefined),
+  rateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 99, resetAt: new Date() }),
+  requireRateLimit: vi.fn(),
 }));
 
-vi.mock('@/lib/auth/session', () => ({ requireAuth: mocks.requireAuth }));
+vi.mock('@/lib/auth/session', () => ({
+  requireAuth: mocks.requireAuth,
+  requireActiveUser: mocks.requireActiveUser,
+}));
 vi.mock('@/lib/prisma', () => ({ prisma: mocks.prisma }));
 vi.mock('@/lib/audit', () => ({ logSecurityEvent: mocks.logSecurityEvent }));
+vi.mock('@/lib/rate-limit', () => ({
+  rateLimit: mocks.rateLimit,
+  requireRateLimit: mocks.requireRateLimit,
+  RATE_LIMITS: {
+    COMPLETE_PROFILE: { max: 5, windowSeconds: 60 },
+  },
+}));
 
 import { POST } from '@/app/api/users/complete-profile/route';
 
@@ -26,11 +39,16 @@ beforeEach(() => {
 
 describe('POST /api/users/complete-profile', () => {
   it('saves phone + language, flips profileCompleted, audits PROFILE_COMPLETED', async () => {
-    mocks.requireAuth.mockResolvedValueOnce({ user: { id: 'u1' } });
-    mocks.prisma.user.findUnique.mockResolvedValueOnce({
+    mocks.requireActiveUser.mockResolvedValue({ user: { id: 'u1' } });
+    // Persistent mock: first findUnique (active-user) returns active row,
+    // subsequent findUniques return profileCompleted=false (route's check).
+    mocks.prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      isBanned: false,
+      deletedAt: null,
       profileCompleted: false,
     });
-    mocks.prisma.user.update.mockResolvedValueOnce({
+    mocks.prisma.user.update.mockResolvedValue({
       id: 'u1',
       phone: '+8801712345678',
       languagePref: 'EN',
@@ -68,8 +86,11 @@ describe('POST /api/users/complete-profile', () => {
   });
 
   it('returns 409 ConflictError if profile already completed', async () => {
-    mocks.requireAuth.mockResolvedValueOnce({ user: { id: 'u1' } });
-    mocks.prisma.user.findUnique.mockResolvedValueOnce({
+    mocks.requireActiveUser.mockResolvedValue({ user: { id: 'u1' } });
+    mocks.prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      isBanned: false,
+      deletedAt: null,
       profileCompleted: true,
     });
 
@@ -86,8 +107,11 @@ describe('POST /api/users/complete-profile', () => {
   });
 
   it('rejects invalid phone with 400', async () => {
-    mocks.requireAuth.mockResolvedValueOnce({ user: { id: 'u1' } });
-    mocks.prisma.user.findUnique.mockResolvedValueOnce({
+    mocks.requireActiveUser.mockResolvedValue({ user: { id: 'u1' } });
+    mocks.prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      isBanned: false,
+      deletedAt: null,
       profileCompleted: false,
     });
 

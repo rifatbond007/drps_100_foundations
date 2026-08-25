@@ -11,16 +11,22 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({
-  prisma: {
-    user: {
-      findUnique: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
+const mocks = vi.hoisted(() => {
+  // Force dev-mode BEFORE next-auth.ts is imported so the default allowlist
+  // is populated. In test/staging/prod the env-guard requires ADMIN_EMAILS
+  // to be set explicitly. Hoisted, so it runs before any `import`.
+  (process.env as Record<string, string>).NODE_ENV = 'development';
+  return {
+    prisma: {
+      user: {
+        findUnique: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+      },
     },
-  },
-  logSecurityEvent: vi.fn().mockResolvedValue(undefined),
-}));
+    logSecurityEvent: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
 vi.mock('next-auth', () => ({
   default: () => ({

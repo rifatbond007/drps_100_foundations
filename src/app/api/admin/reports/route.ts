@@ -116,22 +116,30 @@ export async function GET(request: NextRequest) {
     }
 
     if (format === 'csv') {
+      // RFC-4180-ish CSV escape: quote fields containing comma/quote/newline
+      // and double any internal quotes. Defends against CSV-injection
+      // (`=cmd|...` etc.) by always quoting string fields.
+      const csv = (v: string | number) => {
+        const s = String(v);
+        return `"${s.replace(/"/g, '""')}"`;
+      };
       const rows: string[] = [];
       rows.push('# Totals');
-      rows.push(`totalRaised,${totals.totalRaised}`);
-      rows.push(`totalDonations,${totals.totalDonations}`);
-      rows.push(`totalDonors,${totals.totalDonors}`);
-      rows.push(`successRate,${totals.successRate}`);
+      rows.push(`${csv('totalRaised')},${csv(totals.totalRaised)}`);
+      rows.push(`${csv('totalDonations')},${csv(totals.totalDonations)}`);
+      rows.push(`${csv('totalDonors')},${csv(totals.totalDonors)}`);
+      rows.push(`${csv('successRate')},${csv(totals.successRate)}`);
       rows.push('');
       rows.push('# By purpose');
-      rows.push('purpose,amount,count');
-      for (const p of byPurpose) rows.push(`${p.purpose},${p.amount},${p.count}`);
+      rows.push(`${csv('purpose')},${csv('amount')},${csv('count')}`);
+      for (const p of byPurpose) rows.push(`${csv(p.purpose)},${csv(p.amount)},${csv(p.count)}`);
       rows.push('');
       rows.push('# By month (last 12 months)');
-      rows.push('month,amount,count');
-      for (const m of byMonth) rows.push(`${m.month},${m.amount},${m.count}`);
+      rows.push(`${csv('month')},${csv('amount')},${csv('count')}`);
+      for (const m of byMonth) rows.push(`${csv(m.month)},${csv(m.amount)},${csv(m.count)}`);
 
-      const body = rows.join('\n') + '\n';
+      // UTF-8 BOM so Excel on Windows renders Bengali correctly.
+      const body = '\uFEFF' + rows.join('\n') + '\n';
       return new Response(body, {
         status: 200,
         headers: {

@@ -7,10 +7,11 @@
  */
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { requireAuth } from '@/lib/auth/session';
+import { requireAuth, requireActiveUser } from '@/lib/auth/session';
 import { ok, fail } from '@/lib/api/helpers';
 import { NotFoundError, ValidationError } from '@/lib/errors';
 import { logSecurityEvent } from '@/lib/audit';
+import { rateLimit, requireRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 const UpdateProfileSchema = z
   .object({
@@ -22,7 +23,13 @@ const UpdateProfileSchema = z
       .max(20)
       .regex(/^(\+?880|0)1[3-9]\d{8}$/, 'Invalid Bangladesh phone number')
       .optional(),
-    avatarUrl: z.string().url().max(500).optional().nullable(),
+    avatarUrl: z
+      .string()
+      .url()
+      .max(500)
+      .refine((u) => u.startsWith('https://'), 'avatarUrl must be https')
+      .optional()
+      .nullable(),
     languagePref: z.enum(['BN', 'EN']).optional(),
   })
   .strict();
@@ -30,8 +37,10 @@ const UpdateProfileSchema = z
 export async function GET() {
   try {
     const session = await requireAuth();
+    // Filter soft-deleted users out — a banned user whose row was later
+    // soft-deleted by an admin must not be able to read their PII.
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: session.user.id, deletedAt: null },
       select: {
         id: true,
         email: true,
@@ -67,8 +76,8 @@ export async function GET() {
       role: user.role,
       languagePref: user.languagePref,
       profileCompleted: user.profileCompleted,
-      createdAt: user.createdAt,
-      lastLoginAt: user.lastLoginAt,
+      createdAt: user.createdAt.toISOString(),
+      lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
       donationCount: donationAgg._count._all,
       totalDonated: donationAgg._sum.amount?.toString() ?? '0',
     });
@@ -79,7 +88,14 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    const session = await requireAuth();
+    const session = await requireActiveUser();
+    // Rate-limit profile mutations — guards against profile spam / scrape.
+    const rl = await rateLimit(
+      `user:profile:patch:${session.user.id}`,
+      RATE_LIMITS.API_GENERAL.max,
+      RATE_LIMITS.API_GENERAL.windowSeconds
+    );
+    requireRateLimit(rl);
     let body: unknown;
     try {
       body = await request.json();
@@ -122,7 +138,7 @@ export async function PATCH(request: Request) {
       details: { fields: changedKeys },
     });
 
-    return ok(updated);
+    return ok({ ...updated, updatedAt: updated.updatedAt.toISOString() });
   } catch (error) {
     return fail(error);
   }

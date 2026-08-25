@@ -4,10 +4,11 @@
  */
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { requireAuth } from '@/lib/auth/session';
+import { requireAuth, requireActiveUser } from '@/lib/auth/session';
 import { ok, fail } from '@/lib/api/helpers';
 import { ValidationError } from '@/lib/errors';
 import { logSecurityEvent } from '@/lib/audit';
+import { rateLimit, requireRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 const SettingsSchema = z
   .object({
@@ -20,6 +21,12 @@ const SettingsSchema = z
 export async function GET() {
   try {
     const session = await requireAuth();
+    // Refuse if the user is soft-deleted.
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id, deletedAt: null },
+      select: { id: true },
+    });
+    if (!user) throw new ValidationError('User no longer exists');
     // Upsert so first-time users always get a row to read.
     const settings = await prisma.userSettings.upsert({
       where: { userId: session.user.id },
@@ -34,7 +41,13 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const session = await requireAuth();
+    const session = await requireActiveUser();
+    const rl = await rateLimit(
+      `user:settings:put:${session.user.id}`,
+      RATE_LIMITS.API_GENERAL.max,
+      RATE_LIMITS.API_GENERAL.windowSeconds
+    );
+    requireRateLimit(rl);
     let body: unknown;
     try {
       body = await request.json();

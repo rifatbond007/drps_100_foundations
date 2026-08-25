@@ -24,10 +24,14 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
  * Comma-separated list of emails that should be promoted to ADMIN on any
  * sign-in (handles first-time signup AND existing USER accounts).
  *
- * Defaults to the foundation admin email if unset.
+ * In development, defaults to the foundation admin email if unset so the
+ * local dev workflow keeps working. In staging/production, ADMIN_EMAILS
+ * MUST be set explicitly — falling back to a real email would be an
+ * accidental privilege-escalation risk in any non-dev environment.
  */
+const isDev = process.env.NODE_ENV === 'development';
 export const ADMIN_EMAILS: readonly string[] = (
-  process.env.ADMIN_EMAILS ?? 'drps19foundation.org@gmail.com'
+  process.env.ADMIN_EMAILS ?? (isDev ? 'drps19foundation.org@gmail.com' : '')
 )
   .split(',')
   .map((e) => e.trim().toLowerCase())
@@ -50,8 +54,10 @@ export async function signInCallback({
   account?: { provider: string } | null;
 }): Promise<boolean> {
   if (account?.provider !== 'google') return false;
-
-  const email = user.email!;
+  // Guard: Google may omit email for unverified accounts. Refuse cleanly
+  // (return false) rather than crashing on a non-null assertion.
+  if (!user.email) return false;
+  const email = user.email;
   const existing = await prisma.user.findUnique({ where: { email } });
   if (!existing) {
     await prisma.user.create({
@@ -197,7 +203,15 @@ export function sessionCallback(params: any): any {
     session: { user?: Record<string, unknown> };
     token: Record<string, unknown>;
   };
-  if (!token.id) return session;
+  if (!token.id) {
+    // Token is invalid (deleted/ban-revoked/user not signed in). Strip any
+    // OAuth profile fields NextAuth pre-attached so we don't leak name/email
+    // /image for an unauthenticated session.
+    if (session.user) {
+      delete (session as { user?: Record<string, unknown> }).user;
+    }
+    return session;
+  }
   if (session.user) {
     session.user.id = token.id;
     session.user.role = (token.role as 'USER' | 'ADMIN') ?? 'USER';

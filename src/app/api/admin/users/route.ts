@@ -53,9 +53,21 @@ export async function GET(request: NextRequest) {
       AND: [
         q
           ? {
+              // Escape `%` and `_` so a user searching `100%` doesn't match
+              // every row. The `\\` is the LIKE escape char.
               OR: [
-                { email: { contains: q, mode: 'insensitive' } },
-                { name: { contains: q, mode: 'insensitive' } },
+                {
+                  email: {
+                    contains: q.replace(/[\\%_]/g, '\\$&'),
+                    mode: 'insensitive',
+                  },
+                },
+                {
+                  name: {
+                    contains: q.replace(/[\\%_]/g, '\\$&'),
+                    mode: 'insensitive',
+                  },
+                },
               ],
             }
           : {},
@@ -66,7 +78,7 @@ export async function GET(request: NextRequest) {
       ],
     };
 
-    const [users, total, aggregates] = await Promise.all([
+    const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
         orderBy: { createdAt: 'desc' },
@@ -89,12 +101,19 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.user.count({ where }),
-      prisma.donation.groupBy({
-        by: ['userId'],
-        where: { status: 'SUCCESS', userId: { not: null } },
-        _sum: { amount: true },
-      }),
     ]);
+
+    // Scope the donation aggregation to ONLY the page's user ids — avoids a
+    // full-table scan over donations on every list request.
+    const pageUserIds = users.map((u) => u.id);
+    const aggregates =
+      pageUserIds.length === 0
+        ? []
+        : await prisma.donation.groupBy({
+            by: ['userId'],
+            where: { status: 'SUCCESS', userId: { in: pageUserIds } },
+            _sum: { amount: true },
+          });
 
     const totalsByUser = new Map(
       aggregates.map((row) => [row.userId as string, row._sum.amount ?? new Prisma.Decimal(0)])

@@ -26,14 +26,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const session = await requireAdmin();
     const { id } = await params;
 
+    // Self-target + existence checks run BEFORE rate-limit so spamming your
+    // own id doesn't burn the admin's quota.
+    const target = await requireAdminTargetUser(id, session.user.id);
+
     const rl = await rateLimit(
       `admin:users:role:${session.user.id}`,
       RATE_LIMITS.ADMIN_ACTION.max,
       RATE_LIMITS.ADMIN_ACTION.windowSeconds
     );
     requireRateLimit(rl);
-
-    const target = await requireAdminTargetUser(id, session.user.id);
 
     let body: unknown;
     try {
