@@ -12,6 +12,11 @@ import { requireAuth } from '@/lib/auth/session';
  *   /api/users/complete-profile as part of its submit flow.
  * - Reads session and forwards role to Sidebar so admin menu items only
  *   render for admins.
+ *
+ * Layout strategy mirrors the admin layout: the area below the sticky
+ * site header fills the rest of the viewport, sidebar scrolls
+ * internally, main column scrolls internally — so a long donation
+ * history or a wide table never forces the page itself to scroll.
  */
 export default async function AuthenticatedLayout({
   children,
@@ -33,9 +38,9 @@ export default async function AuthenticatedLayout({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-8">
+    <div className="mx-auto flex h-[calc(100vh-4rem)] w-full max-w-7xl gap-0 px-4 py-0">
       <Sidebar isAdmin={session.user.role === 'ADMIN'} />
-      <div className="flex-1">{children}</div>
+      <main className="min-h-0 flex-1 overflow-y-auto px-4 py-8">{children}</main>
     </div>
   );
 }

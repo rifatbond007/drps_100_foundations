@@ -95,8 +95,11 @@ export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   };
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r bg-muted/30 md:flex md:flex-col">
-      <nav className="flex flex-1 flex-col gap-4 p-4">
+    <aside className="hidden h-full w-64 shrink-0 flex-col overflow-y-auto border-r bg-muted/30 md:flex">
+      {/* Top section: scrollable nav. min-h-0 lets flex-1 actually shrink
+          below its content height so overflow-y-auto can take over on
+          short viewports / many sections. */}
+      <nav className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
         {sections.map((section, idx) => (
           <div key={section.headingKey ?? `section-${idx}`} className="space-y-1">
             {section.headingKey && (
@@ -128,7 +131,9 @@ export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
         ))}
       </nav>
 
-      <div className="p-4">
+      {/* Bottom section: pinned sign-out. Uses shrink-0 so it never gets
+          compressed when the nav above scrolls. */}
+      <div className="shrink-0 border-t bg-background p-4">
         <Separator className="mb-3" />
         <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
