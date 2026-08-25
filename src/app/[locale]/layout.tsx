@@ -36,11 +36,17 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={direction} suppressHydrationWarning>
-      <body className="flex min-h-screen flex-col bg-background font-sans antialiased">
+      {/*
+        Body is locked to h-screen so the Header + Footer + main area
+        always fit in 100vh regardless of page content. The <main>
+        region is the only overflow-y-auto surface — Header + Footer
+        are shrink-0 sticky/fixed boundaries and never scroll.
+      */}
+      <body className="flex h-screen flex-col overflow-hidden bg-background font-sans antialiased">
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Providers>
             <Header locale={locale} />
-            <main className="flex-1">{children}</main>
+            <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</main>
             <Footer locale={locale} />
           </Providers>
         </NextIntlClientProvider>

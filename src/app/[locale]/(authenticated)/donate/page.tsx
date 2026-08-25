@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AmountSelector } from '@/components/donation/AmountSelector';
@@ -11,13 +12,29 @@ import { useAuth } from '@/lib/hooks/use-auth';
 /**
  * Donate page (client component).
  * SKELETON — payment-agent will wire to /api/donations/create + bKash flow.
+ *
+ * Admins are not allowed to donate — the API route /api/donations/create
+ * will reject them with 403 once implemented, and the UI redirects them
+ * to the admin users page as a friendlier UX than showing an empty form.
  */
 export default function DonatePage() {
   const t = useTranslations('donation');
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+  const locale = useLocale();
   const [amount, setAmount] = useState<number | null>(null);
   const [purpose, setPurpose] = useState<string>('GENERAL_FUND');
   const [submitting, setSubmitting] = useState(false);
+
+  // Redirect admins away from the donate flow as soon as we know who they
+  // are. Without this, an admin who clicks an old bookmark could submit
+  // the form only to be rejected by the (eventually implemented) API.
+  useEffect(() => {
+    if (isLoading) return;
+    if (user?.role === 'ADMIN') {
+      router.replace(`/${locale}/admin/users`);
+    }
+  }, [user, isLoading, locale, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +50,9 @@ export default function DonatePage() {
       setSubmitting(false);
     }
   };
+
+  // Don't flash the form for an admin who is being redirected.
+  if (user?.role === 'ADMIN') return null;
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">

@@ -186,10 +186,17 @@
   },
   "admin": {
     "title": "Admin panel",
+    "dashboard": {
+      "manageUsers": "Manage users",
+      "manageUsersDesc": "Ban, unban, and search all registered users",
+      "viewReports": "View reports",
+      "viewReportsDesc": "Donation trends and CSV export"
+    },
     "users": {
       "title": "User management",
       "subtitle": "All registered users",
       "search": "Search by email or name",
+      "searchPlaceholder": "Email or name…",
       "ban": "Ban",
       "unban": "Unban",
       "makeAdmin": "Make admin",
@@ -201,7 +208,43 @@
       "joinedAt": "Joined on",
       "lastLoginAt": "Last login",
       "totalDonated": "Total donated",
-      "empty": "No users found"
+      "empty": "No users found",
+      "roles": {
+        "USER": "User",
+        "ADMIN": "Admin"
+      },
+      "statuses": {
+        "active": "Active",
+        "banned": "Banned"
+      },
+      "banDialog": {
+        "title": "Ban user",
+        "description": "The user will be blocked from signing in. This can be undone later.",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "Briefly explain why this user is being banned…",
+        "cancel": "Cancel",
+        "confirm": "Ban user"
+      },
+      "confirm": {
+        "ban": "Ban {name}?",
+        "unban": "Unban {name}?",
+        "makeAdmin": "Grant admin to {name}?",
+        "removeAdmin": "Remove admin from {name}?",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      },
+      "toasts": {
+        "banned": "User banned",
+        "unbanned": "User unbanned",
+        "promoted": "Promoted to admin",
+        "demoted": "Admin role removed",
+        "error": "Action failed: {message}"
+      },
+      "pagination": {
+        "prev": "Previous",
+        "next": "Next",
+        "page": "Page {page} of {total}"
+      }
     },
     "reports": {
       "title": "Reports",
@@ -212,7 +255,17 @@
       "byPurpose": "By purpose",
       "byMonth": "By month",
       "exportCsv": "Export CSV",
-      "exportPdf": "Export PDF"
+      "exportPdf": "Export PDF",
+      "loading": "Loading reports…",
+      "error": "Failed to load reports",
+      "empty": "No donations recorded yet",
+      "months": "Last 12 months",
+      "purposes": {
+        "GENERAL_FUND": "General fund",
+        "EDUCATION": "Education",
+        "MEDICAL": "Medical",
+        "EMERGENCY": "Emergency"
+      }
     }
   },
   "errors": {

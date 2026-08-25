@@ -28,9 +28,15 @@ interface Props {
   name: string;
   email: string;
   avatarUrl: string | null;
+  /**
+   * When true, the menu shows admin shortcuts (Dashboard / Users / Reports)
+   * and hides the personal Settings link, since admins don't manage their
+   * own profile from this menu. Defaults to false.
+   */
+  isAdmin?: boolean;
 }
 
-export function UserMenu({ locale, name, email, avatarUrl }: Props) {
+export function UserMenu({ locale, name, email, avatarUrl, isAdmin = false }: Props) {
   const t = useTranslations('nav');
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -109,22 +115,53 @@ export function UserMenu({ locale, name, email, avatarUrl }: Props) {
             <p className="truncate text-xs text-muted-foreground">{email}</p>
           </div>
 
-          <Link
-            href={`/${locale}/dashboard`}
-            role="menuitem"
-            className="block rounded-sm px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-            onClick={() => setOpen(false)}
-          >
-            {t('dashboard')}
-          </Link>
-          <Link
-            href={`/${locale}/settings`}
-            role="menuitem"
-            className="block rounded-sm px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-            onClick={() => setOpen(false)}
-          >
-            {t('settings')}
-          </Link>
+          {isAdmin ? (
+            <>
+              <Link
+                href={`/${locale}/admin/dashboard`}
+                role="menuitem"
+                className="block rounded-sm px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                onClick={() => setOpen(false)}
+              >
+                {t('dashboard')}
+              </Link>
+              <Link
+                href={`/${locale}/admin/users`}
+                role="menuitem"
+                className="block rounded-sm px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                onClick={() => setOpen(false)}
+              >
+                {t('users')}
+              </Link>
+              <Link
+                href={`/${locale}/admin/reports`}
+                role="menuitem"
+                className="block rounded-sm px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                onClick={() => setOpen(false)}
+              >
+                {t('reports')}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href={`/${locale}/dashboard`}
+                role="menuitem"
+                className="block rounded-sm px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                onClick={() => setOpen(false)}
+              >
+                {t('dashboard')}
+              </Link>
+              <Link
+                href={`/${locale}/settings`}
+                role="menuitem"
+                className="block rounded-sm px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                onClick={() => setOpen(false)}
+              >
+                {t('settings')}
+              </Link>
+            </>
+          )}
 
           <div className="my-1 border-t" />
 

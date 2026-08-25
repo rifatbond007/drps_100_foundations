@@ -13,10 +13,11 @@
  */
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { requireAuth } from '@/lib/auth/session';
+import { requireActiveUser } from '@/lib/auth/session';
 import { ok, fail } from '@/lib/api/helpers';
 import { ConflictError, ValidationError } from '@/lib/errors';
 import { logSecurityEvent } from '@/lib/audit';
+import { rateLimit, requireRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 const CompleteProfileSchema = z.object({
   phone: z
@@ -30,7 +31,13 @@ const CompleteProfileSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const session = await requireAuth();
+    const session = await requireActiveUser();
+    const rl = await rateLimit(
+      `user:complete-profile:${session.user.id}`,
+      RATE_LIMITS.COMPLETE_PROFILE.max,
+      RATE_LIMITS.COMPLETE_PROFILE.windowSeconds
+    );
+    requireRateLimit(rl);
     let body: unknown;
     try {
       body = await request.json();
