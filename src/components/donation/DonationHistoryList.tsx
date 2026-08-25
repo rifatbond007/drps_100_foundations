@@ -35,12 +35,14 @@ export function DonationHistoryList({ userId }: { userId: string }) {
     <div className="space-y-2">
       {donations.map((d) => (
         <Card key={d.id}>
-          <CardContent className="flex items-center justify-between py-4">
-            <div>
+          <CardContent className="flex items-center justify-between gap-3 py-4">
+            <div className="min-w-0 flex-1">
               <div className="font-semibold">{formatBDT(d.amount)}</div>
-              <div className="text-sm text-muted-foreground">{t(`purposes.${d.purpose}`)}</div>
+              <div className="truncate text-sm text-muted-foreground">
+                {t(`purposes.${d.purpose}`)}
+              </div>
             </div>
-            <div className="text-right">
+            <div className="shrink-0 text-right">
               <div className="text-sm font-medium">{t(`status.${d.status}`)}</div>
               <div className="text-xs text-muted-foreground">
                 {new Date(d.createdAt).toLocaleDateString()}

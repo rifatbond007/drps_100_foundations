@@ -25,7 +25,7 @@ export default async function DonateFailedPage({
         <p className="mt-2 text-muted-foreground">{t('subtitle')}</p>
         {id && <p className="mt-2 font-mono text-xs text-muted-foreground">Reference: {id}</p>}
       </div>
-      <div className="flex gap-3">
+      <div className="flex flex-wrap justify-center gap-3">
         <Button asChild>
           <Link href={`/${locale}/donate`}>{t('tryAgain')}</Link>
         </Button>

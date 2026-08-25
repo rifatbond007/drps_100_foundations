@@ -29,7 +29,7 @@ export default async function AdminLayout({
   return (
     <div className="mx-auto flex h-full w-full max-w-7xl gap-0 px-4">
       <Sidebar isAdmin />
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-8">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto py-8">{children}</div>
     </div>
   );
 }
