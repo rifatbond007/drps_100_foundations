@@ -50,14 +50,13 @@ When documenting a decision, use this format in `docs/DECISIONS.md`:
 **Context:** [What is the issue?]
 **Decision:** [What we chose]
 **Consequences:**
-
 - ✅ [Positive consequence]
 - ✅ [Positive consequence]
 - ❌ [Negative consequence or trade-off]
-  **Alternatives Considered:**
+**Alternatives Considered:**
 - [Option A] — [Why rejected]
 - [Option B] — [Why rejected]
-  **References:** [Links, docs, benchmarks]
+**References:** [Links, docs, benchmarks]
 ```
 
 ## Research Output Format
@@ -74,7 +73,6 @@ When investigating, document in `docs/RESEARCH.md`:
 ## Options Investigated
 
 ### Option 1: [Name]
-
 - **Description:** [...]
 - **Pros:** [...]
 - **Cons:** [...]
@@ -82,7 +80,6 @@ When investigating, document in `docs/RESEARCH.md`:
 - **Documentation:** [Link]
 
 ### Option 2: [Name]
-
 [Same structure]
 
 ## Recommendation
@@ -103,7 +100,6 @@ From `README.md §9` (open questions):
 3. **Hosting Choice** — VPS (full control) vs Vercel + Supabase (managed)?
 
 Other research areas to consider:
-
 - bKash tokenized vs checkout API
 - NextAuth.js v5 session strategies (JWT vs Database)
 - Prisma connection pooling for serverless
@@ -132,7 +128,6 @@ Other research areas to consider:
 User: "Should we use NextAuth JWT or database sessions?"
 
 You:
-
 1. Read `docs/BACKEND_PLANNING.md` for current session strategy
 2. WebSearch "NextAuth.js v5 JWT vs database sessions 2026"
 3. WebFetch official NextAuth docs
@@ -144,7 +139,6 @@ You:
 ## Output to Project Orchestrator
 
 When done, report:
-
 ```
 ✅ Research Complete: [Topic]
 

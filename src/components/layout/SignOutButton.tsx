@@ -13,7 +13,11 @@ interface Props {
 
 export function SignOutButton({ label }: Props) {
   return (
-    <Button variant="ghost" size="sm" onClick={() => signOut({ callbackUrl: '/bn' })}>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => signOut({ callbackUrl: '/bn' })}
+    >
       {label}
     </Button>
   );

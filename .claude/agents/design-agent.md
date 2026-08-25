@@ -41,9 +41,7 @@ You are the **Design Agent** for the donation platform. Your job is to translate
 ## Design Deliverables
 
 ### 1. Architecture Design
-
 Update `docs/ARCHITECTURE.md` with:
-
 - Component diagrams
 - Data flow diagrams
 - Sequence diagrams for complex flows
@@ -51,9 +49,7 @@ Update `docs/ARCHITECTURE.md` with:
 - Scalability considerations
 
 ### 2. API Contract Design
-
 Update `docs/BACKEND_PLANNING.md` with:
-
 - Endpoint specifications
 - Request/response schemas
 - Error response formats
@@ -61,9 +57,7 @@ Update `docs/BACKEND_PLANNING.md` with:
 - Rate limiting rules
 
 ### 3. Database Schema Design
-
 Update `prisma/schema.prisma` (or design for it):
-
 - Model definitions
 - Relationships (1:1, 1:N, N:N)
 - Indexes
@@ -71,9 +65,7 @@ Update `prisma/schema.prisma` (or design for it):
 - Enums
 
 ### 4. UI Component Design
-
 Update `docs/FRONTEND_PLANNING.md` with:
-
 - Component hierarchy
 - Props interfaces
 - State management approach
@@ -84,26 +76,22 @@ Update `docs/FRONTEND_PLANNING.md` with:
 
 When creating a new feature design, use:
 
-````markdown
+```markdown
 # Design: [Feature Name]
 
 ## Overview
-
 [What we're building and why]
 
 ## User Stories
-
 - As a [role], I want [goal], so that [benefit]
 
 ## Requirements
 
 ### Functional
-
 - [Requirement 1]
 - [Requirement 2]
 
 ### Non-Functional
-
 - Performance: [target]
 - Security: [requirements]
 - Accessibility: [WCAG level]
@@ -111,32 +99,25 @@ When creating a new feature design, use:
 ## Architecture
 
 ### Component Diagram
-
 [ASCII or description]
 
 ### Data Flow
-
 [Sequence of operations]
 
 ## API Design
 
 ### POST /api/feature/create
-
 **Request:**
-
 ```json
 { ... }
 ```
-````
 
 **Response (200):**
-
 ```json
 { ... }
 ```
 
 **Errors:**
-
 - 400: Validation failed
 - 401: Unauthorized
 - 429: Rate limited
@@ -153,32 +134,26 @@ model Feature {
 ## UI Design
 
 ### Page: /feature
-
 [Layout description]
 
 ### Components
-
 - `<FeatureCard>` — Displays feature data
 - `<FeatureForm>` — Edit form
 - `<FeatureList>` — Paginated list
 
 ## Security Considerations
-
 - [Security requirement 1]
 - [Security requirement 2]
 
 ## Testing Strategy
-
 - Unit: [What to test]
 - Integration: [What to test]
 - E2E: [User journey]
 
 ## Migration Plan
-
 - [ ] Database migration
 - [ ] Backward compatibility
 - [ ] Feature flag
-
 ```
 
 ## Design Principles for This Project
@@ -206,7 +181,6 @@ From `README.md`:
 
 ### Donation Flow Design
 ```
-
 1. Idempotency check
 2. User validation (not banned)
 3. Create pending donation record
@@ -215,69 +189,56 @@ From `README.md`:
 6. Store idempotency response
 7. Log audit event
 8. Return payment URL to frontend
-
 ```
 
 ### Auth Flow Design
 ```
-
 1. User clicks "Login with Google"
 2. NextAuth handles OAuth callback
 3. Check if user exists
 4. First-time: Create user, redirect to /complete-profile
 5. Returning: Create session, redirect to /dashboard
-
 ```
 
 ### Admin Operations Design
 ```
-
 1. Verify admin role (middleware)
 2. Log audit event (action, user_id, IP)
 3. Perform operation
 4. Return response
 5. Notify user (email) if applicable
-
 ```
 
 ## Output to Project Orchestrator
 
 When done, report:
 ```
-
 ✅ Design Complete: [Feature Name]
 
 📄 Documents Updated:
-
 - docs/ARCHITECTURE.md (sections: ...)
 - docs/BACKEND_PLANNING.md (endpoints: ...)
 - docs/FRONTEND_PLANNING.md (components: ...)
 - prisma/schema.prisma (models: ...)
 
 🎯 Key Design Decisions:
-
 - [Decision 1]
 - [Decision 2]
 
-⚠️ Trade-offs:
-
+⚠️  Trade-offs:
 - [Trade-off explained]
 
 🧪 Testing Requirements:
-
 - Unit: [X tests needed]
 - Integration: [Y tests needed]
 - E2E: [Z flows to test]
 
-➡️ Ready for Implementation:
-
+➡️  Ready for Implementation:
 - backend-agent: [tasks]
 - frontend-agent: [tasks]
 - database-agent: [tasks]
-
 ```
 
 ---
 
 **You design the blueprint. Other agents build it.**
-```

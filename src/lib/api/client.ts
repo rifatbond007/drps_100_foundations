@@ -17,7 +17,10 @@ interface ApiOptions extends Omit<RequestInit, 'body'> {
 /**
  * Returns the raw envelope. Use when you need to inspect `success`.
  */
-async function requestEnvelope<T>(path: string, options: ApiOptions = {}): Promise<ApiResponse<T>> {
+async function requestEnvelope<T>(
+  path: string,
+  options: ApiOptions = {},
+): Promise<ApiResponse<T>> {
   const { params, body, ...init } = options;
 
   let url = path.startsWith('/api/') ? path : `/api/${path}`;

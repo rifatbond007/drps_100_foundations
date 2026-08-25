@@ -30,7 +30,6 @@ You are the **Backend Agent** for the donation platform. Your job is to implemen
 ## Tech Stack (Per Backend)
 
 From `docs/BACKEND_PLANNING.md`:
-
 - **Runtime:** Node.js 20 LTS
 - **Framework:** Next.js 15 API Routes
 - **Language:** TypeScript
@@ -254,12 +253,7 @@ export const donationService = new DonationService();
 ```typescript
 // src/lib/errors.ts
 export class AppError extends Error {
-  constructor(
-    public code: string,
-    message: string,
-    public statusCode = 500,
-    public details?: any
-  ) {
+  constructor(public code: string, message: string, public statusCode = 500, public details?: any) {
     super(message);
   }
 }
@@ -310,7 +304,7 @@ class BKashClient {
     // Fetch new token from bKash
     const response = await fetch(`${process.env.BKASH_BASE_URL}/token/grant`, {
       method: 'POST',
-      headers: { username: process.env.BKASH_USERNAME!, password: process.env.BKASH_PASSWORD! },
+      headers: { 'username': process.env.BKASH_USERNAME!, 'password': process.env.BKASH_PASSWORD! },
       body: JSON.stringify({
         app_key: process.env.BKASH_APP_KEY!,
         app_secret: process.env.BKASH_APP_SECRET!,
@@ -328,7 +322,7 @@ class BKashClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: token,
+        'Authorization': token,
         'X-APP-Key': process.env.BKASH_APP_KEY!,
       },
       body: JSON.stringify({
@@ -346,7 +340,7 @@ class BKashClient {
     const token = await this.getToken();
     const response = await fetch(`${process.env.BKASH_BASE_URL}/payment/query/${paymentId}`, {
       method: 'GET',
-      headers: { Authorization: token, 'X-APP-Key': process.env.BKASH_APP_KEY! },
+      headers: { 'Authorization': token, 'X-APP-Key': process.env.BKASH_APP_KEY! },
     });
     return response.json();
   }
@@ -381,7 +375,6 @@ export const bkashClient = new BKashClient();
 ## Output to Project Orchestrator
 
 When done, report:
-
 ```
 ✅ Backend Implementation: [Feature]
 

@@ -20,11 +20,7 @@ export async function POST(_request: Request) {
   // 9. cache idempotency response
   // 10. audit log
   return NextResponse.json(
-    {
-      success: false,
-      error: 'NOT_IMPLEMENTED',
-      message: 'Donation create arrives with payment-agent phase',
-    },
-    { status: 501 }
+    { success: false, error: 'NOT_IMPLEMENTED', message: 'Donation create arrives with payment-agent phase' },
+    { status: 501 },
   );
 }

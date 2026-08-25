@@ -69,7 +69,9 @@ export default function DonatePage() {
         <CardHeader>
           <CardTitle className="text-base">{t('recentDonations')}</CardTitle>
         </CardHeader>
-        <CardContent>{user ? <DonationHistoryList userId={user.id} /> : null}</CardContent>
+        <CardContent>
+          {user ? <DonationHistoryList userId={user.id} /> : null}
+        </CardContent>
       </Card>
     </div>
   );

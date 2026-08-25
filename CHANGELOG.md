@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-
 - Comprehensive planning documentation (`docs/`)
 - 14 specialized development agents (`.claude/agents/`)
 - Production-grade Docker stack (`docker-compose.yml`, `Dockerfile`)
@@ -24,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONTRIBUTING.md with branching + commit conventions
 
 ### Fixed (Audit Phase)
-
 - `backup-db.sh` actually contained restore logic — rewritten correctly
 - `monitor.sh` had hardcoded path, no error tracking — fixed
 - `setup-vps.sh` wrote `.env` to wrong directory — fixed
@@ -37,7 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Nginx hardcoded `example.com` — now `${DOMAIN}` template
 
 ### Security
-
 - Non-root Docker user (`nextjs`, uid 1001)
 - Independent payment verification via bKash Query API (planned)
 - Rate limiting at both Nginx and Redis layers
@@ -48,7 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.0] - 2026-08-20
 
 ### Added
-
 - Initial project planning phase
 - Documentation structure
 - Agent ecosystem design

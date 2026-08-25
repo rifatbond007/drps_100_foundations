@@ -11,17 +11,17 @@ A production-grade donation web platform for a school-run organization. Members 
 
 ## 📚 Documentation Index
 
-| Document                                                 | Description                                     |
-| -------------------------------------------------------- | ----------------------------------------------- |
-| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)           | System architecture, components, data flow      |
-| [docs/FRONTEND_PLANNING.md](./docs/FRONTEND_PLANNING.md) | UI specs, components, i18n, responsive design   |
-| [docs/BACKEND_PLANNING.md](./docs/BACKEND_PLANNING.md)   | API endpoints, Prisma schema, bKash integration |
-| [docs/CI_CD_PIPELINE.md](./docs/CI_CD_PIPELINE.md)       | GitHub Actions, Docker, deployment              |
-| [docs/PROJECT_STRUCTURE.md](./docs/PROJECT_STRUCTURE.md) | Code organization and setup                     |
-| [docs/WORKFLOW.md](./docs/WORKFLOW.md)                   | Unified workflow (research → deploy)            |
-| [CONTRIBUTING.md](./CONTRIBUTING.md)                     | Branching, commits, PR conventions              |
-| [SECURITY.md](./SECURITY.md)                             | How to report vulnerabilities                   |
-| [.claude/agents/](./.claude/agents/)                     | 14 specialized development agents               |
+| Document | Description |
+|----------|-------------|
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | System architecture, components, data flow |
+| [docs/FRONTEND_PLANNING.md](./docs/FRONTEND_PLANNING.md) | UI specs, components, i18n, responsive design |
+| [docs/BACKEND_PLANNING.md](./docs/BACKEND_PLANNING.md) | API endpoints, Prisma schema, bKash integration |
+| [docs/CI_CD_PIPELINE.md](./docs/CI_CD_PIPELINE.md) | GitHub Actions, Docker, deployment |
+| [docs/PROJECT_STRUCTURE.md](./docs/PROJECT_STRUCTURE.md) | Code organization and setup |
+| [docs/WORKFLOW.md](./docs/WORKFLOW.md) | Unified workflow (research → deploy) |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Branching, commits, PR conventions |
+| [SECURITY.md](./SECURITY.md) | How to report vulnerabilities |
+| [.claude/agents/](./.claude/agents/) | 14 specialized development agents |
 
 ---
 
@@ -47,9 +47,9 @@ No Kubernetes needed at this scale — keep it simple and maintainable.
 
 ## 👥 Roles & Permissions
 
-| Role      | Permissions                                                                                                                                            |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **user**  | Login, donate via bKash (no approval needed), update own profile, view own donation history                                                            |
+| Role | Permissions |
+|------|-------------|
+| **user** | Login, donate via bKash (no approval needed), update own profile, view own donation history |
 | **admin** | Everything a user can + view/manage user list (ban/unban, search), view overall donation reports (read-only). **No control over donation flow itself** |
 
 **Donation flow is fully self-service and automated** — admins only handle user management and reporting oversight.
@@ -58,25 +58,25 @@ No Kubernetes needed at this scale — keep it simple and maintainable.
 
 ## 🛠️ Tech Stack
 
-| Layer              | Choice                                | Reason                                        |
-| ------------------ | ------------------------------------- | --------------------------------------------- |
-| Frontend + Backend | Next.js 15 (App Router)               | Unified full-stack framework, SSR-friendly    |
-| Language           | TypeScript                            | Type safety across the stack                  |
-| Package manager    | **pnpm 9**                            | Fast, disk-efficient, strict                  |
-| Auth               | NextAuth.js v5 + Google Provider      | No passwords, built-in session handling       |
-| Database           | PostgreSQL 16                         | Strong consistency, needed for financial data |
-| ORM                | Prisma 5                              | Type-safe queries + migrations                |
-| Cache / Session    | Redis 7                               | Sessions, rate limiting, idempotency          |
-| Payment            | bKash Tokenized Checkout (PGW)        | Local BD payment method                       |
-| i18n               | next-intl                             | SSR-friendly Bangla/English toggle            |
-| File storage       | Cloudflare R2                         | Avatars, receipts                             |
-| Deployment         | Docker + Nginx + Let's Encrypt on VPS | Full control, reusable DevOps skillset        |
-| Error tracking     | Sentry                                | Production error visibility                   |
-| UI Components      | shadcn/ui + Tailwind CSS              | Accessible, customizable                      |
-| Forms              | React Hook Form + Zod                 | Type-safe form validation                     |
-| State              | Zustand + TanStack Query              | Client + server state                         |
-| Testing            | Vitest + Playwright                   | Unit + E2E testing                            |
-| CI/CD              | GitHub Actions                        | Automated pipeline                            |
+| Layer | Choice | Reason |
+|-------|--------|--------|
+| Frontend + Backend | Next.js 15 (App Router) | Unified full-stack framework, SSR-friendly |
+| Language | TypeScript | Type safety across the stack |
+| Package manager | **pnpm 9** | Fast, disk-efficient, strict |
+| Auth | NextAuth.js v5 + Google Provider | No passwords, built-in session handling |
+| Database | PostgreSQL 16 | Strong consistency, needed for financial data |
+| ORM | Prisma 5 | Type-safe queries + migrations |
+| Cache / Session | Redis 7 | Sessions, rate limiting, idempotency |
+| Payment | bKash Tokenized Checkout (PGW) | Local BD payment method |
+| i18n | next-intl | SSR-friendly Bangla/English toggle |
+| File storage | Cloudflare R2 | Avatars, receipts |
+| Deployment | Docker + Nginx + Let's Encrypt on VPS | Full control, reusable DevOps skillset |
+| Error tracking | Sentry | Production error visibility |
+| UI Components | shadcn/ui + Tailwind CSS | Accessible, customizable |
+| Forms | React Hook Form + Zod | Type-safe form validation |
+| State | Zustand + TanStack Query | Client + server state |
+| Testing | Vitest + Playwright | Unit + E2E testing |
+| CI/CD | GitHub Actions | Automated pipeline |
 
 ---
 
@@ -108,14 +108,12 @@ user_settings user_id (FK), email_notifications, donation_receipts, theme
 ## 🔄 Core Flows
 
 ### Auth Flow
-
 1. User clicks "Login with Google"
 2. NextAuth OAuth → creates session
 3. First-time login → "Complete Profile" (phone for bKash)
 4. Redirect to dashboard
 
 ### Donation Flow
-
 1. User selects amount → clicks Donate
 2. Backend calls bKash Checkout → payment URL
 3. User redirected to bKash, completes payment
@@ -124,7 +122,6 @@ user_settings user_id (FK), email_notifications, donation_receipts, theme
 6. Donation updated → confirmation shown
 
 ### i18n Flow
-
 - Routes: `/bn/dashboard`, `/en/dashboard`
 - Static content in `bn.json` / `en.json`
 - Stored in cookie + URL, toggle in UI
@@ -169,7 +166,6 @@ user_settings user_id (FK), email_notifications, donation_receipts, theme
 ## 🚀 Quick Start
 
 ### Prerequisites
-
 - Node.js 20+
 - pnpm 9+ (`corepack enable && corepack prepare pnpm@9 --activate`)
 - Docker + Docker Compose (for Postgres + Redis)
@@ -205,13 +201,13 @@ open http://localhost:3000
 
 ### Stack Status
 
-| Component                                    | Status                     |
-| -------------------------------------------- | -------------------------- |
-| Documentation                                | ✅ Complete                |
-| Infrastructure (Docker, Nginx, Scripts)      | ✅ Complete                |
-| CI/CD (GitHub Actions)                       | ✅ Complete                |
+| Component | Status |
+|-----------|--------|
+| Documentation | ✅ Complete |
+| Infrastructure (Docker, Nginx, Scripts) | ✅ Complete |
+| CI/CD (GitHub Actions) | ✅ Complete |
 | Source code (`src/`, `prisma/`, `messages/`) | ⏳ **Not yet implemented** |
-| Tests                                        | � **Not yet implemented**  |
+| Tests | � **Not yet implemented** |
 
 ---
 
@@ -224,13 +220,11 @@ Production deploys use the GitHub Actions pipeline in `.github/workflows/`:
 3. Deploy workflow SSHs to VPS, pulls image, runs migrations, restarts services
 
 **Required GitHub Secrets:**
-
 - `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`
 - `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`
 - `SLACK_WEBHOOK` (for deployment notifications)
 
 **First-time VPS setup:**
-
 ```bash
 sudo ./scripts/setup-vps.sh yourdomain.com admin@yourdomain.com
 ```
@@ -242,7 +236,6 @@ See [docs/CI_CD_PIPELINE.md](./docs/CI_CD_PIPELINE.md) for full deployment guide
 ## 🤝 Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for:
-
 - Branch naming convention
 - Conventional Commits format
 - PR template and review process
@@ -264,4 +257,4 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for:
 
 ---
 
-_Last updated: August 20, 2026_
+*Last updated: August 20, 2026*

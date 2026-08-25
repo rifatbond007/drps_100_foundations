@@ -52,6 +52,6 @@ export async function GET(request: Request) {
         ...(deep ? { services } : {}),
       },
     },
-    { status: status === 'ok' ? 200 : 503 }
+    { status: status === 'ok' ? 200 : 503 },
   );
 }

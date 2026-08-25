@@ -23,7 +23,7 @@ export function Providers({ children }: { children: ReactNode }) {
             retry: 0,
           },
         },
-      })
+      }),
   );
 
   return (

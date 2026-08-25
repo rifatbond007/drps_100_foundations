@@ -17,20 +17,20 @@ You are the **Project Orchestrator** for the donation platform. Your job is to c
 
 ## Available Specialized Agents
 
-| Agent            | Triggered By                                             | Reads                                                                     | Writes                                             |
-| ---------------- | -------------------------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------- |
-| `research-agent` | New features, tech decisions, open questions             | README.md, docs/                                                          | docs/RESEARCH.md, docs/DECISIONS.md                |
-| `design-agent`   | Architecture/UI/API design tasks                         | docs/ARCHITECTURE.md, docs/FRONTEND_PLANNING.md, docs/BACKEND_PLANNING.md | docs/* (specs)                                     |
-| `frontend-agent` | React components, pages, UI styling, i18n                | docs/FRONTEND_PLANNING.md                                                 | src/app/, src/components/                          |
-| `backend-agent`  | API routes, database, business logic, bKash              | docs/BACKEND_PLANNING.md                                                  | src/app/api/, prisma/                              |
-| `database-agent` | Schema changes, migrations, queries                      | prisma/schema.prisma                                                      | prisma/                                            |
-| `auth-agent`     | NextAuth, sessions, OAuth, RBAC                          | docs/BACKEND_PLANNING.md §3.1                                             | src/lib/auth/, src/middleware.ts                   |
-| `payment-agent`  | bKash integration, payment flow                          | docs/BACKEND_PLANNING.md §5.3                                             | src/lib/payment/                                   |
-| `i18n-agent`     | Bangla/English translations, locale routing              | docs/FRONTEND_PLANNING.md §6                                              | messages/, src/middleware.ts                       |
-| `testing-agent`  | Unit tests, integration tests, E2E tests                 | src/                                                                      | tests/                                             |
-| `security-agent` | Rate limiting, validation, auth checks, security headers | docs/BACKEND_PLANNING.md §6                                               | src/lib/security/                                  |
-| `devops-agent`   | Docker, CI/CD, deployment, monitoring                    | docs/CI_CD_PIPELINE.md                                                    | .github/workflows/, Dockerfile, docker-compose.yml |
-| `docs-agent`     | Documentation sync, ADRs, README updates                 | docs/                                                                     | docs/                                              |
+| Agent | Triggered By | Reads | Writes |
+|-------|-------------|-------|--------|
+| `research-agent` | New features, tech decisions, open questions | README.md, docs/ | docs/RESEARCH.md, docs/DECISIONS.md |
+| `design-agent` | Architecture/UI/API design tasks | docs/ARCHITECTURE.md, docs/FRONTEND_PLANNING.md, docs/BACKEND_PLANNING.md | docs/* (specs) |
+| `frontend-agent` | React components, pages, UI styling, i18n | docs/FRONTEND_PLANNING.md | src/app/, src/components/ |
+| `backend-agent` | API routes, database, business logic, bKash | docs/BACKEND_PLANNING.md | src/app/api/, prisma/ |
+| `database-agent` | Schema changes, migrations, queries | prisma/schema.prisma | prisma/ |
+| `auth-agent` | NextAuth, sessions, OAuth, RBAC | docs/BACKEND_PLANNING.md §3.1 | src/lib/auth/, src/middleware.ts |
+| `payment-agent` | bKash integration, payment flow | docs/BACKEND_PLANNING.md §5.3 | src/lib/payment/ |
+| `i18n-agent` | Bangla/English translations, locale routing | docs/FRONTEND_PLANNING.md §6 | messages/, src/middleware.ts |
+| `testing-agent` | Unit tests, integration tests, E2E tests | src/ | tests/ |
+| `security-agent` | Rate limiting, validation, auth checks, security headers | docs/BACKEND_PLANNING.md §6 | src/lib/security/ |
+| `devops-agent` | Docker, CI/CD, deployment, monitoring | docs/CI_CD_PIPELINE.md | .github/workflows/, Dockerfile, docker-compose.yml |
+| `docs-agent` | Documentation sync, ADRs, README updates | docs/ | docs/ |
 
 ## Workflow Phases
 
@@ -49,20 +49,20 @@ When a user makes a request:
 
 ## Decision Matrix: Which Agent?
 
-| If the request is about...    | Delegate to      |
-| ----------------------------- | ---------------- |
-| Adding a new page/UI feature  | `frontend-agent` |
-| New API endpoint              | `backend-agent`  |
+| If the request is about... | Delegate to |
+|--------------------------|-------------|
+| Adding a new page/UI feature | `frontend-agent` |
+| New API endpoint | `backend-agent` |
 | Database table/column changes | `database-agent` |
-| Login/auth flows              | `auth-agent`     |
-| Payment processing            | `payment-agent`  |
-| Translations/locales          | `i18n-agent`     |
-| Tests (any kind)              | `testing-agent`  |
-| Security improvements         | `security-agent` |
-| CI/CD, Docker, deploy         | `devops-agent`   |
-| Architecture decisions        | `design-agent`   |
-| New tech research             | `research-agent` |
-| Documentation updates         | `docs-agent`     |
+| Login/auth flows | `auth-agent` |
+| Payment processing | `payment-agent` |
+| Translations/locales | `i18n-agent` |
+| Tests (any kind) | `testing-agent` |
+| Security improvements | `security-agent` |
+| CI/CD, Docker, deploy | `devops-agent` |
+| Architecture decisions | `design-agent` |
+| New tech research | `research-agent` |
+| Documentation updates | `docs-agent` |
 
 ## Multi-Phase Requests
 
@@ -77,7 +77,7 @@ const tasks = [
   { agent: 'backend-agent', task: 'Implement campaign CRUD APIs' },
   { agent: 'frontend-agent', task: 'Build campaign pages and components' },
   { agent: 'testing-agent', task: 'Write unit + E2E tests' },
-  { agent: 'docs-agent', task: 'Update BACKEND_PLANNING.md and FRONTEND_PLANNING.md' },
+  { agent: 'docs-agent', task: 'Update BACKEND_PLANNING.md and FRONTEND_PLANNING.md' }
 ];
 ```
 
@@ -118,7 +118,6 @@ After completing work, report to user in this structure:
 ## Tech Stack Reference
 
 From `README.md §4`:
-
 - **Frontend + Backend:** Next.js 15 (App Router)
 - **Language:** TypeScript
 - **Auth:** NextAuth.js v5 + Google Provider

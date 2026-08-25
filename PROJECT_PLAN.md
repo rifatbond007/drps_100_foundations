@@ -50,13 +50,13 @@ A production-grade donation web platform for a school-run organization.
 
 ## 2. Build Order (5 Priorities, Scoped)
 
-| #      | Milestone                        | Branch naming                              | Depends on       |
-| ------ | -------------------------------- | ------------------------------------------ | ---------------- |
-| **P1** | Complete user profile            | `feat/user-profile`                        | current scaffold |
-| **P2** | Complete admin profile           | `feat/admin-profile`                       | P1               |
-| **P3** | Frontend ↔ backend wiring        | `feat/api-web-warnings` (rename as needed) | P1, P2           |
-| **P4** | CI perfectly working (no deploy) | `ci/green-pipeline`                        | P1, P2, P3       |
-| **P5** | Landing page                     | `feat/landing-page`                        | P3               |
+| # | Milestone | Branch naming | Depends on |
+|---|-----------|---------------|------------|
+| **P1** | Complete user profile | `feat/user-profile` | current scaffold |
+| **P2** | Complete admin profile | `feat/admin-profile` | P1 |
+| **P3** | Frontend ↔ backend wiring | `feat/api-web-warnings` (rename as needed) | P1, P2 |
+| **P4** | CI perfectly working (no deploy) | `ci/green-pipeline` | P1, P2, P3 |
+| **P5** | Landing page | `feat/landing-page` | P3 |
 
 > All branches merge into `develop`. `main` is left untouched in this round.
 
@@ -72,23 +72,22 @@ must gate the dashboard.
 
 **Files to touch / create:**
 
-| Path                                                         | Action                                                        |
-| ------------------------------------------------------------ | ------------------------------------------------------------- |
-| `src/app/api/users/profile/route.ts`                         | `GET` / `PATCH` — name, phone, languagePref, avatarUrl        |
-| `src/app/api/users/settings/route.ts`                        | `GET` / `PATCH` — emailNotifications, donationReceipts, theme |
-| `src/app/api/users/complete-profile/route.ts`                | Already partial — finalize (Zod: phone, name)                 |
-| `src/app/[locale]/(authenticated)/settings/page.tsx`         | Finalize — uses settings form                                 |
-| `src/app/[locale]/(requires-auth)/complete-profile/page.tsx` | Finalize — uses ProfileCompletionForm                         |
-| `src/components/auth/ProfileCompletionForm.tsx`              | Finalize — RHF + Zod, bn/en labels                            |
-| `src/components/user/ProfileCard.tsx`                        | New — avatar, name, phone, language toggle                    |
-| `src/components/user/SettingsForm.tsx`                       | New — RHF + Zod, switches for notifications/theme             |
-| `src/lib/validation/user.ts`                                 | Keep; add `settingsSchema` if missing                         |
-| `src/lib/hooks/use-profile.ts`                               | New — TanStack Query hooks (`useProfile`, `useUpdateProfile`) |
-| `src/lib/api/client.ts`                                      | Keep — fetch wrapper used by the hooks                        |
-| `messages/bn.json`, `messages/en.json`                       | Add profile + settings keys in both                           |
+| Path | Action |
+|---|---|
+| `src/app/api/users/profile/route.ts` | `GET` / `PATCH` — name, phone, languagePref, avatarUrl |
+| `src/app/api/users/settings/route.ts` | `GET` / `PATCH` — emailNotifications, donationReceipts, theme |
+| `src/app/api/users/complete-profile/route.ts` | Already partial — finalize (Zod: phone, name) |
+| `src/app/[locale]/(authenticated)/settings/page.tsx` | Finalize — uses settings form |
+| `src/app/[locale]/(requires-auth)/complete-profile/page.tsx` | Finalize — uses ProfileCompletionForm |
+| `src/components/auth/ProfileCompletionForm.tsx` | Finalize — RHF + Zod, bn/en labels |
+| `src/components/user/ProfileCard.tsx` | New — avatar, name, phone, language toggle |
+| `src/components/user/SettingsForm.tsx` | New — RHF + Zod, switches for notifications/theme |
+| `src/lib/validation/user.ts` | Keep; add `settingsSchema` if missing |
+| `src/lib/hooks/use-profile.ts` | New — TanStack Query hooks (`useProfile`, `useUpdateProfile`) |
+| `src/lib/api/client.ts` | Keep — fetch wrapper used by the hooks |
+| `messages/bn.json`, `messages/en.json` | Add profile + settings keys in both |
 
 **Reuse (do not rewrite):**
-
 - `withAuth(handler)` from `src/lib/api/helpers.ts`
 - `rateLimit('COMPLETE_PROFILE', ...)` from `src/lib/rate-limit.ts`
 - `logSecurityEvent(...)` from `src/lib/audit.ts`
@@ -96,7 +95,6 @@ must gate the dashboard.
 - shadcn primitives from `src/components/ui/`
 
 **Verification:**
-
 ```bash
 pnpm lint
 pnpm type-check
@@ -106,7 +104,6 @@ pnpm test:e2e -- profile.spec.ts
 ```
 
 **Done when:**
-
 - Profile page renders the current user's data.
 - Settings save succeeds and survives reload.
 - Profile-completion form blocks `/dashboard` until `phone` is set.
@@ -122,19 +119,19 @@ donation flow itself.**
 
 **Files to touch / create:**
 
-| Path                                         | Action                                                  |
-| -------------------------------------------- | ------------------------------------------------------- |
-| `src/app/api/admin/users/route.ts`           | `GET` (paginated + search), `PATCH` (ban/unban, role)   |
-| `src/app/api/admin/users/[id]/route.ts`      | `GET` (full profile read)                               |
-| `src/app/api/admin/reports/route.ts`         | `GET` — totals, counts, time-series; **never** mutation |
-| `src/app/[locale]/admin/users/page.tsx`      | Users table page                                        |
-| `src/app/[locale]/admin/users/[id]/page.tsx` | Single-user admin view                                  |
-| `src/app/[locale]/admin/reports/page.tsx`    | Reports dashboard (Recharts)                            |
-| `src/components/admin/UsersTable.tsx`        | Finalize — shadcn table, ban/unban actions              |
-| `src/components/admin/UserProfileCard.tsx`   | New — read-only view for admin                          |
-| `src/components/admin/ReportsChart.tsx`      | New — Recharts wrapper, bn/en labels                    |
-| `src/lib/hooks/use-admin-users.ts`           | New — list + mutations                                  |
-| `messages/bn.json`, `messages/en.json`       | Add admin keys in both                                  |
+| Path | Action |
+|---|---|
+| `src/app/api/admin/users/route.ts` | `GET` (paginated + search), `PATCH` (ban/unban, role) |
+| `src/app/api/admin/users/[id]/route.ts` | `GET` (full profile read) |
+| `src/app/api/admin/reports/route.ts` | `GET` — totals, counts, time-series; **never** mutation |
+| `src/app/[locale]/admin/users/page.tsx` | Users table page |
+| `src/app/[locale]/admin/users/[id]/page.tsx` | Single-user admin view |
+| `src/app/[locale]/admin/reports/page.tsx` | Reports dashboard (Recharts) |
+| `src/components/admin/UsersTable.tsx` | Finalize — shadcn table, ban/unban actions |
+| `src/components/admin/UserProfileCard.tsx` | New — read-only view for admin |
+| `src/components/admin/ReportsChart.tsx` | New — Recharts wrapper, bn/en labels |
+| `src/lib/hooks/use-admin-users.ts` | New — list + mutations |
+| `messages/bn.json`, `messages/en.json` | Add admin keys in both |
 
 **Authorization:** every handler calls `requireAdmin()`. `src/middleware.ts` already
 returns 403 (not redirect) for `/api/admin/*` when role ≠ `ADMIN`.
@@ -142,7 +139,6 @@ returns 403 (not redirect) for `/api/admin/*` when role ≠ `ADMIN`.
 **Reuse:** same lib files as P1 + `requireAdmin()` from `src/lib/auth/session.ts`.
 
 **Verification:**
-
 ```bash
 pnpm test -- src/lib/auth tests/lib/
 pnpm test:e2e -- admin.spec.ts
@@ -151,7 +147,6 @@ pnpm test:e2e -- admin.spec.ts
 ```
 
 **Done when:**
-
 - Non-admin user gets 403 on `/api/admin/users`.
 - Admin can ban/unban; user's `lastLoginAt` shows `null` after re-auth.
 - Reports page renders totals + chart from seeded donations.
@@ -183,22 +178,21 @@ No more placeholder UI, no more unused `useState` mocks.
 
 **Files to touch / create:**
 
-| Path                                       | Action                                              |
-| ------------------------------------------ | --------------------------------------------------- |
-| `src/lib/hooks/use-auth.ts`                | Finalize — returns `{ user, isLoading, signOut }`   |
-| `src/lib/api/client.ts`                    | Add toast on error; ensure `credentials: 'include'` |
-| `src/components/layout/Header.tsx`         | Finalize — uses `useAuth()`                         |
-| `src/components/layout/Sidebar.tsx`        | Finalize — role-aware nav items                     |
-| `src/components/layout/SignOutButton.tsx`  | Finalize — calls `signOut()`                        |
-| `src/app/[locale]/(public)/login/page.tsx` | Finalize                                            |
-| All `(authenticated)` pages                | Wire to real hooks, replace mock data               |
-| `src/components/ui/toast.tsx`              | Add (shadcn) — needed for error feedback            |
+| Path | Action |
+|---|---|
+| `src/lib/hooks/use-auth.ts` | Finalize — returns `{ user, isLoading, signOut }` |
+| `src/lib/api/client.ts` | Add toast on error; ensure `credentials: 'include'` |
+| `src/components/layout/Header.tsx` | Finalize — uses `useAuth()` |
+| `src/components/layout/Sidebar.tsx` | Finalize — role-aware nav items |
+| `src/components/layout/SignOutButton.tsx` | Finalize — calls `signOut()` |
+| `src/app/[locale]/(public)/login/page.tsx` | Finalize |
+| All `(authenticated)` pages | Wire to real hooks, replace mock data |
+| `src/components/ui/toast.tsx` | Add (shadcn) — needed for error feedback |
 
 **Reuse:** shadcn `Button`, `Card`, `Input`, `Skeleton`, `Toast` (new).
 `useAuth` returns `Session | null`; pages should `redirect('/login')` if null.
 
 **Verification:**
-
 ```bash
 pnpm test
 pnpm test:e2e --headed   # walk through every page; confirm no "loading forever"
@@ -206,7 +200,6 @@ pnpm test:e2e --headed   # walk through every page; confirm no "loading forever"
 ```
 
 **Done when:**
-
 - Every page renders data from the API (or honest empty states).
 - Every form submits to the API and reflects the result.
 - No console errors in the browser during a full navigation walk-through.
@@ -221,12 +214,12 @@ fast where possible, and produce a green badge.
 
 **Workflows to finalize (already partially exist):**
 
-| Path                                 | State   | Action                     |
-| ------------------------------------ | ------- | -------------------------- |
-| `.github/workflows/ci.yml`           | partial | Finalize — full pipeline   |
+| Path | State | Action |
+|---|---|---|
+| `.github/workflows/ci.yml` | partial | Finalize — full pipeline |
 | `.github/workflows/code-quality.yml` | partial | Finalize — add i18n parity |
-| `.github/workflows/docker.yml`       | exists  | **Leave** — out of scope   |
-| `.github/workflows/deploy.yml`       | exists  | **Leave** — out of scope   |
+| `.github/workflows/docker.yml` | exists | **Leave** — out of scope |
+| `.github/workflows/deploy.yml` | exists | **Leave** — out of scope |
 
 **Final `ci.yml` shape (no deploy):**
 
@@ -236,14 +229,14 @@ on:
   push: { branches: [main, develop] }
   pull_request: { branches: [main, develop] }
 jobs:
-  lint: # pnpm lint
-  format: # pnpm format:check
-  type-check: # pnpm type-check
-  i18n-parity: # node scripts/i18n-parity-check.mjs
-  unit: # pnpm test:cov (vitest, jsdom + redis + postgres service)
-  integration: # pnpm test -- tests/lib/integration (uses real DB)
-  e2e: # pnpm test:e2e (Playwright + browsers)
-  build: # pnpm build (compile check)
+  lint:           # pnpm lint
+  format:         # pnpm format:check
+  type-check:     # pnpm type-check
+  i18n-parity:    # node scripts/i18n-parity-check.mjs
+  unit:           # pnpm test:cov (vitest, jsdom + redis + postgres service)
+  integration:    # pnpm test -- tests/lib/integration (uses real DB)
+  e2e:            # pnpm test:e2e (Playwright + browsers)
+  build:          # pnpm build (compile check)
 ```
 
 **Targets:**
@@ -259,13 +252,12 @@ jobs:
 
 **New scripts (CI-only):**
 
-| Path                                    | Purpose                                              |
-| --------------------------------------- | ---------------------------------------------------- |
-| `scripts/i18n-parity-check.mjs`         | Fails if keys differ between `bn.json` and `en.json` |
-| `scripts/check-coverage-thresholds.mjs` | Fails if vitest thresholds not met                   |
+| Path | Purpose |
+|---|---|
+| `scripts/i18n-parity-check.mjs` | Fails if keys differ between `bn.json` and `en.json` |
+| `scripts/check-coverage-thresholds.mjs` | Fails if vitest thresholds not met |
 
 **Done when:**
-
 - Push to `develop` with a failing test → CI fails with the right job red.
 - Push with everything passing → CI badge is green in <10 min.
 - No deploy job runs (`.github/workflows/deploy.yml` and `docker.yml` left alone
@@ -297,23 +289,22 @@ and funnels visitors toward login / donate.
 
 **Files to touch / create:**
 
-| Path                                        | Action                                                 |
-| ------------------------------------------- | ------------------------------------------------------ |
-| `src/app/[locale]/(public)/page.tsx`        | Finalize — composes the sections                       |
-| `src/components/landing/Hero.tsx`           | New                                                    |
-| `src/components/landing/TrustStrip.tsx`     | New                                                    |
-| `src/components/landing/ImpactCounters.tsx` | New — animated counters                                |
-| `src/components/landing/CauseCard.tsx`      | New                                                    |
-| `src/components/landing/HowItWorks.tsx`     | New                                                    |
-| `src/components/landing/Testimonials.tsx`   | New — placeholder                                      |
-| `src/components/landing/CtaBanner.tsx`      | New                                                    |
-| `src/app/api/public/stats/route.ts`         | New — public read-only stats                           |
-| `src/lib/hooks/use-public-stats.ts`         | New — TanStack Query hook                              |
-| `src/lib/stores/ui-store.ts`                | Add `hasSeenHeroCta` flag for dismissal (optional)     |
-| `messages/bn.json`, `messages/en.json`      | Add `landing.*` keys (most may already exist — verify) |
+| Path | Action |
+|---|---|
+| `src/app/[locale]/(public)/page.tsx` | Finalize — composes the sections |
+| `src/components/landing/Hero.tsx` | New |
+| `src/components/landing/TrustStrip.tsx` | New |
+| `src/components/landing/ImpactCounters.tsx` | New — animated counters |
+| `src/components/landing/CauseCard.tsx` | New |
+| `src/components/landing/HowItWorks.tsx` | New |
+| `src/components/landing/Testimonials.tsx` | New — placeholder |
+| `src/components/landing/CtaBanner.tsx` | New |
+| `src/app/api/public/stats/route.ts` | New — public read-only stats |
+| `src/lib/hooks/use-public-stats.ts` | New — TanStack Query hook |
+| `src/lib/stores/ui-store.ts` | Add `hasSeenHeroCta` flag for dismissal (optional) |
+| `messages/bn.json`, `messages/en.json` | Add `landing.*` keys (most may already exist — verify) |
 
 **Design rules:**
-
 - Use `cn()` for class composition; no inline `style={{...}}` for layout.
 - `prettier-plugin-tailwindcss` sorts classes.
 - Images from `public/` only; Cloudflare R2 + Google hosts are allowlisted
@@ -325,7 +316,6 @@ and funnels visitors toward login / donate.
 from `next-intl`.
 
 **Verification:**
-
 ```bash
 pnpm test:e2e -- landing.spec.ts
 # Playwright projects: chromium + mobile (Pixel 5) — already configured in playwright.config.ts
@@ -336,7 +326,6 @@ npx lighthouse http://localhost:3000/bn --view --preset=mobile
 ```
 
 **Done when:**
-
 - Bilingual, responsive, fast (LCP < 2.5s on local).
 - All CTAs route correctly (or land on `/donate` placeholder).
 - Counters load from `/api/public/stats` and gracefully show "—" on error.
@@ -347,29 +336,24 @@ npx lighthouse http://localhost:3000/bn --view --preset=mobile
 ## 4. Cross-Cutting Concerns
 
 ### 4.1 i18n parity CI check (P4)
-
 Add `scripts/i18n-parity-check.mjs`:
-
 - Load both JSON files.
 - Diff keys recursively.
 - Exit 1 with a clear diff if any key is missing on either side.
 
 ### 4.2 Conventional Commits
-
 Already enforced (`.commitlintrc.json` + husky + lint-staged).
 Subject ≤ 72 chars, lowercase, no trailing period, imperative. Types: feat, fix, docs,
 style, refactor, perf, test, chore, ci, build, revert. Scopes: auth, payment, donation,
 i18n, db, ui, api, admin, infra.
 
 ### 4.3 Branching (from CONTRIBUTING.md)
-
 - `develop` ← integration target for this round.
 - `feat/<scope>-<desc>` / `fix/<scope>-<desc>` / `ci/...`
 - Squash-merge into `develop` after CI green.
 - `main` left untouched.
 
 ### 4.4 Security reporting
-
 `SECURITY.md` — email `riftbond007@users.noreply.github.com` or open GitHub Security Advisory.
 
 ---
@@ -446,31 +430,31 @@ Can't be answered from code alone — flag for the user:
 
 ## 9. Files Index (Critical Paths)
 
-| Path                                   | Purpose                                        |
-| -------------------------------------- | ---------------------------------------------- |
-| `package.json`                         | pnpm scripts, deps                             |
-| `tsconfig.json`                        | Strict TS, `@/*` alias                         |
-| `next.config.js`                       | i18n + headers + image allowlist               |
-| `tailwind.config.ts`                   | shadcn tokens + fonts                          |
-| `prisma/schema.prisma`                 | Data model                                     |
-| `src/middleware.ts`                    | i18n + auth + admin guards                     |
-| `src/i18n.ts`                          | next-intl config                               |
-| `src/lib/auth/next-auth.ts`            | NextAuth config                                |
-| `src/lib/auth/session.ts`              | Server-side session helpers                    |
-| `src/lib/prisma.ts`                    | Singleton Prisma                               |
-| `src/lib/redis.ts`                     | Singleton Redis                                |
-| `src/lib/audit.ts`                     | Security event log                             |
-| `src/lib/rate-limit.ts`                | Sliding-window limiter                         |
-| `src/lib/api/client.ts`                | Fetch wrapper                                  |
-| `src/lib/api/helpers.ts`               | `withAuth`, `withRole`, `withRateLimit`        |
-| `src/lib/utils.ts`                     | `cn()`, `formatBDT()`, `truncate()`, `sleep()` |
-| `src/lib/hooks/`                       | TanStack Query hooks                           |
-| `src/lib/validation/`                  | Zod schemas                                    |
-| `messages/bn.json`, `messages/en.json` | Translations                                   |
-| `.github/workflows/ci.yml`             | Lint + test + build                            |
-| `.github/workflows/code-quality.yml`   | Format + commitlint + i18n parity              |
-| `scripts/`                             | CI + ops scripts                               |
+| Path | Purpose |
+|---|---|
+| `package.json` | pnpm scripts, deps |
+| `tsconfig.json` | Strict TS, `@/*` alias |
+| `next.config.js` | i18n + headers + image allowlist |
+| `tailwind.config.ts` | shadcn tokens + fonts |
+| `prisma/schema.prisma` | Data model |
+| `src/middleware.ts` | i18n + auth + admin guards |
+| `src/i18n.ts` | next-intl config |
+| `src/lib/auth/next-auth.ts` | NextAuth config |
+| `src/lib/auth/session.ts` | Server-side session helpers |
+| `src/lib/prisma.ts` | Singleton Prisma |
+| `src/lib/redis.ts` | Singleton Redis |
+| `src/lib/audit.ts` | Security event log |
+| `src/lib/rate-limit.ts` | Sliding-window limiter |
+| `src/lib/api/client.ts` | Fetch wrapper |
+| `src/lib/api/helpers.ts` | `withAuth`, `withRole`, `withRateLimit` |
+| `src/lib/utils.ts` | `cn()`, `formatBDT()`, `truncate()`, `sleep()` |
+| `src/lib/hooks/` | TanStack Query hooks |
+| `src/lib/validation/` | Zod schemas |
+| `messages/bn.json`, `messages/en.json` | Translations |
+| `.github/workflows/ci.yml` | Lint + test + build |
+| `.github/workflows/code-quality.yml` | Format + commitlint + i18n parity |
+| `scripts/` | CI + ops scripts |
 
 ---
 
-_End of plan. Update this file as decisions are made or scope changes._
+*End of plan. Update this file as decisions are made or scope changes.*

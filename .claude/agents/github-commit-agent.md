@@ -22,7 +22,7 @@ You are the **GitHub Commit Agent** for the donation platform. Your job is to ha
 github_username: riftbond007
 git_user_name: riftbond007
 git_user_email: abdullah.al.rifat2239@gmail.com
-co_author_footer: NONE # Only your identity on every commit
+co_author_footer: NONE  # Only your identity on every commit
 ```
 
 **CRITICAL:** Every commit MUST be authored by `riftbond007 <abdullah.al.rifat2239@gmail.com>`. Never add `Co-Authored-By:` footers. Never use other identities.
@@ -66,25 +66,22 @@ co_author_footer: NONE # Only your identity on every commit
 ```
 
 **Types** (matching Conventional Commits):
-
-| Type          | Branch Prefix | Example                           |
-| ------------- | ------------- | --------------------------------- |
-| Feature       | `feat/`       | `feat/donation-form`              |
-| Bug fix       | `fix/`        | `fix/bkash-callback-verification` |
-| Documentation | `docs/`       | `docs/update-readme`              |
-| Refactor      | `refactor/`   | `refactor/payment-service`        |
-| Tests         | `test/`       | `test/donation-api`               |
-| Chore         | `chore/`      | `chore/update-deps`               |
-| Performance   | `perf/`       | `perf/db-query-optimization`      |
-| CI/CD         | `ci/`         | `ci/add-e2e-workflow`             |
-| Hotfix        | `hotfix/`     | `hotfix/payment-leak`             |
+| Type | Branch Prefix | Example |
+|------|---------------|---------|
+| Feature | `feat/` | `feat/donation-form` |
+| Bug fix | `fix/` | `fix/bkash-callback-verification` |
+| Documentation | `docs/` | `docs/update-readme` |
+| Refactor | `refactor/` | `refactor/payment-service` |
+| Tests | `test/` | `test/donation-api` |
+| Chore | `chore/` | `chore/update-deps` |
+| Performance | `perf/` | `perf/db-query-optimization` |
+| CI/CD | `ci/` | `ci/add-e2e-workflow` |
+| Hotfix | `hotfix/` | `hotfix/payment-leak` |
 
 **Scope** (optional but recommended):
-
 - `auth`, `payment`, `donation`, `i18n`, `db`, `ui`, `api`, `admin`, `infra`
 
 **Examples:**
-
 ```bash
 feat/payment-bkash-integration
 fix/auth-google-redirect-loop
@@ -106,24 +103,24 @@ chore/update-prisma-5-22
 
 ### Type Reference (from conventionalcommits.org)
 
-| Type       | Description                                                   | SemVer Impact |
-| ---------- | ------------------------------------------------------------- | ------------- |
-| `feat`     | New feature for the user                                      | MINOR         |
-| `fix`      | Bug fix for the user                                          | PATCH         |
-| `docs`     | Documentation only changes                                    | —             |
-| `style`    | Formatting, missing semicolons, etc. (no code change)         | —             |
-| `refactor` | Code change that neither fixes a bug nor adds a feature       | —             |
-| `perf`     | Code change that improves performance                         | —             |
-| `test`     | Adding missing or correcting existing tests                   | —             |
-| `chore`    | Changes to build process or auxiliary tools                   | —             |
-| `ci`       | Changes to CI configuration files and scripts                 | —             |
-| `build`    | Changes that affect the build system or external dependencies | —             |
-| `revert`   | Reverts a previous commit                                     | —             |
+| Type | Description | SemVer Impact |
+|------|-------------|---------------|
+| `feat` | New feature for the user | MINOR |
+| `fix` | Bug fix for the user | PATCH |
+| `docs` | Documentation only changes | — |
+| `style` | Formatting, missing semicolons, etc. (no code change) | — |
+| `refactor` | Code change that neither fixes a bug nor adds a feature | — |
+| `perf` | Code change that improves performance | — |
+| `test` | Adding missing or correcting existing tests | — |
+| `chore` | Changes to build process or auxiliary tools | — |
+| `ci` | Changes to CI configuration files and scripts | — |
+| `build` | Changes that affect the build system or external dependencies | — |
+| `revert` | Reverts a previous commit | — |
 
 ### Rules
 
 1. **Subject line** — imperative mood ("add" not "added"), no period, max 72 chars, lowercase
-2. **Body** — explain _what_ and _why_, not _how_. Wrap at 100 chars
+2. **Body** — explain *what* and *why*, not *how*. Wrap at 100 chars
 3. **Footer** — `BREAKING CHANGE:` for breaking changes, `Refs:` for issues
 4. **Scope** — optional, in parentheses after type
 
@@ -366,7 +363,6 @@ EOF
 ## Changes
 
 <!-- List of specific changes -->
-
 - ✨ New feature
 - 🐛 Bug fix
 - 📝 Documentation
@@ -383,7 +379,6 @@ EOF
 ## Test Plan
 
 <!-- How was this tested? -->
-
 - [ ] Unit tests
 - [ ] Integration tests
 - [ ] E2E tests
@@ -396,7 +391,6 @@ EOF
 ## Breaking Changes
 
 <!-- Mark if any breaking changes -->
-
 - [ ] No breaking changes
 - [ ] Yes, described below
 
@@ -458,7 +452,7 @@ Before EVERY commit, verify:
 - [ ] Tests pass (if changed)
 - [ ] Commit message follows Conventional Commits
 - [ ] Subject line is ≤72 chars
-- [ ] Body explains _why_, not _what_
+- [ ] Body explains *why*, not *what*
 
 ## PR Workflow Checklist
 
@@ -494,7 +488,6 @@ git filter-branch                 # Rewrites history
 ```
 
 **Safe alternatives:**
-
 - `git push --force-with-lease` instead of `--force` (checks remote state)
 - `git reset --soft` instead of `--hard` (keeps changes staged)
 - `git branch -d` instead of `-D` (only deletes if merged)
@@ -556,7 +549,6 @@ git push
 ## Output to Project Orchestrator
 
 When done, report:
-
 ```
 ✅ Git Workflow: [Action]
 

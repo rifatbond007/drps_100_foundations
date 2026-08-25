@@ -122,7 +122,7 @@ describe('<AmountSelector />', () => {
   it('calls onChange when amount clicked', () => {
     const handleChange = vi.fn();
     render(<AmountSelector value={null} onChange={handleChange} />);
-
+    
     fireEvent.click(screen.getByText(/৳500|500/));
     expect(handleChange).toHaveBeenCalledWith(500);
   });
@@ -136,10 +136,10 @@ describe('<AmountSelector />', () => {
   it('allows custom amount input', () => {
     const handleChange = vi.fn();
     render(<AmountSelector value={null} onChange={handleChange} />);
-
+    
     const input = screen.getByPlaceholderText(/custom/i);
     fireEvent.change(input, { target: { value: '250' } });
-
+    
     expect(handleChange).toHaveBeenCalledWith(250);
   });
 });
@@ -226,17 +226,15 @@ describe('POST /api/donations/create', () => {
   it('rate limits excessive requests', async () => {
     // Make 4 requests in quick succession
     const requests = Array.from({ length: 4 }, () =>
-      POST(
-        new Request('http://localhost/api/donations/create', {
-          method: 'POST',
-          body: JSON.stringify({ amount: 100, purpose: 'GENERAL_FUND' }),
-        }) as any
-      )
+      POST(new Request('http://localhost/api/donations/create', {
+        method: 'POST',
+        body: JSON.stringify({ amount: 100, purpose: 'GENERAL_FUND' }),
+      }) as any)
     );
 
     const responses = await Promise.all(requests);
     const lastResponse = responses[responses.length - 1];
-
+    
     expect(lastResponse.status).toBe(429);
   });
 });
@@ -258,32 +256,32 @@ test.describe('Donation Flow', () => {
 
   test('user can complete a donation', async ({ page }) => {
     await page.goto('/bn/donate');
-
+    
     // Select amount
     await page.click('button:has-text("৳500"), button:has-text("500")');
-
+    
     // Select purpose
     await page.click('[data-testid="purpose-select"]');
     await page.click('[data-value="EDUCATION"]');
-
+    
     // Accept terms
     await page.check('[data-testid="terms-checkbox"]');
-
+    
     // Submit
     await page.click('button:has-text("পেমেন্টে")');
-
+    
     // Should redirect to bKash (in test, mocked)
     await expect(page).toHaveURL(/bka\.sh/);
   });
 
   test('shows validation errors for invalid amount', async ({ page }) => {
     await page.goto('/bn/donate');
-
+    
     const input = page.locator('[data-testid="custom-amount"]');
     await input.fill('5'); // Below minimum
-
+    
     await page.click('button:has-text("পেমেন্�ে")');
-
+    
     await expect(page.locator('text=/সর্বনিম্ন|Minimum/i')).toBeVisible();
   });
 
@@ -291,9 +289,9 @@ test.describe('Donation Flow', () => {
     // Login as admin
     await page.goto('/bn/login');
     // ... admin login flow
-
+    
     await page.goto('/bn/admin/reports');
-
+    
     await expect(page.locator('h1')).toContainText(/রিপোর্ট|Reports/i);
     await expect(page.locator('[data-testid="total-donations"]')).toBeVisible();
   });
@@ -425,7 +423,6 @@ export default defineConfig({
 ```
 
 **Coverage Targets:**
-
 - Unit: 80% lines, 75% branches
 - Integration: All API endpoints
 - E2E: Critical user journeys (login, donate, history)
@@ -444,7 +441,6 @@ export default defineConfig({
 ## Test Scenarios Per Feature
 
 ### Donation Flow
-
 - [ ] User can create donation with valid amount
 - [ ] Invalid amount shows error
 - [ ] Anonymous donation hides donor info
@@ -454,7 +450,6 @@ export default defineConfig({
 - [ ] Idempotency prevents double-charge
 
 ### Auth Flow
-
 - [ ] Login redirects to Google
 - [ ] First-time user goes to /complete-profile
 - [ ] Returning user goes to /dashboard
@@ -463,7 +458,6 @@ export default defineConfig({
 - [ ] Admin can access /admin/*
 
 ### History Flow
-
 - [ ] Empty state shows message
 - [ ] Paginated list of donations
 - [ ] CSV export downloads
@@ -473,7 +467,6 @@ export default defineConfig({
 ## Output to Project Orchestrator
 
 When done, report:
-
 ```
 ✅ Testing Implementation: [Feature]
 

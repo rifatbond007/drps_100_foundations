@@ -1,6 +1,10 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function AboutPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('about');
@@ -10,7 +14,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       <h1 className="text-4xl font-bold tracking-tight">{t('title')}</h1>
       <p className="mt-4 text-lg text-muted-foreground">{t('subtitle')}</p>
 
-      <div className="prose prose-stone dark:prose-invert mt-8">
+      <div className="prose prose-stone mt-8 dark:prose-invert">
         <p>{t('body')}</p>
       </div>
     </div>

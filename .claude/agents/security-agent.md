@@ -78,8 +78,8 @@ src/
 import { redis } from '@/lib/redis';
 
 export interface RateLimitConfig {
-  windowMs: number; // Time window in seconds
-  max: number; // Max requests per window
+  windowMs: number;  // Time window in seconds
+  max: number;       // Max requests per window
 }
 
 export interface RateLimitResult {
@@ -112,7 +112,7 @@ export async function rateLimit(
     // Get oldest entry to calculate reset time
     const oldest = await redis.zrange(key, 0, 0, 'WITHSCORES');
     const resetAt = new Date(parseInt(oldest[1]) + windowSeconds * 1000);
-
+    
     return {
       allowed: false,
       remaining: 0,
@@ -135,11 +135,11 @@ export async function rateLimit(
 
 // Predefined rate limit configs
 export const RATE_LIMITS = {
-  DONATION_CREATE: { max: 3, windowSeconds: 300 }, // 3 per 5 min
-  LOGIN: { max: 5, windowSeconds: 60 }, // 5 per minute
-  API_GENERAL: { max: 100, windowSeconds: 60 }, // 100 per minute
-  ADMIN_ACTION: { max: 30, windowSeconds: 60 }, // 30 per minute
-  PASSWORD_RESET: { max: 3, windowSeconds: 3600 }, // 3 per hour
+  DONATION_CREATE: { max: 3, windowSeconds: 300 },     // 3 per 5 min
+  LOGIN: { max: 5, windowSeconds: 60 },                 // 5 per minute
+  API_GENERAL: { max: 100, windowSeconds: 60 },         // 100 per minute
+  ADMIN_ACTION: { max: 30, windowSeconds: 60 },         // 30 per minute
+  PASSWORD_RESET: { max: 3, windowSeconds: 3600 },      // 3 per hour
 };
 ```
 
@@ -151,63 +151,57 @@ import { z } from 'zod';
 
 // Donation validation
 export const createDonationSchema = z.object({
-  amount: z
-    .number()
+  amount: z.number()
     .min(10, 'Minimum ৳10')
     .max(100000, 'Maximum ৳100,000')
-    .refine((val) => Number.isFinite(val), 'Invalid amount')
-    .refine((val) => Math.round(val * 100) === val * 100, 'Max 2 decimal places'),
-
+    .refine(val => Number.isFinite(val), 'Invalid amount')
+    .refine(val => Math.round(val * 100) === val * 100, 'Max 2 decimal places'),
+  
   purpose: z.enum(['GENERAL_FUND', 'EDUCATION', 'MEDICAL', 'EMERGENCY'], {
     errorMap: () => ({ message: 'Invalid purpose' }),
   }),
-
+  
   isAnonymous: z.boolean().default(false),
-
+  
   idempotencyKey: z.string().uuid('Invalid idempotency key'),
-
+  
   // Prevent injection
   metadata: z.record(z.string()).optional(),
 });
 
 // User profile validation
 export const updateProfileSchema = z.object({
-  name: z
-    .string()
+  name: z.string()
     .trim()
     .min(1, 'Name required')
     .max(100, 'Name too long')
     .regex(/^[\p{L}\s.-]+$/u, 'Invalid characters'), // Unicode letters
-
-  phone: z
-    .string()
+  
+  phone: z.string()
     .regex(/^\+8801[3-9]\d{8}$/, 'Invalid Bangladesh phone (+8801XXXXXXXXX)')
     .optional(),
-
+  
   languagePref: z.enum(['BN', 'EN']),
 });
 
 // Admin actions
 export const banUserSchema = z.object({
   userId: z.string().cuid(),
-  reason: z
-    .string()
+  reason: z.string()
     .trim()
     .min(10, 'Reason must be at least 10 characters')
     .max(500, 'Reason too long'),
 });
 
 // Email validation
-export const emailSchema = z
-  .string()
+export const emailSchema = z.string()
   .trim()
   .toLowerCase()
   .email('Invalid email')
   .max(254, 'Email too long');
 
 // Phone validation (Bangladesh)
-export const bangladeshPhoneSchema = z
-  .string()
+export const bangladeshPhoneSchema = z.string()
   .regex(/^\+8801[3-9]\d{8}$/, 'Must be +8801XXXXXXXXX');
 ```
 
@@ -328,9 +322,12 @@ export function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-
+  
   // HSTS (1 year, include subdomains, preload)
-  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  response.headers.set(
+    'Strict-Transport-Security',
+    'max-age=31536000; includeSubDomains; preload'
+  );
 
   // Content Security Policy
   const csp = [
@@ -340,11 +337,11 @@ export function middleware(request: NextRequest) {
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
     "connect-src 'self' https://tokenized.pay.bka.sh",
-    'frame-src https://pay.bka.sh',
+    "frame-src https://pay.bka.sh",
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    'upgrade-insecure-requests',
+    "upgrade-insecure-requests",
   ].join('; ');
   response.headers.set('Content-Security-Policy', csp);
 
@@ -412,18 +409,18 @@ export async function logSecurityEvent(event: SecurityEvent) {
 
 function sanitizeDetails(details?: Record<string, any>): Record<string, any> {
   if (!details) return {};
-
+  
   const sensitiveKeys = ['password', 'token', 'secret', 'apikey', 'credit_card', 'cvv'];
   const sanitized: Record<string, any> = {};
-
+  
   for (const [key, value] of Object.entries(details)) {
-    if (sensitiveKeys.some((s) => key.toLowerCase().includes(s))) {
+    if (sensitiveKeys.some(s => key.toLowerCase().includes(s))) {
       sanitized[key] = '[REDACTED]';
     } else {
       sanitized[key] = value;
     }
   }
-
+  
   return sanitized;
 }
 ```
@@ -439,9 +436,9 @@ import DOMPurify from 'isomorphic-dompurify';
  */
 export function sanitizeHtml(input: string): string {
   return DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: [], // No HTML by default
+    ALLOWED_TAGS: [],        // No HTML by default
     ALLOWED_ATTR: [],
-    KEEP_CONTENT: true, // Keep text content
+    KEEP_CONTENT: true,      // Keep text content
   });
 }
 
@@ -487,28 +484,28 @@ const KEY = Buffer.from(process.env.ENCRYPTION_KEY!, 'hex'); // 32 bytes
 export function encrypt(plaintext: string): string {
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(ALGORITHM, KEY, iv);
-
+  
   let encrypted = cipher.update(plaintext, 'utf8', 'hex');
   encrypted += cipher.final('hex');
-
+  
   const authTag = cipher.getAuthTag();
-
+  
   // Format: iv:authTag:encrypted
   return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
 }
 
 export function decrypt(ciphertext: string): string {
   const [ivHex, authTagHex, encrypted] = ciphertext.split(':');
-
+  
   const iv = Buffer.from(ivHex, 'hex');
   const authTag = Buffer.from(authTagHex, 'hex');
   const decipher = crypto.createDecipheriv(ALGORITHM, KEY, iv);
-
+  
   decipher.setAuthTag(authTag);
-
+  
   let decrypted = decipher.update(encrypted, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
-
+  
   return decrypted;
 }
 
@@ -526,7 +523,6 @@ export function hashData(data: string): string {
 ## Security Checklist (Per Feature)
 
 ### API Endpoint
-
 - [ ] Authentication required (except public routes)
 - [ ] Authorization verified (RBAC)
 - [ ] Input validated with Zod
@@ -540,7 +536,6 @@ export function hashData(data: string): string {
 - [ ] Sensitive data not logged
 
 ### Payment Flow (CRITICAL)
-
 - [ ] NEVER trust callback/webhook data
 - [ ] Independently verify via Query API
 - [ ] Idempotency keys prevent double-charge
@@ -550,7 +545,6 @@ export function hashData(data: string): string {
 - [ ] Audit log every transaction
 
 ### User Data
-
 - [ ] PII encrypted at rest
 - [ ] Phone numbers validated (BD format)
 - [ ] Email addresses validated + normalized
@@ -560,18 +554,18 @@ export function hashData(data: string): string {
 
 ## OWASP Top 10 Coverage
 
-| Risk                       | Mitigation                                    |
-| -------------------------- | --------------------------------------------- |
-| A01 Broken Access Control  | Auth + RBAC + ownership checks                |
-| A02 Cryptographic Failures | HTTPS, encryption at rest, bcrypt             |
-| A03 Injection              | Zod validation + Prisma parameterized queries |
-| A04 Insecure Design        | Threat modeling, security by design           |
-| A05 Security Misconfig     | Hardened defaults, env var validation         |
-| A06 Vulnerable Components  | npm audit, Dependabot, Snyk                   |
-| A07 Auth Failures          | NextAuth + rate limit + ban check             |
-| A08 Data Integrity         | Idempotency, signature verification           |
-| A09 Logging Failures       | Audit logs + Sentry + Slack alerts            |
-| A10 SSRF                   | URL allowlist, no user-controlled URLs        |
+| Risk | Mitigation |
+|------|-----------|
+| A01 Broken Access Control | Auth + RBAC + ownership checks |
+| A02 Cryptographic Failures | HTTPS, encryption at rest, bcrypt |
+| A03 Injection | Zod validation + Prisma parameterized queries |
+| A04 Insecure Design | Threat modeling, security by design |
+| A05 Security Misconfig | Hardened defaults, env var validation |
+| A06 Vulnerable Components | npm audit, Dependabot, Snyk |
+| A07 Auth Failures | NextAuth + rate limit + ban check |
+| A08 Data Integrity | Idempotency, signature verification |
+| A09 Logging Failures | Audit logs + Sentry + Slack alerts |
+| A10 SSRF | URL allowlist, no user-controlled URLs |
 
 ## Critical Rules
 
@@ -600,7 +594,6 @@ If a security issue is found:
 ## Output to Project Orchestrator
 
 When done, report:
-
 ```
 ✅ Security Implementation: [Feature]
 

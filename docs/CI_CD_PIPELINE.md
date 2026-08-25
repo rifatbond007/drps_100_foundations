@@ -24,11 +24,11 @@
 
 ### 1.2 Environments
 
-| Environment | Branch    | URL                 | Auto Deploy     |
-| ----------- | --------- | ------------------- | --------------- |
-| Development | `develop` | dev.example.com     | Yes             |
-| Staging     | `staging` | staging.example.com | Yes             |
-| Production  | `main`    | example.com         | Manual approval |
+| Environment | Branch | URL | Auto Deploy |
+|-------------|--------|-----|-------------|
+| Development | `develop` | dev.example.com | Yes |
+| Staging | `staging` | staging.example.com | Yes |
+| Production | `main` | example.com | Manual approval |
 
 ---
 
@@ -372,7 +372,7 @@ jobs:
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
       url: ${{ github.ref == 'refs/heads/main' && 'https://example.com' || 'https://staging.example.com' }}
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -385,27 +385,27 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /opt/donation-platform
-
+            
             # Backup current state
             docker compose ps > before.txt
-
+            
             # Pull latest images
             docker compose pull
-
+            
             # Run database migrations
             docker compose run --rm app npx prisma migrate deploy
-
+            
             # Restart services with zero downtime
             docker compose up -d --no-deps --build app
             docker compose up -d --no-deps nginx
-
+            
             # Wait for health check
             sleep 10
             curl -f http://localhost:3000/api/health || exit 1
-
+            
             # Clean up old images
             docker image prune -af
-
+            
             # Show status
             docker compose ps
             echo "Deployment completed successfully!"
@@ -469,7 +469,7 @@ jobs:
         run: |
           npm run build
           npm run analyze
-
+          
           # Fail if bundle size exceeds limit
           SIZE=$(du -b .next/static/chunks/main-*.js | cut -f1)
           MAX_SIZE=209715  # 200KB
@@ -585,7 +585,7 @@ services:
     container_name: donation-app
     restart: unless-stopped
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://donation:donation@postgres:5432/donation
@@ -614,13 +614,7 @@ services:
     volumes:
       - ./logs:/app/logs
     healthcheck:
-      test:
-        [
-          'CMD',
-          'node',
-          '-e',
-          "require('http').get('http://localhost:3000/api/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })",
-        ]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -638,7 +632,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=donation
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./backups:/backups
@@ -646,7 +640,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U donation']
+      test: ["CMD-SHELL", "pg_isready -U donation"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -660,13 +654,13 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - redis-data:/data
     networks:
       - app-network
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -679,8 +673,8 @@ services:
     container_name: donation-nginx
     restart: unless-stopped
     ports:
-      - '80:80'
-      - '443:443'
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
@@ -750,8 +744,8 @@ http {
     gzip on;
     gzip_vary on;
     gzip_min_length 1024;
-    gzip_types text/plain text/css text/xml text/javascript
-               application/json application/javascript application/xml+rss
+    gzip_types text/plain text/css text/xml text/javascript 
+               application/json application/javascript application/xml+rss 
                application/atom+xml image/svg+xml;
 
     # Rate limiting
@@ -777,11 +771,11 @@ http {
 server {
     listen 80;
     server_name example.com www.example.com;
-
+    
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
-
+    
     location / {
         return 301 https://$host$request_uri;
     }
@@ -806,7 +800,7 @@ server {
     # Proxy to Next.js app
     location / {
         limit_req zone=general burst=20 nodelay;
-
+        
         proxy_pass http://app:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
@@ -823,7 +817,7 @@ server {
     # API rate limiting
     location /api/ {
         limit_req zone=api burst=50 nodelay;
-
+        
         proxy_pass http://app:3000;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -1031,13 +1025,13 @@ SLACK_WEBHOOK="$1"
 
 check_health() {
     RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL")
-
+    
     if [ "$RESPONSE" != "200" ]; then
         MESSAGE="🚨 Application is DOWN! HTTP Status: $RESPONSE"
         curl -X POST "$SLACK_WEBHOOK" \
             -H 'Content-Type: application/json' \
             -d "{\"text\": \"$MESSAGE\"}"
-
+        
         # Attempt auto-restart
         cd /opt/donation-platform
         docker compose restart app
@@ -1047,7 +1041,7 @@ check_health() {
 # Check disk space
 check_disk() {
     DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
-
+    
     if [ "$DISK_USAGE" -gt 80 ]; then
         MESSAGE="⚠️ Disk usage high: ${DISK_USAGE}%"
         curl -X POST "$SLACK_WEBHOOK" \
@@ -1059,7 +1053,7 @@ check_disk() {
 # Check database
 check_database() {
     DB_STATUS=$(docker exec donation-postgres pg_isready -U donation)
-
+    
     if [ $? -ne 0 ]; then
         MESSAGE="🚨 Database is DOWN!"
         curl -X POST "$SLACK_WEBHOOK" \
@@ -1074,7 +1068,6 @@ check_database
 ```
 
 **Cron job:**
-
 ```bash
 */5 * * * * /opt/donation-platform/scripts/monitor.sh $SLACK_WEBHOOK_URL
 ```
@@ -1118,16 +1111,16 @@ Examples:
 
 ### 8.1 GitHub Secrets Required
 
-| Secret            | Description                |
-| ----------------- | -------------------------- |
-| `DOCKER_USERNAME` | Docker Hub username        |
-| `DOCKER_TOKEN`    | Docker Hub access token    |
-| `VPS_HOST`        | VPS IP address             |
-| `VPS_USER`        | VPS SSH username           |
-| `VPS_SSH_KEY`     | VPS SSH private key        |
-| `SLACK_WEBHOOK`   | Slack notification webhook |
-| `SONAR_TOKEN`     | SonarCloud token           |
-| `CODECOV_TOKEN`   | Codecov token              |
+| Secret | Description |
+|--------|-------------|
+| `DOCKER_USERNAME` | Docker Hub username |
+| `DOCKER_TOKEN` | Docker Hub access token |
+| `VPS_HOST` | VPS IP address |
+| `VPS_USER` | VPS SSH username |
+| `VPS_SSH_KEY` | VPS SSH private key |
+| `SLACK_WEBHOOK` | Slack notification webhook |
+| `SONAR_TOKEN` | SonarCloud token |
+| `CODECOV_TOKEN` | Codecov token |
 
 ### 8.2 Environment Variables
 
@@ -1193,14 +1186,14 @@ LOG_LEVEL=info
 
 ### 9.2 Alerting Rules
 
-| Alert            | Condition                  | Severity |
-| ---------------- | -------------------------- | -------- |
-| App Down         | Health check fails 3 times | Critical |
-| High Error Rate  | >5% errors in 5 minutes    | High     |
-| Slow Response    | P95 >2s for 5 minutes      | Medium   |
-| Disk Full        | >90% disk usage            | High     |
-| Database Down    | Connection fails 3 times   | Critical |
-| Payment Failures | >10% failure rate          | High     |
+| Alert | Condition | Severity |
+|-------|-----------|----------|
+| App Down | Health check fails 3 times | Critical |
+| High Error Rate | >5% errors in 5 minutes | High |
+| Slow Response | P95 >2s for 5 minutes | Medium |
+| Disk Full | >90% disk usage | High |
+| Database Down | Connection fails 3 times | Critical |
+| Payment Failures | >10% failure rate | High |
 
 ---
 

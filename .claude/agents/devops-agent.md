@@ -156,7 +156,7 @@ services:
     container_name: donation-app
     restart: unless-stopped
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=${DATABASE_URL}
@@ -176,7 +176,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:3000/api/health']
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -184,8 +184,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: '10m'
-        max-file: '3'
+        max-size: "10m"
+        max-file: "3"
 
   postgres:
     image: postgres:16-alpine
@@ -201,7 +201,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -216,7 +216,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -226,8 +226,8 @@ services:
     container_name: donation-nginx
     restart: unless-stopped
     ports:
-      - '80:80'
-      - '443:443'
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
@@ -273,16 +273,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
+      
       - uses: pnpm/action-setup@v3
         with:
           version: 9
-
+      
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-
+      
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
@@ -299,32 +299,32 @@ jobs:
           POSTGRES_DB: test
         ports: [5432:5432]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
+      
       redis:
         image: redis:7-alpine
         ports: [6379:6379]
-
+    
     steps:
       - uses: actions/checkout@v4
-
+      
       - uses: pnpm/action-setup@v3
         with:
           version: 9
-
+      
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-
+      
       - run: pnpm install --frozen-lockfile
-
+      
       - name: Run migrations
         run: pnpm prisma migrate deploy
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
-
+      
       - run: pnpm test:run --coverage
-
+      
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -337,22 +337,22 @@ jobs:
     needs: [lint, test]
     steps:
       - uses: actions/checkout@v4
-
+      
       - uses: pnpm/action-setup@v3
         with:
           version: 9
-
+      
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-
+      
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-
+      
       - run: pnpm build
       - run: pnpm test:e2e
-
+      
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -365,19 +365,19 @@ jobs:
     needs: [lint, test]
     steps:
       - uses: actions/checkout@v4
-
+      
       - uses: pnpm/action-setup@v3
         with:
           version: 9
-
+      
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-
+      
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-
+      
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -408,22 +408,22 @@ jobs:
     permissions:
       contents: read
       packages: write
-
+    
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-
+      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
+      
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
+      
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -435,7 +435,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
-
+      
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -465,7 +465,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
-
+    
     steps:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
@@ -475,33 +475,33 @@ jobs:
           ssh_key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /opt/donation-app
-
+            
             # Backup before deploy
             ./scripts/backup-db.sh
-
+            
             # Pull latest image
             docker compose pull app
-
+            
             # Restart services (zero downtime)
             docker compose up -d --no-deps --scale app=2 app
             sleep 10
             docker compose up -d --no-deps app
-
+            
             # Clean up old images
             docker image prune -f
-
+            
             # Health check
             sleep 30
             curl -f https://yourdomain.com/api/health || exit 1
-
+            
             echo "✅ Deployment successful"
-
+      
       - name: Notify Slack
         if: always()
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          text: 'Deployment ${{ job.status }}'
+          text: "Deployment ${{ job.status }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 ```
@@ -513,11 +513,11 @@ jobs:
 server {
     listen 80;
     server_name yourdomain.com www.yourdomain.com;
-
+    
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
-
+    
     location / {
         return 301 https://$host$request_uri;
     }
@@ -526,7 +526,7 @@ server {
 server {
     listen 443 ssl http2;
     server_name yourdomain.com www.yourdomain.com;
-
+    
     ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
@@ -534,22 +534,22 @@ server {
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
-
+    
     # Security headers
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
     add_header X-Frame-Options "DENY" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
+    
     # Rate limiting
     limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
     limit_req_zone $binary_remote_addr zone=login_limit:10m rate=1r/s;
-
+    
     # Gzip
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
     gzip_min_length 1000;
-
+    
     # Proxy to app
     location / {
         proxy_pass http://app:3000;
@@ -564,20 +564,20 @@ server {
         proxy_read_timeout 60s;
         proxy_connect_timeout 60s;
     }
-
+    
     # API rate limit
     location /api/ {
         limit_req zone=api_limit burst=20 nodelay;
         proxy_pass http://app:3000;
     }
-
+    
     # Static files caching
     location /_next/static/ {
         proxy_pass http://app:3000;
         expires 1y;
         add_header Cache-Control "public, immutable";
     }
-
+    
     # Health check (no rate limit)
     location /api/health {
         proxy_pass http://app:3000;
@@ -665,7 +665,7 @@ SLACK_WEBHOOK="$SLACK_WEBHOOK_URL"
 
 check_health() {
     response=$(curl -sf -o /dev/null -w "%{http_code}" $DOMAIN/api/health || echo "000")
-
+    
     if [ "$response" != "200" ]; then
         echo "❌ Health check failed (HTTP $response)"
         curl -X POST -H 'Content-type: application/json' \
@@ -677,7 +677,7 @@ check_health() {
 
 check_disk() {
     usage=$(df -h / | tail -1 | awk '{print $5}' | sed 's/%//')
-
+    
     if [ "$usage" -gt 80 ]; then
         echo "⚠️ Disk usage: ${usage}%"
         curl -X POST -H 'Content-type: application/json' \
@@ -688,7 +688,7 @@ check_disk() {
 
 check_containers() {
     unhealthy=$(docker ps --filter "health=unhealthy" -q)
-
+    
     if [ -n "$unhealthy" ]; then
         echo "❌ Unhealthy containers detected"
         curl -X POST -H 'Content-type: application/json' \
@@ -744,13 +744,13 @@ docker compose up -d
 
 ## Monitoring Stack
 
-| Tool             | Purpose                | Alerts                  |
-| ---------------- | ---------------------- | ----------------------- |
-| Sentry           | Error tracking         | New errors, error spike |
-| UptimeRobot      | Uptime monitoring      | Down >5 min             |
-| Custom script    | Container health, disk | Cron every 5 min        |
-| Slack            | Centralized alerts     | Critical issues         |
-| Grafana (future) | Metrics dashboard      | CPU, memory, DB         |
+| Tool | Purpose | Alerts |
+|------|---------|--------|
+| Sentry | Error tracking | New errors, error spike |
+| UptimeRobot | Uptime monitoring | Down >5 min |
+| Custom script | Container health, disk | Cron every 5 min |
+| Slack | Centralized alerts | Critical issues |
+| Grafana (future) | Metrics dashboard | CPU, memory, DB |
 
 ## Critical Rules
 
@@ -781,7 +781,6 @@ docker compose up -d
 ## Output to Project Orchestrator
 
 When done, report:
-
 ```
 ✅ DevOps Implementation: [Feature]
 

@@ -5,7 +5,6 @@
 ## Type of Change
 
 <!-- Mark with "x" — also matches Conventional Commits type in PR title -->
-
 - [ ] `feat` — New feature (MINOR semver)
 - [ ] `fix` — Bug fix (PATCH semver)
 - [ ] `docs` — Documentation only
@@ -30,14 +29,12 @@
 ## Related Issues
 
 <!-- Link issues: Closes #123, Fixes #456, Refs #789 -->
-
 - Closes #
 - Refs #
 
 ## Changes Made
 
 <!-- Bullet list of specific changes -->
-
 -
 -
 -
@@ -49,7 +46,6 @@
 ## Breaking Changes
 
 <!-- Mark if any breaking changes -->
-
 - [ ] No breaking changes
 - [ ] Yes — described below
 
@@ -58,7 +54,6 @@
 ## Test Plan
 
 <!-- How was this tested? -->
-
 - [ ] Unit tests added/updated (`pnpm test`)
 - [ ] Integration tests added/updated
 - [ ] E2E tests added/updated (`pnpm test:e2e`)
@@ -66,7 +61,6 @@
 
 **Test scenarios covered:**
 -
-
 -
 -
 

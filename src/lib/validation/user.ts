@@ -8,7 +8,11 @@ export const bangladeshPhoneSchema = z
   .regex(/^\+8801[3-9]\d{8}$/, 'Must be +8801XXXXXXXXX');
 
 export const completeProfileSchema = z.object({
-  name: z.string().trim().min(1, 'Name required').max(100, 'Name too long'),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Name required')
+    .max(100, 'Name too long'),
   phone: bangladeshPhoneSchema,
   languagePref: z.enum(['BN', 'EN']),
 });
@@ -16,7 +20,12 @@ export const completeProfileSchema = z.object({
 export type CompleteProfileInput = z.infer<typeof completeProfileSchema>;
 
 export const updateProfileSchema = z.object({
-  name: z.string().trim().min(1).max(100).optional(),
+  name: z
+    .string()
+    .trim()
+    .min(1)
+    .max(100)
+    .optional(),
   phone: bangladeshPhoneSchema.optional(),
   languagePref: z.enum(['BN', 'EN']).optional(),
 });

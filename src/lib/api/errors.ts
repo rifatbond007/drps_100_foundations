@@ -13,7 +13,7 @@ export class ApiClientError extends Error {
 
   constructor(
     message: string,
-    opts: { status: number; code: string; errorId?: string; details?: unknown }
+    opts: { status: number; code: string; errorId?: string; details?: unknown },
   ) {
     super(message);
     this.name = 'ApiClientError';

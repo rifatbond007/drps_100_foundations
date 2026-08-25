@@ -14,8 +14,7 @@ export const redis =
     maxRetriesPerRequest: 3,
     enableReadyCheck: true,
     lazyConnect: false,
-    reconnectOnError: (err) =>
-      err.message.includes('READONLY') || err.message.includes('ETIMEDOUT'),
+    reconnectOnError: (err) => err.message.includes('READONLY') || err.message.includes('ETIMEDOUT'),
   });
 
 if (process.env.NODE_ENV !== 'production') {

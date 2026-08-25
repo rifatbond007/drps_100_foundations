@@ -28,7 +28,10 @@ const SECRET = process.env.NEXTAUTH_SECRET ?? '';
  * Copy cookies/Set-Cookie + key headers (Vary) from `source` onto a redirect.
  * Use this for every NextResponse.redirect/NextResponse.json() we return.
  */
-function withIntlHeaders(response: NextResponse, source: NextResponse): NextResponse {
+function withIntlHeaders(
+  response: NextResponse,
+  source: NextResponse,
+): NextResponse {
   // Forward Set-Cookie headers
   for (const [name, value] of source.headers.entries()) {
     if (name.toLowerCase() === 'set-cookie' || name.toLowerCase() === 'vary') {
@@ -45,7 +48,7 @@ function withIntlHeaders(response: NextResponse, source: NextResponse): NextResp
 function redirectWithIntl(
   intlResponse: NextResponse,
   url: URL,
-  request: NextRequest
+  request: NextRequest,
 ): NextResponse {
   const headers = new Headers(request.headers);
   // Pass through any cookie/header adjustments the intl middleware made
@@ -102,7 +105,9 @@ export default async function middleware(request: NextRequest) {
     pathname === prefix || pathname.startsWith(`${prefix}/`);
 
   // Routes that require login only (profile completion guarded separately)
-  const loginOnlyPaths = [`/${locale}/complete-profile`];
+  const loginOnlyPaths = [
+    `/${locale}/complete-profile`,
+  ];
   const isLoginOnlyRoute = loginOnlyPaths.some(matchesPath);
 
   // Routes that require login AND completed profile
@@ -131,11 +136,7 @@ export default async function middleware(request: NextRequest) {
       return redirectWithIntl(intlResponse, loginUrl, request);
     }
     if (profileCompleted === false) {
-      return redirectWithIntl(
-        intlResponse,
-        new URL(`/${locale}/complete-profile`, nextUrl),
-        request
-      );
+      return redirectWithIntl(intlResponse, new URL(`/${locale}/complete-profile`, nextUrl), request);
     }
   }
 

@@ -103,17 +103,14 @@ What is the change we're proposing or have agreed to implement?
 What becomes easier or harder because of this change?
 
 ### Positive
-
 - Benefit 1
 - Benefit 2
 
 ### Negative
-
 - Trade-off 1
 - Trade-off 2
 
 ### Neutral
-
 - Side effect 1
 
 ## Alternatives Considered
@@ -140,7 +137,6 @@ Accepted — 2026-01-15
 ## Context
 
 We need to build a donation platform with:
-
 - Server-side rendering for SEO
 - API routes for backend logic
 - Strong TypeScript support
@@ -153,14 +149,12 @@ Use **Next.js 15 (App Router)** as a unified full-stack framework.
 ## Consequences
 
 ### Positive
-
 - Single deployment unit (Vercel/Docker)
 - Server + client components for performance
 - Built-in i18n, image optimization, routing
 - TypeScript-first with excellent DX
 
 ### Negative
-
 - Vendor coupling to Next.js conventions
 - App Router learning curve
 
@@ -228,7 +222,7 @@ Use **Next.js 15 (App Router)** as a unified full-stack framework.
 
 ### 4. README Structure
 
-````markdown
+```markdown
 # Project Name
 
 > One-line description
@@ -254,15 +248,15 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full details.
 
 ## 🛠️ Tech Stack
 
-| Layer    | Technology                       |
-| -------- | -------------------------------- |
+| Layer | Technology |
+|-------|-----------|
 | Frontend | Next.js 15, React 19, TypeScript |
-| Backend  | Next.js API Routes, Node.js      |
-| Database | PostgreSQL 16, Prisma            |
-| Cache    | Redis 7                          |
-| Auth     | NextAuth.js v5                   |
-| Payment  | bKash PGW                        |
-| i18n     | next-intl (Bangla + English)     |
+| Backend | Next.js API Routes, Node.js |
+| Database | PostgreSQL 16, Prisma |
+| Cache | Redis 7 |
+| Auth | NextAuth.js v5 |
+| Payment | bKash PGW |
+| i18n | next-intl (Bangla + English) |
 
 ## 🚀 Quick Start
 
@@ -284,7 +278,6 @@ cp .env.example .env
 pnpm prisma migrate dev
 pnpm dev
 ```
-````
 
 Visit [http://localhost:3000](http://localhost:3000)
 
@@ -324,8 +317,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 ## 📄 License
 
 [MIT](LICENSE)
-
-````
+```
 
 ### 5. Architecture Diagram (Mermaid)
 
@@ -342,7 +334,7 @@ graph TB
     OAuth[Google OAuth]
     bKash[bKash PGW]
     Sentry[Sentry]
-
+    
     User -->|HTTPS| Nginx
     Nginx --> App
     App -->|Read/Write| DB
@@ -350,7 +342,7 @@ graph TB
     App -->|Auth| OAuth
     App -->|Payments| bKash
     App -->|Errors| Sentry
-````
+```
 
 ## Data Flow: Donation
 
@@ -360,7 +352,7 @@ sequenceDiagram
     participant A as Next.js
     participant B as bKash
     participant DB as PostgreSQL
-
+    
     U->>A: POST /api/donations/create
     A->>DB: Create PENDING donation
     A->>B: Create payment
@@ -373,8 +365,7 @@ sequenceDiagram
     A->>DB: Update to SUCCESS
     A-->>U: Redirect to success page
 ```
-
-````
+```
 
 ### 6. Inline Code Comments
 
@@ -402,7 +393,7 @@ export async function rateLimit(/* ... */) {
 async function verifyPayment(paymentId: string) {
   // ...
 }
-````
+```
 
 ### 7. CHANGELOG Entry
 
@@ -417,27 +408,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
-
 - Feature X
 - API endpoint Y
 
 ### Changed
-
 - Updated Z to W
 
 ### Fixed
-
 - Bug in payment verification
 
 ## [1.2.0] - 2026-08-15
 
 ### Added
-
 - Admin reports dashboard
 - CSV export for donation history
 
 ### Security
-
 - Added rate limiting to all API endpoints
 ```
 
@@ -445,20 +431,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### When to Update Docs
 
-| Code Change            | Doc Updates Needed                      |
-| ---------------------- | --------------------------------------- |
-| New API endpoint       | BACKEND_PLANNING.md, JSDoc, OpenAPI     |
-| New page/component     | FRONTEND_PLANNING.md, Storybook         |
-| Schema change          | BACKEND_PLANNING.md §4, ADR             |
-| New dependency         | README tech stack, ADR if significant   |
-| Deployment change      | CI_CD_PIPELINE.md, .env.example         |
-| Auth flow change       | AUTH.md (or BACKEND_PLANNING §3.1), ADR |
-| Architectural decision | ADR (always)                            |
+| Code Change | Doc Updates Needed |
+|-------------|-------------------|
+| New API endpoint | BACKEND_PLANNING.md, JSDoc, OpenAPI |
+| New page/component | FRONTEND_PLANNING.md, Storybook |
+| Schema change | BACKEND_PLANNING.md §4, ADR |
+| New dependency | README tech stack, ADR if significant |
+| Deployment change | CI_CD_PIPELINE.md, .env.example |
+| Auth flow change | AUTH.md (or BACKEND_PLANNING §3.1), ADR |
+| Architectural decision | ADR (always) |
 
 ### Documentation Review Checklist
 
 Monthly review:
-
 - [ ] README links all work
 - [ ] Architecture diagram matches reality
 - [ ] API docs match endpoints
@@ -505,7 +490,6 @@ Install required tools...
 **Symptom:** `Error: P1001 Can't reach database`
 
 **Solution:**
-
 1. Check PostgreSQL is running
 2. Verify DATABASE_URL in .env
 3. Check firewall
@@ -515,7 +499,6 @@ Install required tools...
 **Symptom:** Payments fail with 401
 
 **Solution:**
-
 1. Verify BKASH credentials
 2. Check sandbox vs production URL
 3. Review token expiry
@@ -537,7 +520,6 @@ Install required tools...
 ## Output to Project Orchestrator
 
 When done, report:
-
 ```
 ✅ Documentation Update: [Feature/Topic]
 

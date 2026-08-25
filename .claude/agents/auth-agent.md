@@ -229,7 +229,7 @@ export default auth((req) => {
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/health') ||
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api/webhooks'); // bKash webhooks are public
+    pathname.startsWith('/api/webhooks');  // bKash webhooks are public
 
   if (isPublicRoute) {
     return intlMiddleware(req);
@@ -383,18 +383,18 @@ declare module 'next-auth/jwt' {
 
 From `README.md §3`:
 
-| Route                   | User          | Admin              |
-| ----------------------- | ------------- | ------------------ |
-| `/` (public)            | ✅            | ✅                 |
-| `/login`                | ✅            | ✅                 |
-| `/dashboard`            | ✅            | ✅                 |
-| `/donate`               | ✅            | ✅                 |
-| `/history`              | ✅            | ✅                 |
-| `/settings`             | ✅            | ✅                 |
-| `/admin/*`              | ❌            | ✅                 |
-| `/api/admin/*`          | ❌            | ✅ (403 for users) |
-| `/api/donations/create` | ✅            | ✅                 |
-| `/api/users/*`          | ✅ (own only) | ✅ (any)           |
+| Route | User | Admin |
+|-------|------|-------|
+| `/` (public) | ✅ | ✅ |
+| `/login` | ✅ | ✅ |
+| `/dashboard` | ✅ | ✅ |
+| `/donate` | ✅ | ✅ |
+| `/history` | ✅ | ✅ |
+| `/settings` | ✅ | ✅ |
+| `/admin/*` | ❌ | ✅ |
+| `/api/admin/*` | ❌ | ✅ (403 for users) |
+| `/api/donations/create` | ✅ | ✅ |
+| `/api/users/*` | ✅ (own only) | ✅ (any) |
 
 ## Security Checklist (Per Auth Change)
 
@@ -423,7 +423,6 @@ From `README.md §3`:
 ## Common Auth Tasks
 
 ### Check if user is banned
-
 ```typescript
 export async function isUserBanned(userId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
@@ -435,7 +434,6 @@ export async function isUserBanned(userId: string): Promise<boolean> {
 ```
 
 ### Ban a user (admin)
-
 ```typescript
 export async function banUser(userId: string, reason: string) {
   await prisma.user.update({
@@ -457,7 +455,6 @@ export async function banUser(userId: string, reason: string) {
 ## Output to Project Orchestrator
 
 When done, report:
-
 ```
 ✅ Auth Implementation: [Feature]
 
