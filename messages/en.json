@@ -16,6 +16,9 @@
   "nav": {
     "home": "Home",
     "about": "About",
+    "blog": "Blog",
+    "alumni": "Alumni",
+    "comingSoon": "Coming soon",
     "dashboard": "Dashboard",
     "donate": "Donate",
     "history": "History",
@@ -33,15 +36,47 @@
     }
   },
   "landing": {
+    "heroBadge": "Trusted by 12,000+ donors across Bangladesh",
     "heroTitle": "Your donation, real change",
     "heroSubtitle": "Secure and transparent donations to verified charitable causes. Process easily via bKash.",
+    "heroHighlight": "100% of every taka reaches the cause.",
     "donateCta": "Donate now",
-    "aboutCta": "Learn more"
+    "aboutCta": "Learn more",
+    "scrollHint": "Scroll to learn more",
+    "stats": {
+      "raised": "Total raised",
+      "donors": "Active donors",
+      "causes": "Verified causes",
+      "transparency": "Fund transparency"
+    },
+    "statsValues": {
+      "raised": "৳2.4Cr+",
+      "donors": "12,400+",
+      "causes": "38",
+      "transparency": "100%"
+    },
+    "trustBadges": {
+      "secure": "Secure payments",
+      "verified": "Verified causes",
+      "transparent": "Transparent ledger"
+    }
   },
   "about": {
     "title": "About us",
     "subtitle": "Our mission and those we serve",
     "body": "This platform is built for transparent, efficient, and secure charitable giving. Every transaction is processed through a secure payment gateway."
+  },
+  "blog": {
+    "title": "Stories from the field",
+    "subtitle": "Updates from our verified causes, the donors who support them, and the impact your giving creates.",
+    "comingSoonTitle": "Our blog is coming soon",
+    "comingSoonBody": "We're preparing in-depth stories from our partners and the communities they serve. Subscribe to be notified when we publish."
+  },
+  "alumni": {
+    "title": "Alumni network",
+    "subtitle": "A growing community of past donors, volunteers, and partner organizations.",
+    "comingSoonTitle": "The alumni directory is coming soon",
+    "comingSoonBody": "We're building a space to recognize the donors, volunteers, and partner organizations that have shaped our journey. Check back shortly."
   },
   "auth": {
     "loginTitle": "Welcome",
