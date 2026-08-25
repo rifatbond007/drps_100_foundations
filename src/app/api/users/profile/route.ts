@@ -10,6 +10,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth/session';
 import { ok, fail } from '@/lib/api/helpers';
 import { NotFoundError, ValidationError } from '@/lib/errors';
+import { logSecurityEvent } from '@/lib/audit';
 
 const UpdateProfileSchema = z
   .object({
@@ -110,6 +111,15 @@ export async function PATCH(request: Request) {
         languagePref: true,
         updatedAt: true,
       },
+    });
+
+    // Audit log — profile updates are security-relevant (phone, language).
+    // Log only the keys that actually changed; never log the new values.
+    const changedKeys = Object.keys(data);
+    await logSecurityEvent({
+      action: 'PROFILE_UPDATED',
+      userId: session.user.id,
+      details: { fields: changedKeys },
     });
 
     return ok(updated);

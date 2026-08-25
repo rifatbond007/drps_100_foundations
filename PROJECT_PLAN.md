@@ -1,7 +1,7 @@
 # Donation Platform — Master Project Plan
 
 **Project:** Donation Platform (School Organization)
-**Audience:** Solo maintainer (`riftbond007`) + puku-cli
+**Audience:** Solo maintainer (`riftbond007`)
 **Last Updated:** 2026-08-24
 **Scope:** Your 5 priorities — user profile, admin profile, frontend↔backend wiring, CI (no deploy), landing page
 

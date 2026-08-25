@@ -19,12 +19,18 @@
     "dashboard": "Dashboard",
     "donate": "Donate",
     "history": "History",
+    "profile": "Profile",
     "settings": "Settings",
     "admin": "Admin",
     "users": "Users",
     "reports": "Reports",
     "login": "Sign in",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "sections": {
+      "main": "Main",
+      "account": "Account",
+      "admin": "Admin"
+    }
   },
   "landing": {
     "heroTitle": "Your donation, real change",
@@ -67,13 +73,24 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Summary of your donations",
+    "greeting": "Hi, {name}",
+    "loadingProfile": "Loading your dashboard…",
+    "completeProfileBanner": "Complete your profile to enable donations",
+    "completeProfileCta": "Complete profile",
+    "profileStatsTitle": "Your donations at a glance",
     "totalDonated": "Total donated",
     "last30Days": "Last 30 days",
     "donationCount": "Donations",
     "allTime": "All time",
     "lastDonation": "Last donation",
     "never": "No donations yet",
-    "donateCta": "Donate now"
+    "donateCta": "Donate now",
+    "donateCtaSecondary": "Donate now",
+    "recentDonations": "Recent donations",
+    "viewAllDonations": "View all",
+    "editProfile": "Edit profile",
+    "loadFailed": "Could not load your profile",
+    "signedInAs": "Signed in as {email}"
   },
   "donation": {
     "title": "Donate",
@@ -138,9 +155,23 @@
     "subtitle": "Manage your account and preferences",
     "profile": "Profile",
     "name": "Name",
+    "namePlaceholder": "Your full name",
     "email": "Email",
+    "emailReadOnly": "Email cannot be changed",
     "phone": "Phone",
-    "language": "Language",
+    "phonePlaceholder": "+8801XXXXXXXXX",
+    "language": "Preferred language",
+    "languageOptions": {
+      "BN": "বাংলা (Bengali)",
+      "EN": "English"
+    },
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themeOptions": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "Match system"
+    },
     "notifications": "Notifications",
     "emailNotifications": "Email notifications",
     "donationReceipts": "Donation receipts",
@@ -148,7 +179,10 @@
     "changePassword": "Change password",
     "deleteAccount": "Delete account",
     "saveChanges": "Save changes",
-    "saved": "Settings saved"
+    "saving": "Saving…",
+    "saved": "Settings saved",
+    "saveFailed": "Could not save changes: {message}",
+    "validationFailed": "Please fix the errors above"
   },
   "admin": {
     "title": "Admin panel",

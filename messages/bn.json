@@ -19,12 +19,18 @@
     "dashboard": "ড্যাশবোর্ড",
     "donate": "দান করুন",
     "history": "ইতিহাস",
+    "profile": "প্রোফাইল",
     "settings": "সেটিংস",
     "admin": "অ্যাডমিন",
     "users": "ব্যবহারকারী",
     "reports": "রিপোর্ট",
     "login": "লগইন",
-    "logout": "লগআউট"
+    "logout": "লগআউট",
+    "sections": {
+      "main": "মূল",
+      "account": "অ্যাকাউন্ট",
+      "admin": "অ্যাডমিন"
+    }
   },
   "landing": {
     "heroTitle": "আপনার দান, বাস্তব পরিবর্তন",
@@ -67,13 +73,24 @@
   "dashboard": {
     "title": "ড্যাশবোর্ড",
     "subtitle": "আপনার দানের সারসংক্ষেপ",
+    "greeting": "হ্যালো, {name}",
+    "loadingProfile": "আপনার ড্যাশবোর্ড লোড হচ্ছে…",
+    "completeProfileBanner": "দান শুরু করতে আপনার প্রোফাইল সম্পূর্ণ করুন",
+    "completeProfileCta": "প্রোফাইল সম্পূর্ণ করুন",
+    "profileStatsTitle": "আপনার দান এক নজরে",
     "totalDonated": "মোট দান",
     "last30Days": "গত ৩০ দিন",
     "donationCount": "দানের সংখ্যা",
     "allTime": "সর্বকাল",
     "lastDonation": "শেষ দান",
     "never": "এখনও কোনো দান নেই",
-    "donateCta": "এখনই দান করুন"
+    "donateCta": "এখনই দান করুন",
+    "donateCtaSecondary": "এখনই দান করুন",
+    "recentDonations": "সাম্প্রতিক দান",
+    "viewAllDonations": "সব দেখুন",
+    "editProfile": "প্রোফাইল সম্পাদনা",
+    "loadFailed": "আপনার প্রোফাইল লোড করা যায়নি",
+    "signedInAs": "{email} হিসেবে সাইন ইন করা আছে"
   },
   "donation": {
     "title": "দান করুন",
@@ -138,9 +155,23 @@
     "subtitle": "আপনার অ্যাকাউন্ট ও পছন্দ পরিচালনা করুন",
     "profile": "প্রোফাইল",
     "name": "নাম",
+    "namePlaceholder": "আপনার পূর্ণ নাম",
     "email": "ইমেল",
+    "emailReadOnly": "ইমেল পরিবর্তন করা যাবে না",
     "phone": "ফোন",
-    "language": "ভাষা",
+    "phonePlaceholder": "+৮৮০১XXXXXXXXX",
+    "language": "পছন্দের ভাষা",
+    "languageOptions": {
+      "BN": "বাংলা",
+      "EN": "English"
+    },
+    "appearance": "চেহারা",
+    "theme": "থিম",
+    "themeOptions": {
+      "light": "হালকা",
+      "dark": "গাঢ়",
+      "system": "সিস্টেমের সাথে মিলিয়ে"
+    },
     "notifications": "বিজ্ঞপ্তি",
     "emailNotifications": "ইমেল বিজ্ঞপ্তি",
     "donationReceipts": "দানের রসিদ",
@@ -148,7 +179,10 @@
     "changePassword": "পাসওয়ার্ড পরিবর্তন",
     "deleteAccount": "অ্যাকাউন্ট মুছুন",
     "saveChanges": "পরিবর্তন সংরক্ষণ করুন",
-    "saved": "সেটিংস সংরক্ষিত হয়েছে"
+    "saving": "সংরক্ষণ হচ্ছে…",
+    "saved": "সেটিংস সংরক্ষিত হয়েছে",
+    "saveFailed": "পরিবর্তন সংরক্ষণ করা যায়নি: {message}",
+    "validationFailed": "উপরের ত্রুটিগুলো ঠিক করুন"
   },
   "admin": {
     "title": "অ্যাডমিন প্যানেল",

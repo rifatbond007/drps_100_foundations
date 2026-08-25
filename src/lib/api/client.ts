@@ -5,6 +5,14 @@
  * H9 (audit fix): returns the discriminated `ApiResponse<T>` envelope;
  * throws `ApiClientError` on `success === false`. Callers must check for
  * the envelope shape explicitly OR use the typed helpers below.
+ *
+ * IMPORTANT: All `/api/*` routes are NOT locale-prefixed — they live at
+ * the app root. When the user is on `/bn/dashboard` (or any locale path),
+ * a relative `fetch('/api/users/profile')` resolves to
+ * `/bn/api/users/profile` because the browser uses the current path as
+ * the base URL. That 404s, even though the route exists at
+ * `/api/users/profile`. We pin every request to `window.location.origin`
+ * to keep API calls off the locale prefix.
  */
 import type { ApiResponse } from '@/types/api';
 import { ApiClientError } from './errors';
@@ -15,12 +23,27 @@ interface ApiOptions extends Omit<RequestInit, 'body'> {
 }
 
 /**
+ * Resolve a possibly-relative `path` to an absolute URL rooted at the
+ * current origin. Strips any leading locale prefix from the supplied path
+ * so callers that mistakenly pass `/bn/api/foo` still hit `/api/foo`.
+ */
+function resolveApiUrl(path: string): string {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  // Normalize: strip the leading locale segment if present (bn|en).
+  const stripped = path.replace(/^\/(bn|en)(?=\/api\/)/, '');
+  const withApi = stripped.startsWith('/api/')
+    ? stripped
+    : `/api${stripped.startsWith('/') ? '' : '/'}${stripped}`;
+  return `${origin}${withApi}`;
+}
+
+/**
  * Returns the raw envelope. Use when you need to inspect `success`.
  */
 async function requestEnvelope<T>(path: string, options: ApiOptions = {}): Promise<ApiResponse<T>> {
   const { params, body, ...init } = options;
 
-  let url = path.startsWith('/api/') ? path : `/api/${path}`;
+  let url = resolveApiUrl(path);
   if (params) {
     const qs = new URLSearchParams();
     for (const [k, v] of Object.entries(params)) qs.set(k, String(v));
