@@ -285,7 +285,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm typecheck
+      - run: pnpm type-check
 
   test:
     name: Unit + Integration Tests
