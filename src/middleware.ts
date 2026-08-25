@@ -85,7 +85,11 @@ export default async function middleware(request: NextRequest) {
     if (!rl.allowed) {
       const retryAfter = Math.max(1, Math.ceil((rl.resetAt.getTime() - Date.now()) / 1000));
       return NextResponse.json(
-        { success: false, error: 'RATE_LIMIT_EXCEEDED', message: 'Too many attempts. Please try again later.' },
+        {
+          success: false,
+          error: 'RATE_LIMIT_EXCEEDED',
+          message: 'Too many attempts. Please try again later.',
+        },
         {
           status: 429,
           headers: {
@@ -93,7 +97,7 @@ export default async function middleware(request: NextRequest) {
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': String(rl.resetAt.getTime()),
           },
-        },
+        }
       );
     }
   }

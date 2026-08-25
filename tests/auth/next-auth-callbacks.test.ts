@@ -81,7 +81,7 @@ describe('signInCallback', () => {
     expect(mocks.prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ email: 'user@example.com' }),
-      }),
+      })
     );
     expect(mocks.logSecurityEvent).not.toHaveBeenCalled();
   });
@@ -99,7 +99,7 @@ describe('signInCallback', () => {
         action: 'LOGIN_BLOCKED',
         userId: 'u1',
         details: { reason: 'spam' },
-      }),
+      })
     );
   });
 
@@ -112,7 +112,7 @@ describe('signInCallback', () => {
 
     expect(ok).toBe(false);
     expect(mocks.logSecurityEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ details: { reason: 'unknown' } }),
+      expect.objectContaining({ details: { reason: 'unknown' } })
     );
   });
 });
@@ -197,7 +197,13 @@ describe('sessionCallback', () => {
     const session: { user?: Record<string, unknown> } = { user: {} };
     const out = sessionCallback({
       session,
-      token: { id: 'u1', role: 'ADMIN', profileCompleted: true, languagePref: 'EN', isBanned: false },
+      token: {
+        id: 'u1',
+        role: 'ADMIN',
+        profileCompleted: true,
+        languagePref: 'EN',
+        isBanned: false,
+      },
     });
     expect(out.user).toMatchObject({
       id: 'u1',
@@ -224,14 +230,14 @@ describe('signInEvent', () => {
     });
 
     expect(mocks.logSecurityEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'USER_LOGIN', userId: 'u1' }),
+      expect.objectContaining({ action: 'USER_LOGIN', userId: 'u1' })
     );
     expect(mocks.logSecurityEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         action: 'USER_REGISTERED',
         userId: 'u1',
         details: expect.objectContaining({ provider: 'google', providerAccountId: 'gid-1' }),
-      }),
+      })
     );
   });
 
@@ -248,7 +254,8 @@ describe('signInEvent', () => {
       account: { provider: 'google', providerAccountId: 'gid-1' },
     });
 
-    const calls = (mocks.logSecurityEvent as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+    const calls = (mocks.logSecurityEvent as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls;
     const actions = calls.map((c) => (c[0] as { action: string }).action);
     expect(actions).toContain('USER_LOGIN');
     expect(actions).not.toContain('USER_REGISTERED');
@@ -264,7 +271,7 @@ describe('signOutEvent', () => {
   it('logs USER_LOGOUT when token has id', async () => {
     await signOutEvent({ token: { id: 'u1' } });
     expect(mocks.logSecurityEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'USER_LOGOUT', userId: 'u1' }),
+      expect.objectContaining({ action: 'USER_LOGOUT', userId: 'u1' })
     );
   });
 

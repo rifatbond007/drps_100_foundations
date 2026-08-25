@@ -30,7 +30,9 @@ export async function POST(request: Request) {
     const url = new URL(request.url);
     const parsed = QuerySchema.safeParse(Object.fromEntries(url.searchParams));
     if (!parsed.success) {
-      throw new ValidationError('Invalid query', { fieldErrors: parsed.error.flatten().fieldErrors });
+      throw new ValidationError('Invalid query', {
+        fieldErrors: parsed.error.flatten().fieldErrors,
+      });
     }
 
     const targetUserId = parsed.data.userId ?? session.user.id;
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
       try {
         await requireAdmin();
       } catch {
-        throw new ForbiddenError('Only admins can refresh other users\' sessions');
+        throw new ForbiddenError("Only admins can refresh other users' sessions");
       }
     }
 

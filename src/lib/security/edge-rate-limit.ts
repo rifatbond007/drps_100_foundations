@@ -79,7 +79,7 @@ function getLimiter(name: string): Ratelimit | null {
  */
 export async function edgeRateLimit(
   identifier: string,
-  bucketName: keyof typeof EDGE_BUCKETS,
+  bucketName: keyof typeof EDGE_BUCKETS
 ): Promise<EdgeRateLimitResult> {
   const limiter = getLimiter(bucketName);
   if (!limiter) {
