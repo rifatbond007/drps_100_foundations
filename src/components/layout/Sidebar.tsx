@@ -28,13 +28,20 @@ interface NavSection {
   items: NavItem[];
 }
 
-const mainSection: NavSection = {
+// Main section varies by role — admins don't donate or browse personal
+// donation history, so they get just the Dashboard link here.
+const userMainSection: NavSection = {
   headingKey: 'sections.main',
   items: [
     { href: '/dashboard', labelKey: 'dashboard', icon: Home },
     { href: '/donate', labelKey: 'donate', icon: Heart },
     { href: '/history', labelKey: 'history', icon: History },
   ],
+};
+
+const adminMainSection: NavSection = {
+  headingKey: 'sections.main',
+  items: [{ href: '/admin/users', labelKey: 'dashboard', icon: Home }],
 };
 
 const accountSection: NavSection = {
@@ -51,7 +58,7 @@ const accountSection: NavSection = {
 function buildSections(isAdmin: boolean): NavSection[] {
   if (isAdmin) {
     return [
-      mainSection,
+      adminMainSection,
       accountSection,
       {
         headingKey: 'sections.admin',
@@ -62,7 +69,7 @@ function buildSections(isAdmin: boolean): NavSection[] {
       },
     ];
   }
-  return [mainSection, accountSection];
+  return [userMainSection, accountSection];
 }
 
 export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {

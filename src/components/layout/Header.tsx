@@ -20,6 +20,7 @@ export async function Header({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'nav' });
   const session = await auth();
   const isLoggedIn = !!session?.user;
+  const isAdmin = session?.user?.role === 'ADMIN';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
@@ -32,7 +33,23 @@ export async function Header({ locale }: { locale: string }) {
           <Link href={`/${locale}/about`} className="text-sm font-medium hover:underline">
             {t('about')}
           </Link>
-          {isLoggedIn && (
+          {isLoggedIn && isAdmin && (
+            <>
+              <Link href={`/${locale}/admin/users`} className="text-sm font-medium hover:underline">
+                {t('dashboard')}
+              </Link>
+              <Link href={`/${locale}/admin/users`} className="text-sm font-medium hover:underline">
+                {t('users')}
+              </Link>
+              <Link
+                href={`/${locale}/admin/reports`}
+                className="text-sm font-medium hover:underline"
+              >
+                {t('reports')}
+              </Link>
+            </>
+          )}
+          {isLoggedIn && !isAdmin && (
             <>
               <Link href={`/${locale}/dashboard`} className="text-sm font-medium hover:underline">
                 {t('dashboard')}
@@ -55,6 +72,7 @@ export async function Header({ locale }: { locale: string }) {
               name={session.user.name}
               email={session.user.email}
               avatarUrl={session.user.image ?? null}
+              isAdmin={isAdmin}
             />
           ) : (
             <SignInButton locale={locale} label={t('login')} />

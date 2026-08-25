@@ -2,7 +2,7 @@
  * GET /api/admin/reports — donation aggregates for the admin reports page.
  *
  * Returns:
- *   - totals: { totalRaised, totalDonations, totalDonors, successRate }
+ *   - totals: { totalRaised, totalDonations, totalDonors, totalUsers, successRate, todayTotal, todayCount }
  *   - byPurpose: array of { purpose, amount, count }
  *   - byMonth: array of { month (YYYY-MM), amount, count } — last 12 months inclusive
  *
@@ -38,29 +38,42 @@ export async function GET(request: NextRequest) {
     // Run all aggregations in parallel
     const now = new Date();
     const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+    // Calendar-day window for "today's total donations" stat card.
+    // Use server-local midnight so the count matches the admin's wall clock.
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    const [statusAgg, purposeGroup, monthRaw, donorCount] = await Promise.all([
-      prisma.donation.groupBy({
-        by: ['status'],
-        _count: { _all: true },
-        _sum: { amount: true },
-      }),
-      prisma.donation.groupBy({
-        by: ['purpose'],
-        where: { status: 'SUCCESS' },
-        _count: { _all: true },
-        _sum: { amount: true },
-      }),
-      prisma.donation.findMany({
-        where: { status: 'SUCCESS', createdAt: { gte: twelveMonthsAgo } },
-        select: { amount: true, createdAt: true },
-      }),
-      prisma.donation.findMany({
-        where: { status: 'SUCCESS', userId: { not: null } },
-        distinct: ['userId'],
-        select: { userId: true },
-      }),
-    ]);
+    const [statusAgg, purposeGroup, monthRaw, donorCount, todayAgg, totalUsers] = await Promise.all(
+      [
+        prisma.donation.groupBy({
+          by: ['status'],
+          _count: { _all: true },
+          _sum: { amount: true },
+        }),
+        prisma.donation.groupBy({
+          by: ['purpose'],
+          where: { status: 'SUCCESS' },
+          _count: { _all: true },
+          _sum: { amount: true },
+        }),
+        prisma.donation.findMany({
+          where: { status: 'SUCCESS', createdAt: { gte: twelveMonthsAgo } },
+          select: { amount: true, createdAt: true },
+        }),
+        prisma.donation.findMany({
+          where: { status: 'SUCCESS', userId: { not: null } },
+          distinct: ['userId'],
+          select: { userId: true },
+        }),
+        prisma.donation.aggregate({
+          where: { status: 'SUCCESS', createdAt: { gte: startOfToday } },
+          _count: { _all: true },
+          _sum: { amount: true },
+        }),
+        // Excludes soft-deleted users. Includes admins so the count reflects
+        // everyone who can sign in.
+        prisma.user.count({ where: { deletedAt: null } }),
+      ]
+    );
 
     const totalRaised = statusAgg
       .filter((s) => s.status === 'SUCCESS')
@@ -74,7 +87,10 @@ export async function GET(request: NextRequest) {
       totalRaised: totalRaised.toString(),
       totalDonations: totalAll,
       totalDonors: donorCount.length,
+      totalUsers,
       successRate,
+      todayTotal: (todayAgg._sum.amount ?? new Prisma.Decimal(0)).toString(),
+      todayCount: todayAgg._count._all,
     };
 
     const byPurpose = purposeGroup
@@ -129,6 +145,9 @@ export async function GET(request: NextRequest) {
       rows.push(`${csv('totalDonations')},${csv(totals.totalDonations)}`);
       rows.push(`${csv('totalDonors')},${csv(totals.totalDonors)}`);
       rows.push(`${csv('successRate')},${csv(totals.successRate)}`);
+      rows.push(`${csv('todayTotal')},${csv(totals.todayTotal)}`);
+      rows.push(`${csv('todayCount')},${csv(totals.todayCount)}`);
+      rows.push(`${csv('totalUsers')},${csv(totals.totalUsers)}`);
       rows.push('');
       rows.push('# By purpose');
       rows.push(`${csv('purpose')},${csv('amount')},${csv('count')}`);

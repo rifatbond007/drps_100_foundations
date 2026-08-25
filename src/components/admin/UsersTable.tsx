@@ -6,16 +6,21 @@
  *   - Role filter, banned filter
  *   - Pagination (prev/next)
  *   - Ban / Unban (with reason dialog)
- *   - Make admin / Remove admin
  *   - Optimistic UI updates with rollback on failure
  *   - Inline error toast on failure
+ *
+ * The "make admin / remove admin" toggle was deliberately removed — role
+ * changes are too sensitive for a one-click button and admins are now
+ * promoted exclusively through the ADMIN_EMAILS allowlist in the signIn
+ * callback (src/lib/auth/next-auth.ts). Manually demoting in-DB remains
+ * possible via a manual UPDATE if needed.
  */
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Search, Ban, ShieldCheck, ShieldOff, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Search, Ban, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -185,24 +190,11 @@ export function UsersTable() {
     );
   };
 
-  const onToggleAdmin = async (user: AdminUser) => {
-    const nextRole: Role = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
-    await withOptimistic(
-      user.id,
-      { role: nextRole },
-      () => apiClient.patch(`/api/admin/users/${user.id}/role`, { role: nextRole }),
-      nextRole === 'ADMIN' ? tCommon('promoted') : tCommon('demoted'),
-      tCommon('error', { message: '' }).replace(': ', '')
-    );
-  };
-
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
-        <CardDescription>{t('subtitle')}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      {/* Page heading is rendered by the admin page so we don't duplicate
+          "User management" + "All registered users" twice on the screen. */}
+      <CardContent className="space-y-4 pt-6">
         {/* Filters */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative flex-1">
@@ -334,20 +326,6 @@ export function UsersTable() {
                           disabled={loading}
                         />
                       )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => onToggleAdmin(u)}
-                        disabled={loading}
-                        aria-label={u.role === 'ADMIN' ? t('removeAdmin') : t('makeAdmin')}
-                      >
-                        {u.role === 'ADMIN' ? (
-                          <ShieldOff className="mr-1 h-3.5 w-3.5" />
-                        ) : (
-                          <ShieldCheck className="mr-1 h-3.5 w-3.5" />
-                        )}
-                        {u.role === 'ADMIN' ? t('removeAdmin') : t('makeAdmin')}
-                      </Button>
                     </div>
                   </td>
                 </tr>
