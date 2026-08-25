@@ -279,6 +279,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      // Email is the only auth identity — single OAuth provider, so allowing
+      // an existing User row to be linked to a fresh Google Account is safe.
+      // Prevents `OAuthAccountNotLinked` when a User row exists (e.g. from a
+      // prior interrupted sign-in) but its `Account` row is missing.
+      allowDangerousEmailAccountLinking: true,
       authorization: {
         params: { prompt: 'consent', access_type: 'offline', response_type: 'code' },
       },
