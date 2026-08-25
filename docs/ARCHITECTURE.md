@@ -65,6 +65,7 @@
 **Technology:** Next.js 15 (App Router) + React 19 + TypeScript
 
 **Structure:**
+
 ```
 src/app/
 ├── [locale]/                    # i18n routing (bn/en)
@@ -89,6 +90,7 @@ src/app/
 ```
 
 **Key Responsibilities:**
+
 - Server-side rendering (SSR) for SEO and performance
 - Client-side interactivity for forms and real-time updates
 - Route protection via middleware
@@ -101,6 +103,7 @@ src/app/
 **Technology:** Next.js API Routes + TypeScript + Zod
 
 **API Structure:**
+
 ```
 /api/
 ├── auth/
@@ -120,6 +123,7 @@ src/app/
 ```
 
 **Key Responsibilities:**
+
 - Business logic execution
 - Database operations (via Prisma)
 - Payment gateway integration
@@ -134,6 +138,7 @@ src/app/
 **Technology:** NextAuth.js v5 (Auth.js) + Google OAuth Provider
 
 **Flow:**
+
 ```
 User → Google OAuth → NextAuth Callback → Session Creation → Database
                                 ↓
@@ -143,6 +148,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 ```
 
 **Session Management:**
+
 - JWT-based sessions (stored in HTTP-only cookies)
 - Session data cached in Redis for performance
 - Automatic token refresh
@@ -155,6 +161,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 **Technology:** PostgreSQL 16 + Prisma ORM
 
 **Schema Design Principles:**
+
 - ACID compliance for financial transactions
 - Proper foreign key relationships
 - Indexes on frequently queried fields
@@ -162,6 +169,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 - Audit trail for sensitive operations
 
 **Connection Pooling:**
+
 - PgBouncer for connection pooling
 - Max 20 connections per instance
 - Timeout: 30 seconds
@@ -173,6 +181,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 **Technology:** Redis 7
 
 **Use Cases:**
+
 - Session storage (NextAuth)
 - Rate limiting counters
 - Temporary payment tokens
@@ -180,6 +189,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 - Real-time leaderboard (top donors)
 
 **Configuration:**
+
 - Max memory: 256MB
 - Eviction policy: allkeys-lru
 - Persistence: AOF (Append Only File)
@@ -191,6 +201,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 **Technology:** bKash Checkout (PGW) API
 
 **Architecture:**
+
 ```
 ┌──────────┐      ┌──────────┐      ┌──────────┐
 │  Client  │─────▶│ Next.js  │─────▶│  bKash   │
@@ -204,6 +215,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 ```
 
 **Security Measures:**
+
 1. **Idempotency Keys:** Prevent duplicate charges
 2. **Independent Verification:** Always call Query API after callback
 3. **Webhook Signature Validation:** Verify bKash signatures
@@ -211,6 +223,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 5. **Transaction Logging:** Full audit trail
 
 **Flow:**
+
 1. User initiates donation → Backend creates pending record
 2. Backend calls bKash Create Payment → Returns payment URL
 3. User completes payment on bKash
@@ -226,6 +239,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 ### 3.1 Deployment Topology
 
 **Option A: VPS (Recommended for Full Control)**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │         VPS (DigitalOcean/AWS EC2)              │
@@ -252,6 +266,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 ```
 
 **Option B: Vercel + Managed Services**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │              Vercel (Next.js Hosting)           │
@@ -287,6 +302,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 ```
 
 **Stages:**
+
 1. **Lint & Type Check** — ESLint, Prettier, TypeScript
 2. **Unit Tests** — Vitest/Jest with >80% coverage
 3. **E2E Tests** — Playwright on staging environment
@@ -337,13 +353,13 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 
 ### 4.2 Rate Limiting Strategy
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| `/api/auth/*` | 5 requests | 1 minute |
-| `/api/donations/create` | 3 requests | 5 minutes |
-| `/api/users/profile` | 10 requests | 1 minute |
-| `/api/admin/*` | 30 requests | 1 minute |
-| General API | 60 requests | 1 minute |
+| Endpoint                | Limit       | Window    |
+| ----------------------- | ----------- | --------- |
+| `/api/auth/*`           | 5 requests  | 1 minute  |
+| `/api/donations/create` | 3 requests  | 5 minutes |
+| `/api/users/profile`    | 10 requests | 1 minute  |
+| `/api/admin/*`          | 30 requests | 1 minute  |
+| General API             | 60 requests | 1 minute  |
 
 ---
 
@@ -371,6 +387,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 ### 5.2 Error Tracking
 
 **Sentry Integration:**
+
 - Client-side errors
 - Server-side errors
 - Performance monitoring
@@ -379,12 +396,14 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 ### 5.3 Logging Strategy
 
 **Log Levels:**
+
 - **ERROR:** System errors, payment failures
 - **WARN:** Deprecated API usage, rate limit warnings
 - **INFO:** User actions, system events
 - **DEBUG:** Detailed debugging (dev only)
 
 **Log Format (JSON):**
+
 ```json
 {
   "timestamp": "2026-08-20T10:30:00Z",
@@ -404,6 +423,7 @@ User → Google OAuth → NextAuth Callback → Session Creation → Database
 ### 6.1 Backup Strategy
 
 **Database Backups:**
+
 - **Frequency:** Daily automated backups at 2 AM (BD time)
 - **Retention:** 30 days
 - **Storage:** Off-site (S3/Backblaze)
@@ -431,11 +451,13 @@ Send notification (Slack/Email)
 ### 7.1 Current Scale (~1,000 users/month)
 
 **Capacity:**
+
 - 50-100 concurrent users
 - ~100 donations/day
 - <10 GB database size
 
 **Resources:**
+
 - VPS: 2 CPU, 4 GB RAM, 50 GB SSD
 - Database: 1 GB RAM, 10 GB storage
 - Redis: 256 MB
@@ -443,11 +465,13 @@ Send notification (Slack/Email)
 ### 7.2 Future Scaling Path
 
 **When to Scale:**
-- >10,000 users/month → Upgrade VPS (4 CPU, 8 GB RAM)
-- >100,000 users/month → Migrate to Kubernetes
-- >1M users/month → Multi-region deployment
+
+- > 10,000 users/month → Upgrade VPS (4 CPU, 8 GB RAM)
+- > 100,000 users/month → Migrate to Kubernetes
+- > 1M users/month → Multi-region deployment
 
 **Scaling Strategies:**
+
 1. **Vertical Scaling:** Upgrade VPS resources
 2. **Horizontal Scaling:** Multiple Next.js instances + load balancer
 3. **Database Scaling:** Read replicas, connection pooling
@@ -461,12 +485,14 @@ Send notification (Slack/Email)
 ### 8.1 Why Monolith?
 
 **Pros:**
+
 - Simpler deployment
 - Easier development for small team
 - Lower operational overhead
 - Faster initial development
 
 **Cons:**
+
 - Harder to scale individual components
 - Tight coupling
 

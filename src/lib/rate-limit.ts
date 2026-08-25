@@ -20,7 +20,7 @@ export interface RateLimitResult {
 export async function rateLimit(
   identifier: string,
   max: number,
-  windowSeconds: number,
+  windowSeconds: number
 ): Promise<RateLimitResult> {
   const key = `ratelimit:${identifier}`;
   const now = Date.now();
@@ -44,7 +44,7 @@ export async function rateLimit(
     } else {
       logger.warn(
         { key, oldest, count },
-        'rate-limit: redis returned empty/malformed zset; defaulting resetAt to now',
+        'rate-limit: redis returned empty/malformed zset; defaulting resetAt to now'
       );
       oldestScore = now;
     }
@@ -66,7 +66,9 @@ export async function rateLimit(
   };
 }
 
-export function requireRateLimit(result: RateLimitResult): asserts result is RateLimitResult & { allowed: true } {
+export function requireRateLimit(
+  result: RateLimitResult
+): asserts result is RateLimitResult & { allowed: true } {
   if (!result.allowed) {
     throw new RateLimitError(result.resetAt);
   }

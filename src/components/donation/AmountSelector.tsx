@@ -29,7 +29,7 @@ export function AmountSelector({ value, onChange }: Props) {
               'rounded-md border-2 py-3 text-sm font-medium transition-colors',
               value === amount
                 ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-input hover:border-primary/50',
+                : 'border-input hover:border-primary/50'
             )}
             aria-pressed={value === amount}
           >

@@ -17,7 +17,11 @@ export async function GET(_request: Request) {
   // 6. Audit log
   // 7. Redirect to /donate/success or /donate/failed
   return NextResponse.json(
-    { success: false, error: 'NOT_IMPLEMENTED', message: 'Callback handler arrives with payment-agent phase' },
-    { status: 501 },
+    {
+      success: false,
+      error: 'NOT_IMPLEMENTED',
+      message: 'Callback handler arrives with payment-agent phase',
+    },
+    { status: 501 }
   );
 }

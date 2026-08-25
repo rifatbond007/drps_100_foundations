@@ -350,13 +350,8 @@ npx husky add .husky/commit-msg 'npx --no-install commitlint --edit "$1"'
     "ts-node": "^10.9.0"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md}": [
-      "prettier --write"
-    ]
+    "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md}": ["prettier --write"]
   },
   "commitlint": {
     "extends": ["@commitlint/config-conventional"]
@@ -410,27 +405,27 @@ npx husky add .husky/commit-msg 'npx --no-install commitlint --edit "$1"'
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  
+
   // Output standalone for Docker
   output: 'standalone',
-  
+
   // Sentry configuration
   sentry: {
     hideSourceMaps: true,
     disableLogger: true,
   },
-  
+
   // Bundle analyzer
   bundleAnalyzer: {
     enabled: process.env.ANALYZE === 'true',
   },
-  
+
   // Image optimization
   images: {
     domains: ['example.com', 'r2.example.com'],
     formats: ['image/webp'],
   },
-  
+
   // Security headers
   async headers() {
     return [
@@ -461,7 +456,7 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Experimental features
   experimental: {
     optimizePackageImports: ['lucide-react', 'date-fns'],
@@ -520,10 +515,7 @@ export default config;
 
 ```json
 {
-  "extends": [
-    "next/core-web-vitals",
-    "next/typescript"
-  ],
+  "extends": ["next/core-web-vitals", "next/typescript"],
   "rules": {
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "warn",
@@ -669,9 +661,11 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-});
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 ```
@@ -689,13 +683,15 @@ const globalForRedis = globalThis as unknown as {
   redis: Redis | undefined;
 };
 
-export const redis = globalForRedis.redis ?? new Redis(process.env.REDIS_URL!, {
-  maxRetriesPerRequest: 3,
-  retryStrategy(times) {
-    const delay = Math.min(times * 50, 2000);
-    return delay;
-  },
-});
+export const redis =
+  globalForRedis.redis ??
+  new Redis(process.env.REDIS_URL!, {
+    maxRetriesPerRequest: 3,
+    retryStrategy(times) {
+      const delay = Math.min(times * 50, 2000);
+      return delay;
+    },
+  });
 
 if (process.env.NODE_ENV !== 'production') globalForRedis.redis = redis;
 ```

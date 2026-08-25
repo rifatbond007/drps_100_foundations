@@ -140,21 +140,26 @@ model Donation {
 ## Schema Design Principles
 
 ### 1. Use cuid() for IDs
+
 ```prisma
 id String @id @default(cuid())
 ```
+
 - Sortable, URL-safe, collision-resistant
 - Better than auto-increment for distributed systems
 
 ### 2. Always Include Timestamps
+
 ```prisma
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 ```
+
 - Audit trail
 - Sync detection
 
 ### 3. Use Enums for Fixed Values
+
 ```prisma
 enum DonationStatus {
   PENDING
@@ -163,23 +168,28 @@ enum DonationStatus {
   CANCELLED
 }
 ```
+
 - Type safety
 - Database-level constraint
 
 ### 4. Index Foreign Keys and Query Fields
+
 ```prisma
 @@index([userId])
 @@index([status, createdAt])  // Composite index for common queries
 ```
 
 ### 5. Use Decimal for Money
+
 ```prisma
 amount Decimal @db.Decimal(10, 2)
 ```
+
 - NEVER use Float for money (precision issues)
 - 10 digits, 2 decimals = up to 99,999,999.99
 
 ### 6. Choose Right Cascade Behavior
+
 ```prisma
 user User @relation(fields: [userId], references: [id], onDelete: Cascade)     // Delete children
 user User @relation(fields: [userId], references: [id], onDelete: Restrict)    // Prevent parent delete
@@ -188,14 +198,17 @@ user User @relation(fields: [userId], references: [id], onDelete: NoAction)    /
 ```
 
 **For this project:**
+
 - `Session` → Cascade (sessions die with user)
 - `Donation` → Restrict (preserve financial records)
 - `AuditLog` → SetNull (keep logs even if user deleted)
 
 ### 7. Use JSON for Flexible Data
+
 ```prisma
 metadata Json?
 ```
+
 - For evolving schemas
 - For unstructured data (bKash raw responses, etc.)
 
@@ -224,6 +237,7 @@ DATABASE_URL=<prod_url> npx prisma migrate deploy
 ## Query Optimization Patterns
 
 ### 1. Select Only Needed Fields
+
 ```typescript
 // ❌ Bad — fetches all fields
 const users = await prisma.user.findMany();
@@ -235,6 +249,7 @@ const users = await prisma.user.findMany({
 ```
 
 ### 2. Use Pagination
+
 ```typescript
 const donations = await prisma.donation.findMany({
   skip: (page - 1) * limit,
@@ -244,6 +259,7 @@ const donations = await prisma.donation.findMany({
 ```
 
 ### 3. Use Cursor for Large Datasets
+
 ```typescript
 // Better than offset for large tables
 const donations = await prisma.donation.findMany({
@@ -254,6 +270,7 @@ const donations = await prisma.donation.findMany({
 ```
 
 ### 4. Use Transactions for Multi-Step Operations
+
 ```typescript
 await prisma.$transaction([
   prisma.donation.update({ where: { id }, data: { status: 'SUCCESS' } }),
@@ -262,6 +279,7 @@ await prisma.$transaction([
 ```
 
 ### 5. Use Aggregations
+
 ```typescript
 const stats = await prisma.donation.aggregate({
   where: { status: 'SUCCESS' },
@@ -326,8 +344,8 @@ await prisma.user.updateMany({
   data: {
     donationCount: {
       // Can't do this in updateMany — need raw query or transaction
-    }
-  }
+    },
+  },
 });
 
 // Better: use raw SQL in migration
@@ -373,6 +391,7 @@ const activeUsers = await prisma.user.findMany({
 ## Output to Project Orchestrator
 
 When done, report:
+
 ```
 ✅ Database Schema Update: [Feature]
 
