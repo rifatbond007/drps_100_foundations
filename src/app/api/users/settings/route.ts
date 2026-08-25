@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth/session';
 import { ok, fail } from '@/lib/api/helpers';
 import { ValidationError } from '@/lib/errors';
+import { logSecurityEvent } from '@/lib/audit';
 
 const SettingsSchema = z
   .object({
@@ -71,6 +72,15 @@ export async function PUT(request: Request) {
         ...(data.theme !== undefined && { theme: data.theme }),
       },
     });
+
+    // Audit log — record which prefs were touched, never the new values.
+    const changedKeys = Object.keys(data);
+    await logSecurityEvent({
+      action: 'SETTINGS_UPDATED',
+      userId: session.user.id,
+      details: { fields: changedKeys },
+    });
+
     return ok(settings);
   } catch (error) {
     return fail(error);

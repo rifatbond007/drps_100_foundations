@@ -179,6 +179,15 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Match all routes except: _next/static, _next/image, favicon, public files
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|gif|webp|ico)).*)'],
+  // Match all routes EXCEPT:
+  //   - _next/static, _next/image
+  //   - favicon.ico
+  //   - public files (image extensions)
+  //   - /api/* — API routes are NOT locale-prefixed. They must reach the
+  //     route handler as-is. If we let the intl middleware see them, it
+  //     rewrites `/api/users/profile` → `/bn/api/users/profile` (307),
+  //     which then 404s because no such route exists.
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:png|jpg|jpeg|svg|gif|webp|ico)).*)',
+  ],
 };

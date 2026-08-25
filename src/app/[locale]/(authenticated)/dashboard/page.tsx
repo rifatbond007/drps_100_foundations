@@ -58,18 +58,20 @@ function StatCard({
   );
 }
 
-function ProfileBanner({ locale, cta }: { locale: string; cta: string }) {
+function ProfileBanner({ locale, message, cta }: { locale: string; message: string; cta: string }) {
+  // There is no /{locale}/complete-profile page (removed intentionally —
+  // see src/middleware.ts). Profile fields are collected lazily at the
+  // donate flow OR edited inline at /settings. Banner always points at
+  // /settings.
   return (
     <Card className="border-yellow-500/40 bg-yellow-500/5">
       <CardContent className="flex flex-col items-start justify-between gap-3 py-4 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
           <AlertTriangle className="h-5 w-5 text-yellow-600" />
-          <p className="text-sm">
-            {/* translation lives in the page; this is just a styled wrapper */}
-          </p>
+          <p className="text-sm">{message}</p>
         </div>
         <Button asChild size="sm">
-          <Link href={`/${locale}/complete-profile`}>{cta}</Link>
+          <Link href={`/${locale}/settings`}>{cta}</Link>
         </Button>
       </CardContent>
     </Card>
@@ -158,8 +160,14 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Profile-completion banner */}
-      {showIncompleteBanner && <ProfileBanner locale={locale} cta={t('completeProfileCta')} />}
+      {/* Profile-completion banner (no /complete-profile route — links to /settings) */}
+      {showIncompleteBanner && (
+        <ProfileBanner
+          locale={locale}
+          message={t('completeProfileBanner')}
+          cta={t('completeProfileCta')}
+        />
+      )}
 
       {/* Stats */}
       <div className="space-y-2">
