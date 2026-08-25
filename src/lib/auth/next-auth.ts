@@ -54,8 +54,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
       }
 
-      // Block banned users
-      if (existing?.isBanned) {
+      // H1 audit fix: re-query after the conditional create so a banned
+      // user whose row was deleted between OAuth roundtrip and callback
+      // is still blocked on re-sign-in. The previous code read `existing`
+      // BEFORE the create, so a deleted-banned re-register slipped past.
+      const current = await prisma.user.findUnique({
+        where: { email: user.email! },
+        select: { id: true, isBanned: true, bannedReason: true },
+      });
+
+      if (current?.isBanned) {
+        await logSecurityEvent({
+          action: 'LOGIN_BLOCKED',
+          userId: current.id,
+          details: { reason: current.bannedReason ?? 'unknown' },
+        });
         return false;
       }
 
