@@ -27,6 +27,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Generate Prisma client BEFORE lint/type-check so the @prisma/client
+      # exports (PrismaClient, generated types) actually exist when tsc and
+      # eslint resolve imports. @prisma/client ships as a stub until
+      # `prisma generate` populates node_modules/.prisma/client.
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
       - name: Format check (Prettier)
         run: pnpm format:check
 
@@ -35,11 +42,6 @@ jobs:
 
       - name: Type-check (tsc --noEmit)
         run: pnpm type-check
-
-      # Generate Prisma client so the auth tests (which mock the adapter)
-      # can import @/lib/auth/next-auth without resolver errors.
-      - name: Generate Prisma client
-        run: pnpm prisma generate
 
       - name: Unit tests (Vitest)
         run: pnpm test
