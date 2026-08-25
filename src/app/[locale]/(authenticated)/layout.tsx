@@ -6,7 +6,10 @@ import { requireAuth } from '@/lib/auth/session';
 /**
  * Authenticated layout — guards all child routes.
  * - Requires login
- * - Incomplete profile → /complete-profile
+ * - No longer redirects incomplete-profile users to /complete-profile.
+ *   Profile fields (phone, languagePref) are collected lazily at point of
+ *   use (e.g. when the user attempts to donate). The donate page calls
+ *   /api/users/complete-profile as part of its submit flow.
  */
 export default async function AuthenticatedLayout({
   children,
@@ -18,15 +21,13 @@ export default async function AuthenticatedLayout({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  let session;
   try {
-    session = await requireAuth();
+    // requireAuth() throws UnauthorizedError if no session. We don't need
+    // the session value here — auth is enough to render the shell.
+    await requireAuth();
   } catch {
-    redirect(`/${locale}/login`);
-  }
-
-  if (!session.user.profileCompleted) {
-    redirect(`/${locale}/complete-profile`);
+    // No /login page — bounce to home, where the SignInButton kicks off Google OAuth.
+    redirect(`/${locale}`);
   }
 
   return (

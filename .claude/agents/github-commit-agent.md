@@ -211,7 +211,7 @@ fi
 # 5. Verify build still passes (if Node project)
 if [ -f "package.json" ]; then
   echo "🧪 Running typecheck..."
-  pnpm typecheck || exit 1
+  pnpm type-check || exit 1
 fi
 
 echo "✅ Pre-commit checks passed"
@@ -234,7 +234,7 @@ git add docs/BACKEND_PLANNING.md
 
 # Step 4: Pre-commit check (lint, format, secrets)
 pnpm lint --fix
-pnpm typecheck
+pnpm type-check
 
 # Step 5: Commit with conventional message
 git commit -m "$(cat <<'EOF'
@@ -321,7 +321,7 @@ None
 ## Checklist
 
 - [x] Code follows project style guide (`pnpm lint`)
-- [x] TypeScript compiles (`pnpm typecheck`)
+- [x] TypeScript compiles (`pnpm type-check`)
 - [x] Unit tests added/updated
 - [x] Integration tests added/updated
 - [x] E2E tests added/updated (if user-facing)
@@ -403,7 +403,7 @@ EOF
 ## Checklist
 
 - [ ] Code follows project style guide (`pnpm lint`)
-- [ ] TypeScript compiles (`pnpm typecheck`)
+- [ ] TypeScript compiles (`pnpm type-check`)
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] E2E tests added/updated (if user-facing)

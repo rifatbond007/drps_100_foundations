@@ -1,8 +1,12 @@
 /**
  * Server-side session helpers.
+ *
+ * requireCompletedProfile is intentionally NOT a redirect — there is no
+ * /complete-profile page. Callers that need a complete profile should
+ * either prompt the user inline (e.g. the donate page) or call
+ * /api/users/complete-profile to mark it complete before proceeding.
  */
 import { auth } from './next-auth';
-import { redirect } from 'next/navigation';
 import { UnauthorizedError, ForbiddenError } from '@/lib/errors';
 
 export async function requireAuth() {
@@ -20,7 +24,7 @@ export async function requireAdmin() {
 export async function requireCompletedProfile() {
   const session = await requireAuth();
   if (!session.user.profileCompleted) {
-    redirect('/complete-profile');
+    throw new UnauthorizedError('Profile incomplete — please complete your profile first.');
   }
   return session;
 }

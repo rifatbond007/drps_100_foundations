@@ -126,7 +126,7 @@ EOF
 5. **Run local checks:**
    ```bash
    pnpm lint
-   pnpm typecheck
+   pnpm type-check
    pnpm test
    pnpm test:e2e
    ```

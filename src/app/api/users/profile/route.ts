@@ -40,14 +40,37 @@ export async function GET() {
         role: true,
         languagePref: true,
         profileCompleted: true,
-        donationCount: true,
-        totalDonated: true,
         createdAt: true,
         lastLoginAt: true,
+        _count: {
+          select: { donations: true },
+        },
       },
     });
     if (!user) throw new NotFoundError('User not found');
-    return ok(user);
+
+    // H-fix: \`donationCount\`/\`totalDonated\` aren't columns on User.
+    // Compute them via aggregation so the route stays type-safe.
+    const donationAgg = await prisma.donation.aggregate({
+      where: { userId: session.user.id, status: 'SUCCESS' },
+      _count: { _all: true },
+      _sum: { amount: true },
+    });
+
+    return ok({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+      phone: user.phone,
+      role: user.role,
+      languagePref: user.languagePref,
+      profileCompleted: user.profileCompleted,
+      createdAt: user.createdAt,
+      lastLoginAt: user.lastLoginAt,
+      donationCount: donationAgg._count._all,
+      totalDonated: donationAgg._sum.amount?.toString() ?? '0',
+    });
   } catch (error) {
     return fail(error);
   }

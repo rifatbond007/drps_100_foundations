@@ -1,11 +1,22 @@
 /**
  * Middleware: i18n routing + auth + role guards.
- * Per auth-agent.md.
+ *
+ * There is no /{locale}/login page — clicking "Sign in" in the header
+ * calls `signIn('google')` directly via the SignInButton client component,
+ * which navigates the browser to Google's account chooser. Middleware
+ * never has to route users TO a login page; it only has to enforce that
+ * protected routes have a session.
+ *
+ * There is no /{locale}/complete-profile page either. Profile fields
+ * (phone, languagePref) are collected lazily — at the point they're
+ * actually needed (donate flow). So authenticated-but-incomplete users
+ * can browse fully-protected pages; the donate action will prompt for
+ * the missing fields before allowing the API call.
  *
  * Hardening (audit C1, H1):
  * - Every redirect/response preserves headers + cookies from intlMiddleware
  *   so locale detection cookies (NEXT_LOCALE) and Vary headers aren't dropped
- *   on auth/profile-completion/admin-redirect flows.
+ *   on auth/admin-redirect flows.
  * - Exact-prefix matching for protected routes to avoid /en/admin-dashboard
  *   accidentally matching /en/admin/dashboard or vice versa.
  */
@@ -14,6 +25,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { locales, defaultLocale } from '@/lib/i18n/config';
+import { edgeRateLimit } from '@/lib/security/edge-rate-limit';
 
 const intlMiddleware = createIntlMiddleware({
   locales: [...locales],
@@ -29,7 +41,6 @@ const SECRET = process.env.NEXTAUTH_SECRET ?? '';
  * Use this for every NextResponse.redirect/NextResponse.json() we return.
  */
 function withIntlHeaders(response: NextResponse, source: NextResponse): NextResponse {
-  // Forward Set-Cookie headers
   for (const [name, value] of source.headers.entries()) {
     if (name.toLowerCase() === 'set-cookie' || name.toLowerCase() === 'vary') {
       response.headers.append(name, value);
@@ -40,7 +51,6 @@ function withIntlHeaders(response: NextResponse, source: NextResponse): NextResp
 
 /**
  * Build a redirect response that still carries intl cookies + Vary.
- * Use NextResponse.redirect's init.headers option (Next 15 supported).
  */
 function redirectWithIntl(
   intlResponse: NextResponse,
@@ -48,7 +58,6 @@ function redirectWithIntl(
   request: NextRequest
 ): NextResponse {
   const headers = new Headers(request.headers);
-  // Pass through any cookie/header adjustments the intl middleware made
   for (const [k, v] of intlResponse.headers.entries()) {
     if (k.toLowerCase() === 'set-cookie' || k.toLowerCase() === 'vary') {
       headers.set(k, v);
@@ -73,6 +82,34 @@ export default async function middleware(request: NextRequest) {
     pathname === '/api/health' ||
     pathname.startsWith('/api/donations/webhook');
 
+  // Edge-compatible rate limit on auth endpoints (per-IP sliding window).
+  // No-op when UPSTASH_REDIS_REST_URL is unset (local dev + CI without creds).
+  if (pathname.startsWith('/api/auth')) {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      'anon';
+    const rl = await edgeRateLimit(ip, 'LOGIN');
+    if (!rl.allowed) {
+      const retryAfter = Math.max(1, Math.ceil((rl.resetAt.getTime() - Date.now()) / 1000));
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'RATE_LIMIT_EXCEEDED',
+          message: 'Too many attempts. Please try again later.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(retryAfter),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rl.resetAt.getTime()),
+          },
+        }
+      );
+    }
+  }
+
   if (isPublicApi) {
     return NextResponse.next();
   }
@@ -80,10 +117,11 @@ export default async function middleware(request: NextRequest) {
   // Run i18n middleware first (sets locale cookie, Vary header)
   const intlResponse = intlMiddleware(request);
 
-  // Auth-free pages (public route group + locale root + next assets)
+  // Auth-free pages: locale root, /about, root, next assets.
+  // (login / complete-profile routes were removed — clicking "Sign in"
+  // triggers Google OAuth directly.)
   const isAuthFreePath =
     pathname === `/${locale}` ||
-    pathname === `/${locale}/login` ||
     pathname === `/${locale}/about` ||
     pathname.startsWith('/_next') ||
     pathname === '/';
@@ -95,17 +133,13 @@ export default async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: SECRET });
   const isLoggedIn = !!token;
   const userRole = token?.role as string | undefined;
-  const profileCompleted = token?.profileCompleted as boolean | undefined;
 
   // H1: exact-prefix matching — `/en/admin-dashboard-fake` must NOT match `/en/admin`.
   const matchesPath = (prefix: string): boolean =>
     pathname === prefix || pathname.startsWith(`${prefix}/`);
 
-  // Routes that require login only (profile completion guarded separately)
-  const loginOnlyPaths = [`/${locale}/complete-profile`];
-  const isLoginOnlyRoute = loginOnlyPaths.some(matchesPath);
-
-  // Routes that require login AND completed profile
+  // Routes that require login (profile completion no longer gates a route —
+  // it's prompted lazily at point of use, e.g. on donate submit).
   const fullyProtectedPaths = [
     `/${locale}/dashboard`,
     `/${locale}/donate`,
@@ -116,43 +150,20 @@ export default async function middleware(request: NextRequest) {
   ];
   const isFullyProtectedRoute = fullyProtectedPaths.some(matchesPath);
 
-  // Login-only routes: just require logged in
-  if (isLoginOnlyRoute && !isLoggedIn) {
-    const loginUrl = new URL(`/${locale}/login`, nextUrl);
-    loginUrl.searchParams.set('callbackUrl', pathname);
-    return redirectWithIntl(intlResponse, loginUrl, request);
-  }
-
-  // Fully-protected routes: require logged in, then completed profile
-  if (isFullyProtectedRoute) {
-    if (!isLoggedIn) {
-      const loginUrl = new URL(`/${locale}/login`, nextUrl);
-      loginUrl.searchParams.set('callbackUrl', pathname);
-      return redirectWithIntl(intlResponse, loginUrl, request);
-    }
-    if (profileCompleted === false) {
-      return redirectWithIntl(
-        intlResponse,
-        new URL(`/${locale}/complete-profile`, nextUrl),
-        request
-      );
-    }
-  }
-
-  // Profile incomplete — but ONLY on login-only routes do we forward them
-  // to /complete-profile. If they're visiting a public page (home, about),
-  // don't bounce them — let them browse.
-  if (
-    isLoggedIn &&
-    profileCompleted === false &&
-    matchesPath(`/${locale}/complete-profile`) === false &&
-    isFullyProtectedRoute === false
-  ) {
-    // No-op: let them view public pages
+  if (isFullyProtectedRoute && !isLoggedIn) {
+    // No /login page — bounce them back to the locale home page.
+    // The header's "Sign in" button on that page will kick off Google OAuth.
+    const homeUrl = new URL(`/${locale}`, nextUrl);
+    homeUrl.searchParams.set('from', pathname);
+    return redirectWithIntl(intlResponse, homeUrl, request);
   }
 
   // Admin routes — require ADMIN role
   if (matchesPath(`/${locale}/admin`)) {
+    if (!isLoggedIn) {
+      const homeUrl = new URL(`/${locale}`, nextUrl);
+      return redirectWithIntl(intlResponse, homeUrl, request);
+    }
     if (userRole !== 'ADMIN') {
       return redirectWithIntl(intlResponse, new URL(`/${locale}/dashboard`, nextUrl), request);
     }
