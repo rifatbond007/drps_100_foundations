@@ -4,17 +4,24 @@
  * Fetches /api/admin/reports and renders:
  *   - By-purpose bar chart (recharts)
  *   - By-month line chart (last 12 months)
- *   - CSV export button
+ *   - CSV export button + manual refresh
  *
- * The lifetime stat cards (Total users / Total raised / Today's donations)
- * live in the admin *layout* above all admin pages, so this panel
- * intentionally omits them to avoid duplication.
+ * Data is loaded through the `useAdminReports` TanStack Query hook with
+ * staleTime: 0 and refetchOnMount: 'always'. That means every time the
+ * panel mounts — including back-navigation from another admin route — the
+ * query re-runs and the charts reflect the latest donations without
+ * needing a hard refresh. The default 60s staleTime set globally in
+ * Providers.tsx is too long for live admin analytics.
+ *
+ * The lifetime stat cards (Total users / Total raised / Today's
+ * donations) live in /admin/dashboard (server component) above all
+ * admin pages, so this panel intentionally omits them to avoid
+ * duplication.
  */
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
-import { Download } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { Download, RefreshCw } from 'lucide-react';
 import {
   Bar,
   BarChart,
@@ -30,23 +37,9 @@ import {
 } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
+import { useAdminReports } from '@/lib/hooks/use-admin-reports';
 import { formatBDT } from '@/lib/utils';
-
-interface Reports {
-  totals: {
-    totalRaised: string;
-    totalDonations: number;
-    totalDonors: number;
-    totalUsers: number;
-    successRate: number;
-    todayTotal: string;
-    todayCount: number;
-  };
-  byPurpose: { purpose: string; amount: string; count: number }[];
-  byMonth: { month: string; amount: string; count: number }[];
-}
 
 const PURPOSE_COLORS = [
   'hsl(var(--primary))',
@@ -58,44 +51,20 @@ const PURPOSE_COLORS = [
 export function ReportsPanel() {
   const rawLocale = useLocale();
   const locale = (rawLocale === 'bn' || rawLocale === 'en' ? rawLocale : 'bn') as 'bn' | 'en';
-  const t = useT();
-  const [data, setData] = useState<Reports | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const result = await apiClient.get<Reports>('/api/admin/reports');
-        if (!cancelled) setData(result);
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof ApiClientError ? e.message : t('error'));
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const t = useTranslations('admin.reports');
+  const { data, error, isLoading, isFetching, refetch } = useAdminReports();
 
   const exportCsv = () => {
     window.open('/api/admin/reports?format=csv', '_blank');
   };
 
-  if (loading && !data) {
+  if (isLoading) {
     return <div className="text-muted-foreground">{t('loading')}</div>;
   }
   if (error) {
     return (
       <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-        {t('error')}: {error}
+        {t('error')}: {error instanceof ApiClientError ? error.message : error.message}
       </div>
     );
   }
@@ -126,7 +95,17 @@ export function ReportsPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => void refetch()}
+          disabled={isFetching}
+          aria-label={t('refresh')}
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+          {t('refresh')}
+        </Button>
         <Button variant="outline" size="sm" onClick={exportCsv}>
           <Download className="mr-2 h-4 w-4" />
           {t('exportCsv')}
@@ -224,10 +203,4 @@ export function ReportsPanel() {
       </Card>
     </div>
   );
-}
-
-// Local re-export to keep the component file self-contained.
-import { useTranslations } from 'next-intl';
-function useT() {
-  return useTranslations('admin.reports');
 }

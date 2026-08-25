@@ -274,6 +274,7 @@
       "loading": "Loading reports…",
       "error": "Failed to load reports",
       "empty": "No donations recorded yet",
+      "refresh": "Refresh",
       "months": "Last 12 months",
       "purposes": {
         "GENERAL_FUND": "General fund",

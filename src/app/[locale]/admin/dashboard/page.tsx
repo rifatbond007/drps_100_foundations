@@ -2,18 +2,20 @@ import Link from 'next/link';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { Users, BarChart } from 'lucide-react';
 import { CardDescription, CardTitle } from '@/components/ui/card';
-import { AdminStatsCard, type AdminTotals } from '@/components/admin/AdminStatsCard';
-import { prisma } from '@/lib/prisma';
+import { AdminStatsCard } from '@/components/admin/AdminStatsCard';
+import { AdminTotalsLive } from '@/components/admin/AdminTotalsLive';
 
 /**
  * /admin/dashboard — landing page for admins.
  *
- * Renders the three stat cards (Total users / Total raised / Today's
+ * Renders three live stat cards (Total users / Total raised / Today's
  * donations) plus two shortcut cards linking to Users and Reports. The
- * stat cards used to live in the admin layout, but that meant every
- * admin page started with the same totals row — moving them here makes
- * /admin/dashboard the canonical landing view and gives the other admin
- * pages more breathing room.
+ * stat values come from `AdminTotalsLive` (client component backed by
+ * TanStack Query with staleTime: 0 and refetchOnMount: 'always') so the
+ * dashboard reflects new donations the moment they land — no hard
+ * refresh required.
+ *
+ * The two shortcut cards below still link to the dedicated admin pages.
  */
 export default async function AdminDashboardPage({
   params,
@@ -25,11 +27,9 @@ export default async function AdminDashboardPage({
   const safeLocale: 'bn' | 'en' = locale === 'en' ? 'en' : 'bn';
   const t = await getTranslations('admin.dashboard');
 
-  const totals: AdminTotals = await loadAdminTotals();
-
   return (
     <div className="space-y-6">
-      <AdminStatsCard totals={totals} locale={safeLocale} />
+      <AdminTotalsLive locale={safeLocale} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Link
@@ -66,63 +66,7 @@ export default async function AdminDashboardPage({
   );
 }
 
-// Local helpers below mirror AdminLayout's loadAdminTotals so the
-// dashboard is self-contained when navigated to directly (the layout
-// helper isn't exported). Keep them in sync with the layout file.
-
-async function loadAdminTotals(): Promise<AdminTotals> {
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  try {
-    const [statusAgg, donorCount, todayAgg, totalUsers] = await Promise.all([
-      prisma.donation.groupBy({
-        by: ['status'],
-        where: { status: 'SUCCESS' },
-        _sum: { amount: true },
-        _count: { _all: true },
-      }),
-      prisma.donation.findMany({
-        where: { status: 'SUCCESS', userId: { not: null } },
-        distinct: ['userId'],
-        select: { userId: true },
-      }),
-      prisma.donation.aggregate({
-        where: { status: 'SUCCESS', createdAt: { gte: startOfToday } },
-        _sum: { amount: true },
-        _count: { _all: true },
-      }),
-      prisma.user.count({ where: { deletedAt: null } }),
-    ]);
-
-    const totalRaised = statusAgg.reduce((acc: number, s: { _sum: { amount: unknown } }) => {
-      const v = s._sum.amount;
-      return acc + (typeof v === 'string' || typeof v === 'number' ? Number(v) : 0);
-    }, 0);
-    const totalDonations = statusAgg.reduce(
-      (acc: number, s: { _count: { _all: number } }) => acc + s._count._all,
-      0
-    );
-
-    return {
-      totalRaised: totalRaised.toString(),
-      totalDonations,
-      totalDonors: donorCount.length,
-      totalUsers,
-      todayTotal: (() => {
-        const v = todayAgg._sum.amount;
-        return (typeof v === 'string' || typeof v === 'number' ? Number(v) : 0).toString();
-      })(),
-      todayCount: todayAgg._count._all,
-    };
-  } catch {
-    return {
-      totalRaised: '0',
-      totalDonations: 0,
-      totalDonors: 0,
-      totalUsers: 0,
-      todayTotal: '0',
-      todayCount: 0,
-    };
-  }
-}
+// `AdminStatsCard` is still re-exported for backwards-compat with tests
+// that imported it from this module path. The dashboard itself uses
+// `AdminTotalsLive` for live updates.
+export { AdminStatsCard };
