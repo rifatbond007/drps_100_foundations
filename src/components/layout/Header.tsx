@@ -35,9 +35,12 @@ export async function Header({ locale }: { locale: string }) {
           </Link>
           {isLoggedIn && isAdmin && (
             <>
-              <Link href={`/${locale}/admin/users`} className="text-sm font-medium hover:underline">
-                {t('dashboard')}
-              </Link>
+              {/* Each link points to a distinct route — a previous version
+                  mapped both "Dashboard" and "Users" to /admin/users, which
+                  caused the sidebar's Users entry to light up at the same
+                  time as the navbar's Dashboard entry. The admin sidebar
+                  already shows Users + Reports, so the header just mirrors
+                  those two links for top-level navigation. */}
               <Link href={`/${locale}/admin/users`} className="text-sm font-medium hover:underline">
                 {t('users')}
               </Link>

@@ -1,11 +1,14 @@
 /**
- * Admin reports panel.
+ * Admin reports panel — charts only.
  *
  * Fetches /api/admin/reports and renders:
- *   - 3 top stat cards (total raised, donors, success rate)
  *   - By-purpose bar chart (recharts)
  *   - By-month line chart (last 12 months)
  *   - CSV export button
+ *
+ * The lifetime stat cards (Total users / Total raised / Today's donations)
+ * live in the admin *layout* above all admin pages, so this panel
+ * intentionally omits them to avoid duplication.
  */
 'use client';
 
@@ -26,7 +29,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
 import { formatBDT } from '@/lib/utils';
@@ -36,7 +39,10 @@ interface Reports {
     totalRaised: string;
     totalDonations: number;
     totalDonors: number;
+    totalUsers: number;
     successRate: number;
+    todayTotal: string;
+    todayCount: number;
   };
   byPurpose: { purpose: string; amount: string; count: number }[];
   byMonth: { month: string; amount: string; count: number }[];
@@ -125,31 +131,6 @@ export function ReportsPanel() {
           <Download className="mr-2 h-4 w-4" />
           {t('exportCsv')}
         </Button>
-      </div>
-
-      {/* Stat cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardDescription>{t('totalRaised')}</CardDescription>
-            <CardTitle className="text-3xl">{formatBDT(data.totals.totalRaised, locale)}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            {data.totals.totalDonations} donations
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>{t('totalDonors')}</CardDescription>
-            <CardTitle className="text-3xl">{data.totals.totalDonors}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>{t('successRate')}</CardDescription>
-            <CardTitle className="text-3xl">{data.totals.successRate}%</CardTitle>
-          </CardHeader>
-        </Card>
       </div>
 
       {/* By purpose */}

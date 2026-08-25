@@ -123,14 +123,6 @@ export function UserMenu({ locale, name, email, avatarUrl, isAdmin = false }: Pr
                 className="block rounded-sm px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
                 onClick={() => setOpen(false)}
               >
-                {t('dashboard')}
-              </Link>
-              <Link
-                href={`/${locale}/admin/users`}
-                role="menuitem"
-                className="block rounded-sm px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                onClick={() => setOpen(false)}
-              >
                 {t('users')}
               </Link>
               <Link

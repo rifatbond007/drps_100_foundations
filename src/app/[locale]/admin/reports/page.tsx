@@ -1,6 +1,13 @@
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import { ReportsPanel } from '@/components/admin/ReportsPanel';
 
+/**
+ * /admin/reports — donation analytics.
+ *
+ * No h1 / subtitle here: total stats live in the layout's stat card row
+ * above all admin pages, so this page just hosts the visualizations
+ * (by-purpose bar + by-month line) and the CSV export.
+ */
 export default async function AdminReportsPage({
   params,
 }: {
@@ -8,15 +15,6 @@ export default async function AdminReportsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations('admin.reports');
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="text-muted-foreground">{t('subtitle')}</p>
-      </div>
-      <ReportsPanel />
-    </div>
-  );
+  return <ReportsPanel />;
 }

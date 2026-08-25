@@ -28,8 +28,8 @@ interface NavSection {
   items: NavItem[];
 }
 
-// Main section varies by role — admins don't donate or browse personal
-// donation history, so they get just the Dashboard link here.
+// Main section for regular users only — admins don't donate or browse
+// personal donation history, so their sidebar skips this section entirely.
 const userMainSection: NavSection = {
   headingKey: 'sections.main',
   items: [
@@ -39,11 +39,9 @@ const userMainSection: NavSection = {
   ],
 };
 
-const adminMainSection: NavSection = {
-  headingKey: 'sections.main',
-  items: [{ href: '/admin/users', labelKey: 'dashboard', icon: Home }],
-};
-
+// Account section is currently user-only. The Settings page is about
+// the signed-in user's own profile/preferences; admins manage their own
+// account the same way, so we keep this section for both roles.
 const accountSection: NavSection = {
   headingKey: 'sections.account',
   items: [
@@ -55,11 +53,22 @@ const accountSection: NavSection = {
 // Note: accountSection currently points at /settings under the label
 // "Profile". If a dedicated /profile page is added later, split this.
 
+/**
+ * Build sidebar sections for the given role.
+ *
+ * Important: every item MUST point to a distinct route. The active-item
+ * highlighter uses prefix-match, so two items with the same href would
+ * both light up when one is clicked (the original bug — clicking the
+ * navbar's "Dashboard" auto-selected "Users" because both routed to
+ * /admin/users).
+ *
+ * Admin now gets only the Admin section (Users + Reports). The redundant
+ * Main "Dashboard" entry that pointed at /admin/users is gone, so there
+ * is no collision with the sidebar Users entry.
+ */
 function buildSections(isAdmin: boolean): NavSection[] {
   if (isAdmin) {
     return [
-      adminMainSection,
-      accountSection,
       {
         headingKey: 'sections.admin',
         items: [
