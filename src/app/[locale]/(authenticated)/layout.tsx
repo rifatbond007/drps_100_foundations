@@ -21,9 +21,10 @@ export default async function AuthenticatedLayout({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  let session;
   try {
-    session = await requireAuth();
+    // requireAuth() throws UnauthorizedError if no session. We don't need
+    // the session value here — auth is enough to render the shell.
+    await requireAuth();
   } catch {
     // No /login page — bounce to home, where the SignInButton kicks off Google OAuth.
     redirect(`/${locale}`);
