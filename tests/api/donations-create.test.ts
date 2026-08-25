@@ -4,7 +4,9 @@
  * Verifies:
  *  - 401 when unauthenticated
  *  - 403 when role === 'ADMIN'
- *  - 409 when profile is incomplete
+ *  - 200 even when profile is incomplete (profile completion is NOT a
+ *    requirement for donating — users can finish / edit later from
+ *    /settings)
  *  - 400 on bad payload (amount out of range, bad purpose)
  *  - 200 happy path: creates Donation(PENDING), calls dummy payment
  *    provider, returns { donationId, paymentId, redirectUrl }
@@ -105,14 +107,24 @@ describe('POST /api/donations/create', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 409 when profile is incomplete', async () => {
+  it('returns 200 when profile is incomplete (profile is NOT required to donate)', async () => {
     mocks.requireActiveUser.mockResolvedValueOnce({
       user: { id: 'u1', role: 'USER', profileCompleted: false, languagePref: 'BN' },
     });
+    mocks.prisma.donation.create.mockResolvedValueOnce({ id: 'd1', amount: '500' });
+    mocks.dummyPaymentClient.createPayment.mockResolvedValueOnce({
+      paymentId: 'DUMMY-d1',
+      amount: '500.00',
+      currency: 'BDT',
+      redirectUrl: '/donate/checkout?donationId=d1&paymentId=DUMMY-d1',
+      merchantInvoiceNumber: 'd1',
+    });
+
     const res = await POST(buildReq(VALID_BODY));
-    expect(res.status).toBe(409);
+    expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.error).toBe('PROFILE_INCOMPLETE');
+    expect(body.success).toBe(true);
+    expect(body.data.donationId).toBe('d1');
   });
 
   it('returns 403 when role === ADMIN', async () => {

@@ -75,8 +75,6 @@
     "subtitle": "Summary of your donations",
     "greeting": "Hi, {name}",
     "loadingProfile": "Loading your dashboard…",
-    "completeProfileBanner": "Complete your profile to enable donations",
-    "completeProfileCta": "Complete profile",
     "profileStatsTitle": "Your donations at a glance",
     "totalDonated": "Total donated",
     "last30Days": "Last 30 days",
@@ -138,8 +136,7 @@
       "pay": "Pay now",
       "cancel": "Cancel",
       "processing": "Processing…",
-      "backToDashboard": "Back to dashboard",
-      "profileRequired": "Please complete your profile before donating."
+      "backToDashboard": "Back to dashboard"
     },
     "errors": {
       "minAmount": "Minimum donation is 10 BDT",

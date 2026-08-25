@@ -75,8 +75,6 @@
     "subtitle": "আপনার দানের সারসংক্ষেপ",
     "greeting": "হ্যালো, {name}",
     "loadingProfile": "আপনার ড্যাশবোর্ড লোড হচ্ছে…",
-    "completeProfileBanner": "দান শুরু করতে আপনার প্রোফাইল সম্পূর্ণ করুন",
-    "completeProfileCta": "প্রোফাইল সম্পূর্ণ করুন",
     "profileStatsTitle": "আপনার দান এক নজরে",
     "totalDonated": "মোট দান",
     "last30Days": "গত ৩০ দিন",
@@ -138,8 +136,7 @@
       "pay": "এখনই পে করুন",
       "cancel": "বাতিল",
       "processing": "প্রক্রিয়া চলছে…",
-      "backToDashboard": "ড্যাশবোর্ডে ফিরে যান",
-      "profileRequired": "দান করার আগে অনুগ্রহ করে আপনার প্রোফাইল সম্পূর্ণ করুন।"
+      "backToDashboard": "ড্যাশবোর্ডে ফিরে যান"
     },
     "errors": {
       "minAmount": "সর্বনিম্ন দান ১০ টাকা",

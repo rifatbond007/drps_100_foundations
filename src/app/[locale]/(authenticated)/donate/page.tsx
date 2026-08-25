@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AmountSelector } from '@/components/donation/AmountSelector';
 import { DonationHistoryList } from '@/components/donation/DonationHistoryList';
 import { useAuth } from '@/lib/hooks/use-auth';
-import { useProfile } from '@/lib/hooks/use-profile';
 import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
 
@@ -24,14 +23,12 @@ import { ApiClientError } from '@/lib/api/errors';
  * Admins are redirected to /admin/users (role guard is also enforced
  * server-side at /api/donations/create as defense in depth).
  *
- * If the user's profile is incomplete, we prompt completion inline and
- * call /api/users/complete-profile before allowing the donation.
+ * Profile completion is intentionally NOT required to donate — users can
+ * edit or finish their profile at any time from /settings.
  */
 export default function DonatePage() {
   const t = useTranslations('donation');
-  const tCheckout = useTranslations('donation.checkout');
   const { user, isLoading } = useAuth();
-  const { data: profile } = useProfile();
   const router = useRouter();
   const locale = useLocale();
 
@@ -39,7 +36,6 @@ export default function DonatePage() {
   const [purpose, setPurpose] = useState<string>('GENERAL_FUND');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [needsProfile, setNeedsProfile] = useState(false);
 
   // Redirect admins away from the donate flow as soon as we know who
   // they are.
@@ -49,16 +45,6 @@ export default function DonatePage() {
       router.replace(`/${locale}/admin/users`);
     }
   }, [user, isLoading, locale, router]);
-
-  // Surface a profile-incomplete hint so the user knows they need to
-  // finish their profile before they can submit.
-  useEffect(() => {
-    if (profile && profile.profileCompleted === false) {
-      setNeedsProfile(true);
-    } else {
-      setNeedsProfile(false);
-    }
-  }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,12 +67,7 @@ export default function DonatePage() {
       // route; bKash would be a third-party URL.
       window.location.href = res.redirectUrl;
     } catch (e) {
-      if (e instanceof ApiClientError && e.code === 'PROFILE_INCOMPLETE') {
-        setNeedsProfile(true);
-        setError(tCheckout('profileRequired'));
-      } else {
-        setError(e instanceof ApiClientError ? e.message : 'Could not start donation');
-      }
+      setError(e instanceof ApiClientError ? e.message : 'Could not start donation');
       setSubmitting(false);
     }
   };
@@ -100,11 +81,6 @@ export default function DonatePage() {
           <CardTitle>{t('title')}</CardTitle>
         </CardHeader>
         <CardContent>
-          {needsProfile && (
-            <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-900">
-              {tCheckout('profileRequired')}
-            </div>
-          )}
           {error && (
             <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
               {error}

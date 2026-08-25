@@ -5,18 +5,20 @@
  *
  * Flow:
  *   1. requireActiveUser (auth + ban + soft-delete checks)
- *   2. requireActiveUser re-checks `profileCompleted` (no DB hits for
- *      done-flag is fine — we use the cached session column first, then
- *      fall back to the DB if missing)
+ *   2. Role guard — admins cannot donate (UX is /donate redirects them
+ *      too; this is defense in depth)
  *   3. Rate-limit per user (RATE_LIMITS.DONATION_CREATE: 3 / 5 min)
- *   4. Idempotency check via Redis keyed on `idempotencyKey`
- *   5. Zod-validate body
- *   6. Admin role guard (admins can't donate)
- *   7. Insert Donation(PENDING) with bkashPaymentId populated by the
+ *   4. Zod-validate body
+ *   5. Idempotency check via Redis keyed on `idempotencyKey`
+ *   6. Insert Donation(PENDING) with bkashPaymentId populated by the
  *      dummy provider
- *   8. Cache the idempotency response so a retry returns the same body
- *   9. Audit log DONATION_INITIATED
- *  10. Return { donationId, paymentId, redirectUrl }
+ *   7. Cache the idempotency response so a retry returns the same body
+ *   8. Audit log DONATION_INITIATED
+ *   9. Return { donationId, paymentId, redirectUrl }
+ *
+ * Profile completion is intentionally NOT required here — users may
+ * donate without finishing onboarding and edit their profile from
+ * /settings at any time.
  *
  * Provider is selected via `getPaymentClient()` from
  * src/lib/payment/types.ts. Default is Dummy; set PAYMENT_PROVIDER=bkash
@@ -43,19 +45,7 @@ export async function POST(request: NextRequest) {
     // 1. Auth + ban + soft-delete
     const session = await requireActiveUser();
 
-    // 2. Profile must be completed before we can take money
-    if (!session.user.profileCompleted) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'PROFILE_INCOMPLETE',
-          message: 'Please complete your profile before donating',
-        },
-        { status: 409 }
-      );
-    }
-
-    // 3. Role guard — admins cannot donate (UX is /donate redirects them
+    // 2. Role guard — admins cannot donate (UX is /donate redirects them
     //    too; this is defense in depth).
     if (session.user.role === 'ADMIN') {
       return NextResponse.json(
@@ -68,7 +58,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Rate limit per user
+    // 3. Rate limit per user
     const rl = await rateLimit(
       `donation:create:${session.user.id}`,
       RATE_LIMITS.DONATION_CREATE.max,
@@ -76,7 +66,7 @@ export async function POST(request: NextRequest) {
     );
     requireRateLimit(rl);
 
-    // 5. Idempotency (response cache)
+    // 4. Zod-validate body
     let body: z.infer<typeof createDonationSchema>;
     try {
       body = createDonationSchema.parse(await request.json());
@@ -85,6 +75,7 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
+    // 5. Idempotency (response cache)
     const cached = await redis.get(`idem:donation:${body.idempotencyKey}`);
     if (cached) {
       // Replay the cached response verbatim — guarantees an idempotent
