@@ -9,7 +9,10 @@ import { SignOutButton } from './SignOutButton';
 import { Button } from '@/components/ui/button';
 
 export async function Header({ locale }: { locale: string }) {
-  const t = await getTranslations({ locale, namespace: 'common' });
+  // Nav strings live in the `nav` namespace, not `common` — keys like
+  // `about`, `dashboard`, `donate`, `history`, `login`, `logout` are
+  // navigation labels, not generic UI strings.
+  const t = await getTranslations({ locale, namespace: 'nav' });
   const session = await auth();
   const isLoggedIn = !!session?.user;
 
