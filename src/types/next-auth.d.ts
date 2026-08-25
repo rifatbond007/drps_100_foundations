@@ -35,5 +35,7 @@ declare module 'next-auth/jwt' {
     isBanned?: boolean;
     tokenVersion?: number;
     lastBanCheck?: number;
+    name?: string;
+    image?: string;
   }
 }

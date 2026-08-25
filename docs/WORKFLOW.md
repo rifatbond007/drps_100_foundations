@@ -29,6 +29,7 @@ This document defines a **single source of truth** workflow that connects every 
 ## 1. Phase 1: Research & Discovery
 
 ### 1.1 Goals
+
 - Understand requirements
 - Resolve open questions
 - Validate technical decisions
@@ -36,29 +37,33 @@ This document defines a **single source of truth** workflow that connects every 
 
 ### 1.2 Activities
 
-| Activity | Output | Owner |
-|----------|--------|-------|
-| Stakeholder interviews | Requirements doc | PM |
-| Technical research | Decision records (ADR) | Tech lead |
-| Payment gateway evaluation | Integration plan | Backend lead |
-| Security review | Threat model | Security |
-| Localization research | i18n requirements | Frontend lead |
+| Activity                   | Output                 | Owner         |
+| -------------------------- | ---------------------- | ------------- |
+| Stakeholder interviews     | Requirements doc       | PM            |
+| Technical research         | Decision records (ADR) | Tech lead     |
+| Payment gateway evaluation | Integration plan       | Backend lead  |
+| Security review            | Threat model           | Security      |
+| Localization research      | i18n requirements      | Frontend lead |
 
 ### 1.3 Deliverables
 
 **Files created/updated:**
+
 - `docs/RESEARCH.md` — Research findings
 - `docs/DECISIONS.md` — Architecture decision records (ADRs)
 - `docs/REQUIREMENTS.md` — Functional & non-functional requirements
 
 ### 1.4 Exit Criteria
+
 - [ ] All open questions from README resolved
 - [ ] Tech stack confirmed
 - [ ] Payment gateway credentials obtained (sandbox)
 - [ ] Deployment target decided (VPS vs Vercel)
 
 ### 1.5 Context Handoff → Phase 2
+
 The Research phase outputs **feed directly** into Design:
+
 - Requirements → UI/UX specifications
 - ADRs → Architecture decisions
 - Constraints → Technical design limits
@@ -68,6 +73,7 @@ The Research phase outputs **feed directly** into Design:
 ## 2. Phase 2: Design & Planning
 
 ### 2.1 Goals
+
 - Translate requirements into technical design
 - Define system architecture
 - Plan implementation order
@@ -75,17 +81,18 @@ The Research phase outputs **feed directly** into Design:
 
 ### 2.2 Activities
 
-| Activity | Output | Owner |
-|----------|--------|-------|
-| Architecture design | ARCHITECTURE.md | Tech lead |
-| API contract design | BACKEND_PLANNING.md | Backend |
-| UI/UX design | FRONTEND_PLANNING.md | Frontend |
-| Database schema | Prisma schema | Backend |
-| CI/CD design | CI_CD_PIPELINE.md | DevOps |
+| Activity            | Output               | Owner     |
+| ------------------- | -------------------- | --------- |
+| Architecture design | ARCHITECTURE.md      | Tech lead |
+| API contract design | BACKEND_PLANNING.md  | Backend   |
+| UI/UX design        | FRONTEND_PLANNING.md | Frontend  |
+| Database schema     | Prisma schema        | Backend   |
+| CI/CD design        | CI_CD_PIPELINE.md    | DevOps    |
 
 ### 2.3 Deliverables
 
 **Files created/updated:**
+
 - `docs/ARCHITECTURE.md` — System architecture (already exists)
 - `docs/FRONTEND_PLANNING.md` — UI specifications (already exists)
 - `docs/BACKEND_PLANNING.md` — API specifications (already exists)
@@ -95,6 +102,7 @@ The Research phase outputs **feed directly** into Design:
 - `docs/API.md` — API contract documentation
 
 ### 2.4 Exit Criteria
+
 - [ ] Architecture reviewed and approved
 - [ ] API contracts defined (request/response)
 - [ ] Database schema finalized
@@ -102,7 +110,9 @@ The Research phase outputs **feed directly** into Design:
 - [ ] Deployment topology confirmed
 
 ### 2.5 Context Handoff → Phase 3
+
 Design outputs **become the implementation spec**:
+
 - Architecture → File structure
 - API spec → Route handlers
 - UI spec → Components
@@ -113,6 +123,7 @@ Design outputs **become the implementation spec**:
 ## 3. Phase 3: Development
 
 ### 3.1 Goals
+
 - Implement features per design
 - Write tests alongside code
 - Maintain documentation sync
@@ -122,16 +133,16 @@ Design outputs **become the implementation spec**:
 
 Following the build order from README:
 
-| # | Feature | Documentation Reference | Tests Required |
-|---|---------|------------------------|----------------|
-| 1 | Project scaffold | PROJECT_STRUCTURE.md | Setup verification |
-| 2 | NextAuth Google login | BACKEND_PLANNING.md §3.1 | Unit + E2E |
-| 3 | User profile + settings | BACKEND_PLANNING.md §3.3 | Unit + E2E |
-| 4 | i18n setup | FRONTEND_PLANNING.md §6 | Unit |
-| 5 | Dashboard UI | FRONTEND_PLANNING.md §3.2 | E2E |
-| 6 | bKash integration | BACKEND_PLANNING.md §5.3 | Integration + E2E |
-| 7 | Admin role | BACKEND_PLANNING.md §3.4 | Unit + E2E |
-| 8 | Production hardening | BACKEND_PLANNING.md §6 | All |
+| #   | Feature                 | Documentation Reference   | Tests Required     |
+| --- | ----------------------- | ------------------------- | ------------------ |
+| 1   | Project scaffold        | PROJECT_STRUCTURE.md      | Setup verification |
+| 2   | NextAuth Google login   | BACKEND_PLANNING.md §3.1  | Unit + E2E         |
+| 3   | User profile + settings | BACKEND_PLANNING.md §3.3  | Unit + E2E         |
+| 4   | i18n setup              | FRONTEND_PLANNING.md §6   | Unit               |
+| 5   | Dashboard UI            | FRONTEND_PLANNING.md §3.2 | E2E                |
+| 6   | bKash integration       | BACKEND_PLANNING.md §5.3  | Integration + E2E  |
+| 7   | Admin role              | BACKEND_PLANNING.md §3.4  | Unit + E2E         |
+| 8   | Production hardening    | BACKEND_PLANNING.md §6    | All                |
 
 ### 3.3 Development Loop
 
@@ -193,6 +204,7 @@ main (production)
 ```
 
 **Branch naming:**
+
 - `feature/<short-name>` — New features
 - `fix/<short-name>` — Bug fixes
 - `chore/<short-name>` — Maintenance
@@ -217,24 +229,26 @@ chore: update dependencies
 
 **Documentation must stay in sync with code:**
 
-| When code changes... | Update documentation... |
-|----------------------|------------------------|
-| API endpoint added/changed | `docs/BACKEND_PLANNING.md` |
-| New component added | `docs/FRONTEND_PLANNING.md` |
-| Architecture decision changed | `docs/ARCHITECTURE.md` |
-| Database schema migrated | `prisma/schema.prisma` + docs |
-| CI/CD pipeline changed | `docs/CI_CD_PIPELINE.md` |
-| New file/folder structure | `docs/PROJECT_STRUCTURE.md` |
+| When code changes...          | Update documentation...       |
+| ----------------------------- | ----------------------------- |
+| API endpoint added/changed    | `docs/BACKEND_PLANNING.md`    |
+| New component added           | `docs/FRONTEND_PLANNING.md`   |
+| Architecture decision changed | `docs/ARCHITECTURE.md`        |
+| Database schema migrated      | `prisma/schema.prisma` + docs |
+| CI/CD pipeline changed        | `docs/CI_CD_PIPELINE.md`      |
+| New file/folder structure     | `docs/PROJECT_STRUCTURE.md`   |
 
 ### 3.7 Deliverables
 
 **Code artifacts:**
+
 - `src/` — Application source
 - `prisma/` — Database schema and migrations
 - `tests/` — Test files
 - `.github/workflows/` — CI/CD definitions
 
 **Updated docs:**
+
 - All `docs/*.md` files kept current
 - `README.md` reflects latest status
 
@@ -243,6 +257,7 @@ chore: update dependencies
 ## 4. Phase 4: Quality Assurance
 
 ### 4.1 Goals
+
 - Verify feature completeness
 - Catch regressions early
 - Validate security & performance
@@ -265,16 +280,17 @@ chore: update dependencies
 
 ### 4.3 Test Strategy by Layer
 
-| Layer | Tool | Coverage Target | What to Test |
-|-------|------|-----------------|--------------|
-| Unit | Vitest | 80%+ | Pure functions, hooks, utilities |
-| Component | Vitest + Testing Library | 70%+ | UI components, interactions |
-| Integration | Vitest + Supertest | 90%+ | API routes, DB operations |
-| E2E | Playwright | Critical paths | User journeys, flows |
+| Layer       | Tool                     | Coverage Target | What to Test                     |
+| ----------- | ------------------------ | --------------- | -------------------------------- |
+| Unit        | Vitest                   | 80%+            | Pure functions, hooks, utilities |
+| Component   | Vitest + Testing Library | 70%+            | UI components, interactions      |
+| Integration | Vitest + Supertest       | 90%+            | API routes, DB operations        |
+| E2E         | Playwright               | Critical paths  | User journeys, flows             |
 
 ### 4.4 Required Test Cases
 
 #### Auth Flow
+
 - [ ] Google OAuth login success
 - [ ] First-time user profile completion
 - [ ] Returning user redirects to dashboard
@@ -282,6 +298,7 @@ chore: update dependencies
 - [ ] Protected route redirects to login
 
 #### Donation Flow
+
 - [ ] Amount validation (min/max)
 - [ ] bKash redirect URL generated correctly
 - [ ] Callback verification (independent query)
@@ -290,6 +307,7 @@ chore: update dependencies
 - [ ] Success triggers confirmation email
 
 #### Admin Flow
+
 - [ ] Admin can view all users
 - [ ] Non-admin gets 403 on admin routes
 - [ ] Ban/unban user works
@@ -311,6 +329,7 @@ chore: update dependencies
 ## 5. Phase 5: Deployment & Release
 
 ### 5.1 Goals
+
 - Ship to production safely
 - Zero downtime
 - Roll back capability
@@ -384,6 +403,7 @@ MAJOR.MINOR.PATCH
 ```
 
 **Release checklist:**
+
 - [ ] All features tested
 - [ ] CHANGELOG.md updated
 - [ ] Version bumped in package.json
@@ -452,13 +472,13 @@ All phases write to and read from a **single context repository** (the `docs/` f
 
 ### 6.2 Phase Hand-off Matrix
 
-| From → To | What flows forward | Format |
-|-----------|-------------------|--------|
-| Research → Design | Requirements, constraints, decisions | Markdown docs |
-| Design → Development | Specs, schemas, contracts | Code + docs |
-| Development → QA | Code, unit tests | Git branches |
-| QA → Deployment | Test reports, sign-off | CI artifacts |
-| Deployment → Operations | Deployed code, runbooks | Tagged releases |
+| From → To               | What flows forward                   | Format          |
+| ----------------------- | ------------------------------------ | --------------- |
+| Research → Design       | Requirements, constraints, decisions | Markdown docs   |
+| Design → Development    | Specs, schemas, contracts            | Code + docs     |
+| Development → QA        | Code, unit tests                     | Git branches    |
+| QA → Deployment         | Test reports, sign-off               | CI artifacts    |
+| Deployment → Operations | Deployed code, runbooks              | Tagged releases |
 
 ### 6.3 Traceability Matrix
 
@@ -492,10 +512,11 @@ When making architectural decisions, document them in `docs/DECISIONS.md`:
 **Context:** Need ACID compliance for financial transactions
 **Decision:** Use PostgreSQL 16
 **Consequences:**
+
 - ✅ ACID compliance
 - ✅ Strong consistency
 - ❌ Higher operational overhead than NoSQL
-**Alternatives Considered:** MongoDB, MySQL
+  **Alternatives Considered:** MongoDB, MySQL
 ```
 
 ---
@@ -505,12 +526,14 @@ When making architectural decisions, document them in `docs/DECISIONS.md`:
 ### 7.1 Monitoring (Post-Deployment)
 
 **Daily checks:**
+
 - Application health endpoint
 - Database connections
 - Redis memory usage
 - Error rate trends
 
 **Weekly reviews:**
+
 - Backup verification
 - Security log review
 - Performance metrics
@@ -520,12 +543,12 @@ When making architectural decisions, document them in `docs/DECISIONS.md`:
 
 **Severity levels:**
 
-| Severity | Response Time | Examples |
-|----------|--------------|----------|
-| P0 - Critical | <15 min | App down, payment failures |
-| P1 - High | <1 hour | Degraded performance, broken feature |
-| P2 - Medium | <4 hours | Minor bugs, UI issues |
-| P3 - Low | Next sprint | Cosmetic issues, nice-to-haves |
+| Severity      | Response Time | Examples                             |
+| ------------- | ------------- | ------------------------------------ |
+| P0 - Critical | <15 min       | App down, payment failures           |
+| P1 - High     | <1 hour       | Degraded performance, broken feature |
+| P2 - Medium   | <4 hours      | Minor bugs, UI issues                |
+| P3 - Low      | Next sprint   | Cosmetic issues, nice-to-haves       |
 
 **Incident runbook:**
 
@@ -571,17 +594,18 @@ Research phase (new requirements)
 
 ### 8.1 Tools by Phase
 
-| Phase | Primary Tools |
-|-------|---------------|
-| Research | Markdown editor, decision records |
-| Design | Figma, draw.io, ERD tools |
-| Development | VS Code, Git, npm |
-| QA | Vitest, Playwright, ESLint |
-| Deployment | GitHub Actions, Docker, SSH |
+| Phase       | Primary Tools                     |
+| ----------- | --------------------------------- |
+| Research    | Markdown editor, decision records |
+| Design      | Figma, draw.io, ERD tools         |
+| Development | VS Code, Git, npm                 |
+| QA          | Vitest, Playwright, ESLint        |
+| Deployment  | GitHub Actions, Docker, SSH       |
 
 ### 8.2 Automation Points
 
 **Automated by CI:**
+
 - ✅ Linting on every push
 - ✅ Type checking on every push
 - ✅ Unit tests on every push
@@ -591,6 +615,7 @@ Research phase (new requirements)
 - ✅ Deployment on merge to main
 
 **Manual steps:**
+
 - ⚠️ Code review approval
 - ⚠️ Production deployment approval (for main branch)
 - ⚠️ Database migration approval
@@ -600,28 +625,28 @@ Research phase (new requirements)
 
 ## 9. Roles & Responsibilities
 
-| Role | Primary Responsibility |
-|------|----------------------|
-| **Product Owner** | Requirements, priorities, acceptance |
-| **Tech Lead** | Architecture, code review, decisions |
-| **Backend Developer** | API routes, database, business logic |
-| **Frontend Developer** | UI components, pages, client logic |
-| **DevOps Engineer** | CI/CD, deployment, monitoring |
-| **QA Engineer** | Test planning, E2E testing, sign-off |
-| **Security** | Threat model, security review, audit |
+| Role                   | Primary Responsibility               |
+| ---------------------- | ------------------------------------ |
+| **Product Owner**      | Requirements, priorities, acceptance |
+| **Tech Lead**          | Architecture, code review, decisions |
+| **Backend Developer**  | API routes, database, business logic |
+| **Frontend Developer** | UI components, pages, client logic   |
+| **DevOps Engineer**    | CI/CD, deployment, monitoring        |
+| **QA Engineer**        | Test planning, E2E testing, sign-off |
+| **Security**           | Threat model, security review, audit |
 
 ---
 
 ## 10. Communication Cadence
 
-| Event | Frequency | Participants |
-|-------|-----------|--------------|
-| Standup | Daily | Dev team |
-| Sprint planning | Bi-weekly | Full team |
-| Code review | Per PR | Reviewer + author |
+| Event               | Frequency        | Participants            |
+| ------------------- | ---------------- | ----------------------- |
+| Standup             | Daily            | Dev team                |
+| Sprint planning     | Bi-weekly        | Full team               |
+| Code review         | Per PR           | Reviewer + author       |
 | Architecture review | Per major change | Tech lead + senior devs |
-| Retrospective | Bi-weekly | Full team |
-| Production review | Weekly | DevOps + tech lead |
+| Retrospective       | Bi-weekly        | Full team               |
+| Production review   | Weekly           | DevOps + tech lead      |
 
 ---
 

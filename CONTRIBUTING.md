@@ -39,17 +39,17 @@ feat/* / fix/* / docs/* / ...  (feature branches)
 <type>/<scope>-<short-description>
 ```
 
-| Type | Prefix | Example |
-|------|--------|---------|
-| Feature | `feat/` | `feat/payment-bkash-integration` |
-| Bug fix | `fix/` | `fix/auth-google-redirect-loop` |
-| Documentation | `docs/` | `docs/update-readme` |
-| Refactor | `refactor/` | `refactor/donation-service-cqrs` |
-| Tests | `test/` | `test/donation-e2e-flow` |
-| Chore | `chore/` | `chore/update-prisma-5-22` |
-| Performance | `perf/` | `perf/db-query-optimization` |
-| CI/CD | `ci/` | `ci/add-e2e-workflow` |
-| Hotfix | `hotfix/` | `hotfix/payment-leak` |
+| Type          | Prefix      | Example                          |
+| ------------- | ----------- | -------------------------------- |
+| Feature       | `feat/`     | `feat/payment-bkash-integration` |
+| Bug fix       | `fix/`      | `fix/auth-google-redirect-loop`  |
+| Documentation | `docs/`     | `docs/update-readme`             |
+| Refactor      | `refactor/` | `refactor/donation-service-cqrs` |
+| Tests         | `test/`     | `test/donation-e2e-flow`         |
+| Chore         | `chore/`    | `chore/update-prisma-5-22`       |
+| Performance   | `perf/`     | `perf/db-query-optimization`     |
+| CI/CD         | `ci/`       | `ci/add-e2e-workflow`            |
+| Hotfix        | `hotfix/`   | `hotfix/payment-leak`            |
 
 **Scopes:** `auth`, `payment`, `donation`, `i18n`, `db`, `ui`, `api`, `admin`, `infra`
 
@@ -67,24 +67,24 @@ We use [Conventional Commits 1.0.0](https://www.conventionalcommits.org/). Every
 
 ### Types
 
-| Type | Description | SemVer |
-|------|-------------|--------|
-| `feat` | New feature | MINOR |
-| `fix` | Bug fix | PATCH |
-| `docs` | Documentation only | — |
-| `style` | Formatting (no code change) | — |
-| `refactor` | Neither fixes bug nor adds feature | — |
-| `perf` | Performance improvement | — |
-| `test` | Adding or updating tests | — |
-| `chore` | Build/auxiliary tools | — |
-| `ci` | CI configuration | — |
-| `build` | Build system | — |
-| `revert` | Reverts previous commit | — |
+| Type       | Description                        | SemVer |
+| ---------- | ---------------------------------- | ------ |
+| `feat`     | New feature                        | MINOR  |
+| `fix`      | Bug fix                            | PATCH  |
+| `docs`     | Documentation only                 | —      |
+| `style`    | Formatting (no code change)        | —      |
+| `refactor` | Neither fixes bug nor adds feature | —      |
+| `perf`     | Performance improvement            | —      |
+| `test`     | Adding or updating tests           | —      |
+| `chore`    | Build/auxiliary tools              | —      |
+| `ci`       | CI configuration                   | —      |
+| `build`    | Build system                       | —      |
+| `revert`   | Reverts previous commit            | —      |
 
 ### Rules
 
 1. **Subject line** — imperative mood ("add" not "added"), no period, max 72 chars, lowercase
-2. **Body** — explain *what* and *why* (not *how*), wrap at 100 chars
+2. **Body** — explain _what_ and _why_ (not _how_), wrap at 100 chars
 3. **Footer** — `BREAKING CHANGE:` for breaking changes, `Refs:` for issues
 4. **No co-authors** — all commits are attributed to riftbond007
 
@@ -126,7 +126,7 @@ EOF
 5. **Run local checks:**
    ```bash
    pnpm lint
-   pnpm typecheck
+   pnpm type-check
    pnpm test
    pnpm test:e2e
    ```

@@ -20,14 +20,15 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-donation}
       - POSTGRES_DB=${POSTGRES_DB:-donation_dev}
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres-dev-data:/var/lib/postgresql/data
       - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-donation} -d ${POSTGRES_DB:-donation_dev}"]
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-donation} -d ${POSTGRES_DB:-donation_dev}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,13 +39,13 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis-dev-data:/data
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -53,7 +54,7 @@ services:
   app:
     image: node:20-alpine
     container_name: donation-app-dev
-    profiles: ["full"]
+    profiles: ['full']
     working_dir: /app
     command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile && pnpm dev"
     environment:
@@ -70,7 +71,7 @@ services:
       - BKASH_USERNAME=${BKASH_USERNAME:-dev}
       - BKASH_PASSWORD=${BKASH_PASSWORD:-dev}
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       - .:/app
       - app-dev-node-modules:/app/node_modules

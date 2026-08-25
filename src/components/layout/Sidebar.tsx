@@ -26,15 +26,15 @@ const items: NavItem[] = [
 
 export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const locale = useLocale();
-  const t = useTranslations('navigation');
+  const t = useTranslations('nav');
   const pathname = usePathname();
 
   const allItems = [
     ...items,
     ...(isAdmin
       ? [
-          { href: '/admin/users', labelKey: 'adminUsers', icon: Users, adminOnly: true },
-          { href: '/admin/reports', labelKey: 'adminReports', icon: BarChart, adminOnly: true },
+          { href: '/admin/users', labelKey: 'users', icon: Users, adminOnly: true },
+          { href: '/admin/reports', labelKey: 'reports', icon: BarChart, adminOnly: true },
         ]
       : []),
   ];
@@ -54,7 +54,7 @@ export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
                 'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
                 isActive
                   ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-accent hover:text-accent-foreground',
+                  : 'hover:bg-accent hover:text-accent-foreground'
               )}
             >
               <Icon className="h-4 w-4" />

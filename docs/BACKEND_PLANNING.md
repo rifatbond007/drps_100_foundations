@@ -10,21 +10,21 @@
 
 ### 1.1 Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Runtime | Node.js 20 LTS | JavaScript runtime |
-| Framework | Next.js 15 (API Routes) | Server-side endpoints |
-| Language | TypeScript | Type safety |
-| ORM | Prisma | Database queries |
-| Database | PostgreSQL 16 | Primary data store |
-| Cache | Redis 7 | Session, rate limiting |
-| Validation | Zod | Schema validation |
-| Auth | NextAuth.js v5 | Authentication |
-| Payment | bKash PGW API | Payment processing |
-| Logging | Pino | Structured logging |
-| Email | Nodemailer + SendGrid | Transactional emails |
-| Storage | Cloudflare R2 | File storage |
-| Monitoring | Sentry | Error tracking |
+| Layer      | Technology              | Purpose                |
+| ---------- | ----------------------- | ---------------------- |
+| Runtime    | Node.js 20 LTS          | JavaScript runtime     |
+| Framework  | Next.js 15 (API Routes) | Server-side endpoints  |
+| Language   | TypeScript              | Type safety            |
+| ORM        | Prisma                  | Database queries       |
+| Database   | PostgreSQL 16           | Primary data store     |
+| Cache      | Redis 7                 | Session, rate limiting |
+| Validation | Zod                     | Schema validation      |
+| Auth       | NextAuth.js v5          | Authentication         |
+| Payment    | bKash PGW API           | Payment processing     |
+| Logging    | Pino                    | Structured logging     |
+| Email      | Nodemailer + SendGrid   | Transactional emails   |
+| Storage    | Cloudflare R2           | File storage           |
+| Monitoring | Sentry                  | Error tracking         |
 
 ---
 
@@ -73,6 +73,7 @@
 ### 3.1 Authentication Endpoints
 
 #### `POST /api/auth/signin`
+
 **Purpose:** Initiate Google OAuth flow
 
 **Request:** None (handled by NextAuth)
@@ -82,9 +83,11 @@
 ---
 
 #### `GET /api/auth/callback/google`
+
 **Purpose:** Handle Google OAuth callback
 
 **Flow:**
+
 1. Receive OAuth code from Google
 2. Exchange code for user info
 3. Create/update user in database
@@ -96,9 +99,11 @@
 ---
 
 #### `POST /api/auth/signout`
+
 **Purpose:** Sign out user
 
-**Response:** 
+**Response:**
+
 ```json
 {
   "success": true
@@ -110,11 +115,13 @@
 ### 3.2 Donation Endpoints
 
 #### `POST /api/donations/create`
+
 **Purpose:** Initiate a new donation
 
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "amount": 500,
@@ -125,6 +132,7 @@
 ```
 
 **Validation (Zod):**
+
 ```typescript
 const createDonationSchema = z.object({
   amount: z.number().min(10).max(100000),
@@ -135,6 +143,7 @@ const createDonationSchema = z.object({
 ```
 
 **Response (Success):**
+
 ```json
 {
   "success": true,
@@ -147,12 +156,14 @@ const createDonationSchema = z.object({
 ```
 
 **Error Responses:**
+
 - `400` — Invalid input
 - `401` — Unauthorized
 - `429` — Rate limit exceeded
 - `500` — Payment gateway error
 
 **Side Effects:**
+
 - Create donation record (status: pending)
 - Call bKash Create Payment API
 - Log audit event
@@ -160,13 +171,16 @@ const createDonationSchema = z.object({
 ---
 
 #### `GET /api/donations/callback`
+
 **Purpose:** Handle bKash redirect callback
 
 **Query Parameters:**
+
 - `paymentID` (bKash payment ID)
 - `status` (success/failure/cancel)
 
 **Flow:**
+
 1. Receive callback from bKash
 2. **Independently verify via bKash Query API** (never trust callback)
 3. Update donation status
@@ -177,11 +191,13 @@ const createDonationSchema = z.object({
 ---
 
 #### `POST /api/donations/webhook`
+
 **Purpose:** Handle bKash webhook notifications
 
 **Authentication:** Webhook signature verification
 
 **Request Body:**
+
 ```json
 {
   "paymentID": "BKS123456",
@@ -192,6 +208,7 @@ const createDonationSchema = z.object({
 ```
 
 **Flow:**
+
 1. Verify webhook signature
 2. Verify payment status via bKash Query API
 3. Update donation record
@@ -199,6 +216,7 @@ const createDonationSchema = z.object({
 5. Return 200 OK
 
 **Security:**
+
 - Verify HMAC signature
 - Check idempotency (duplicate webhooks)
 - Log all webhook events
@@ -206,11 +224,13 @@ const createDonationSchema = z.object({
 ---
 
 #### `GET /api/donations/history`
+
 **Purpose:** Get user's donation history
 
 **Authentication:** Required
 
 **Query Parameters:**
+
 - `page` (default: 1)
 - `limit` (default: 20, max: 100)
 - `status` (optional: pending|success|failed)
@@ -218,6 +238,7 @@ const createDonationSchema = z.object({
 - `endDate` (optional)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -248,11 +269,13 @@ const createDonationSchema = z.object({
 ### 3.3 User Endpoints
 
 #### `GET /api/users/profile`
+
 **Purpose:** Get current user profile
 
 **Authentication:** Required
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -273,11 +296,13 @@ const createDonationSchema = z.object({
 ---
 
 #### `PUT /api/users/profile`
+
 **Purpose:** Update user profile
 
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "phone": "+8801712345678",
@@ -286,6 +311,7 @@ const createDonationSchema = z.object({
 ```
 
 **Validation:**
+
 ```typescript
 const updateProfileSchema = z.object({
   phone: z.string().regex(/^\+8801[3-9]\d{8}$/),
@@ -294,16 +320,18 @@ const updateProfileSchema = z.object({
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
-  "data": { /* updated user */ }
+  "data": {/* updated user */}
 }
 ```
 
 ---
 
 #### `POST /api/users/avatar`
+
 **Purpose:** Upload user avatar
 
 **Authentication:** Required
@@ -311,17 +339,20 @@ const updateProfileSchema = z.object({
 **Request:** multipart/form-data with image file
 
 **Validation:**
+
 - File type: image/jpeg, image/png, image/webp
 - File size: max 2MB
 - Dimensions: min 100x100, max 2000x2000
 
 **Flow:**
+
 1. Validate file
 2. Upload to Cloudflare R2
 3. Update user avatar_url
 4. Return new URL
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -334,11 +365,13 @@ const updateProfileSchema = z.object({
 ---
 
 #### `POST /api/users/complete-profile`
+
 **Purpose:** Complete profile after first login
 
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "phone": "+8801712345678",
@@ -347,14 +380,16 @@ const updateProfileSchema = z.object({
 ```
 
 **Validation:**
+
 - Phone must be valid BD number
 - Language preference required
 
 **Response:**
+
 ```json
 {
   "success": true,
-  "data": { /* updated user */ }
+  "data": {/* updated user */}
 }
 ```
 
@@ -363,11 +398,13 @@ const updateProfileSchema = z.object({
 ### 3.4 Admin Endpoints
 
 #### `GET /api/admin/users`
+
 **Purpose:** List all users (admin only)
 
 **Authentication:** Required (admin role)
 
 **Query Parameters:**
+
 - `page`, `limit`
 - `search` (name, email, phone)
 - `status` (active|banned)
@@ -375,6 +412,7 @@ const updateProfileSchema = z.object({
 - `order` (asc, desc)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -392,7 +430,7 @@ const updateProfileSchema = z.object({
         "createdAt": "2026-01-15T..."
       }
     ],
-    "pagination": { /* ... */ }
+    "pagination": {/* ... */}
   }
 }
 ```
@@ -400,11 +438,13 @@ const updateProfileSchema = z.object({
 ---
 
 #### `POST /api/admin/users/[id]/ban`
+
 **Purpose:** Ban a user
 
 **Authentication:** Required (admin role)
 
 **Request Body:**
+
 ```json
 {
   "reason": "Violation of terms"
@@ -412,30 +452,35 @@ const updateProfileSchema = z.object({
 ```
 
 **Flow:**
+
 1. Update user status (isBanned: true)
 2. Invalidate all user sessions
 3. Log audit event
 4. Send notification email
 
 **Response:**
+
 ```json
 {
   "success": true,
-  "data": { /* updated user */ }
+  "data": {/* updated user */}
 }
 ```
 
 ---
 
 #### `GET /api/admin/reports/overview`
+
 **Purpose:** Get overview statistics
 
 **Authentication:** Required (admin role)
 
 **Query Parameters:**
+
 - `startDate`, `endDate`
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -451,9 +496,7 @@ const updateProfileSchema = z.object({
         "totalDonated": 50000
       }
     ],
-    "donationsByDay": [
-      { "date": "2026-08-20", "count": 50, "amount": 25000 }
-    ]
+    "donationsByDay": [{ "date": "2026-08-20", "count": 50, "amount": 25000 }]
   }
 }
 ```
@@ -461,15 +504,18 @@ const updateProfileSchema = z.object({
 ---
 
 #### `GET /api/admin/audit-logs`
+
 **Purpose:** View audit logs
 
 **Authentication:** Required (admin role)
 
 **Query Parameters:**
+
 - `page`, `limit`
 - `userId`, `action`, `startDate`, `endDate`
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -484,7 +530,7 @@ const updateProfileSchema = z.object({
         "createdAt": "2026-08-20T..."
       }
     ],
-    "pagination": { /* ... */ }
+    "pagination": {/* ... */}
   }
 }
 ```
@@ -494,11 +540,13 @@ const updateProfileSchema = z.object({
 ### 3.5 Health Check
 
 #### `GET /api/health`
+
 **Purpose:** Health check endpoint
 
 **Authentication:** None
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -513,6 +561,7 @@ const updateProfileSchema = z.object({
 ```
 
 **Checks:**
+
 - Database connection
 - Redis connection
 - bKash API reachability
@@ -838,7 +887,7 @@ export async function rateLimit(
 ): Promise<{ allowed: boolean; remaining: number; resetAt: Date }> {
   const fullKey = `ratelimit:${key}`;
   const current = await redis.incr(fullKey);
-  
+
   if (current === 1) {
     await redis.expire(fullKey, windowSeconds);
   }
@@ -865,7 +914,7 @@ export async function POST(request: Request) {
   if (!limit.allowed) {
     return NextResponse.json(
       { error: 'Rate limit exceeded' },
-      { 
+      {
         status: 429,
         headers: {
           'X-RateLimit-Limit': '3',
@@ -918,8 +967,8 @@ class BKashClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'username': process.env.BKASH_USERNAME!,
-        'password': process.env.BKASH_PASSWORD!,
+        username: process.env.BKASH_USERNAME!,
+        password: process.env.BKASH_PASSWORD!,
       },
       body: JSON.stringify({
         app_key: process.env.BKASH_APP_KEY!,
@@ -935,12 +984,12 @@ class BKashClient {
 
   async createPayment(req: BKashPaymentRequest): Promise<BKashCreateResponse> {
     const token = await this.getToken();
-    
+
     const response = await fetch(`${this.baseUrl}/payment/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': token,
+        Authorization: token,
         'X-APP-Key': process.env.BKASH_APP_KEY!,
       },
       body: JSON.stringify({
@@ -957,11 +1006,11 @@ class BKashClient {
 
   async queryPayment(paymentId: string) {
     const token = await this.getToken();
-    
+
     const response = await fetch(`${this.baseUrl}/payment/query/${paymentId}`, {
       method: 'GET',
       headers: {
-        'Authorization': token,
+        Authorization: token,
         'X-APP-Key': process.env.BKASH_APP_KEY!,
       },
     });
@@ -971,12 +1020,12 @@ class BKashClient {
 
   async executePayment(paymentId: string) {
     const token = await this.getToken();
-    
+
     const response = await fetch(`${this.baseUrl}/payment/execute`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': token,
+        Authorization: token,
         'X-APP-Key': process.env.BKASH_APP_KEY!,
       },
       body: JSON.stringify({ paymentID: paymentId }),
@@ -1053,13 +1102,13 @@ const createDonationSchema = z.object({
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
+
     // Validate
     const validated = createDonationSchema.parse(body);
-    
+
     // Process
     const result = await donationService.createDonation(userId, validated);
-    
+
     return NextResponse.json({
       success: true,
       data: result,
@@ -1078,7 +1127,7 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -1177,13 +1226,13 @@ logger.error({ error, paymentId }, 'Payment verification failed');
 
 ## 9. Caching Strategy
 
-| Data | Cache Duration | Storage |
-|------|---------------|---------|
-| User profile | 5 minutes | Redis |
-| Donation history | 1 minute | Redis |
-| Organization stats | 5 minutes | Redis |
-| bKash token | 50 minutes | Memory |
-| API responses | Varies | Redis |
+| Data               | Cache Duration | Storage |
+| ------------------ | -------------- | ------- |
+| User profile       | 5 minutes      | Redis   |
+| Donation history   | 1 minute       | Redis   |
+| Organization stats | 5 minutes      | Redis   |
+| bKash token        | 50 minutes     | Memory  |
+| API responses      | Varies         | Redis   |
 
 ---
 
@@ -1206,7 +1255,7 @@ describe('DonationService', () => {
       isAnonymous: false,
       idempotencyKey: 'uuid',
     });
-    
+
     expect(result).toHaveProperty('paymentUrl');
   });
 });
@@ -1225,7 +1274,7 @@ describe('POST /api/donations/create', () => {
       method: 'POST',
       body: JSON.stringify({ amount: 500 }),
     });
-    
+
     const response = await POST(request);
     expect(response.status).toBe(401);
   });

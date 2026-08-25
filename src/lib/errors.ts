@@ -12,7 +12,7 @@ export class AppError extends Error {
   constructor(
     message: string,
     public statusCode: number = 500,
-    public code: string = 'INTERNAL_ERROR',
+    public code: string = 'INTERNAL_ERROR'
   ) {
     super(message);
     this.name = this.constructor.name;
@@ -56,10 +56,19 @@ export class NotFoundError extends AppError {
   }
 }
 
+export class ConflictError extends AppError {
+  constructor(message = 'Conflict') {
+    super(message, 409, 'CONFLICT');
+  }
+  override get safeMessage(): string {
+    return this.message;
+  }
+}
+
 export class ValidationError extends AppError {
   constructor(
     message = 'Invalid input',
-    public details?: Record<string, unknown>,
+    public details?: Record<string, unknown>
   ) {
     super(message, 400, 'VALIDATION_ERROR');
   }
@@ -78,7 +87,10 @@ export class RateLimitError extends AppError {
 }
 
 export class PaymentError extends AppError {
-  constructor(message: string, public providerCode?: string) {
+  constructor(
+    message: string,
+    public providerCode?: string
+  ) {
     super(message, 502, 'PAYMENT_ERROR');
   }
   override get safeMessage(): string {

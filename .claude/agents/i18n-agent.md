@@ -166,9 +166,9 @@ t('stats.totalDonated');
 
 ```typescript
 // Usage
-t('count', { count: 0 });  // "কোনো দান নেই"
-t('count', { count: 1 });  // "১টি দান"
-t('count', { count: 5 });  // "৫টি দান"
+t('count', { count: 0 }); // "কোনো দান নেই"
+t('count', { count: 1 }); // "১টি দান"
+t('count', { count: 5 }); // "৫টি দান"
 ```
 
 ### 5. Number Formatting
@@ -247,7 +247,7 @@ export default createIntlMiddleware({
   locales,
   defaultLocale,
   localePrefix: 'always', // Always include locale in URL
-  localeDetection: true,  // Detect from Accept-Language header
+  localeDetection: true, // Detect from Accept-Language header
 });
 ```
 
@@ -456,7 +456,7 @@ Organize translations by feature/namespace:
     "previous": "Previous",
     "yes": "Yes",
     "no": "No"
-  },
+  }
   // ... (parallel structure)
 }
 ```
@@ -470,10 +470,10 @@ Add Bangla fonts to Next.js:
 import { Noto_Sans_Bengali, Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const notoBengali = Noto_Sans_Bengali({ 
-  subsets: ['bengali'], 
+const notoBengali = Noto_Sans_Bengali({
+  subsets: ['bengali'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-bengali' 
+  variable: '--font-bengali'
 });
 
 export default function RootLayout({ children }) {
@@ -530,17 +530,15 @@ import en from '../messages/en.json';
 function flattenKeys(obj: any, prefix = ''): string[] {
   return Object.entries(obj).flatMap(([key, value]) => {
     const fullKey = prefix ? `${prefix}.${key}` : key;
-    return typeof value === 'object' && value !== null
-      ? flattenKeys(value, fullKey)
-      : [fullKey];
+    return typeof value === 'object' && value !== null ? flattenKeys(value, fullKey) : [fullKey];
   });
 }
 
 const bnKeys = new Set(flattenKeys(bn));
 const enKeys = new Set(flattenKeys(en));
 
-const missingInEn = [...bnKeys].filter(k => !enKeys.has(k));
-const missingInBn = [...enKeys].filter(k => !bnKeys.has(k));
+const missingInEn = [...bnKeys].filter((k) => !enKeys.has(k));
+const missingInBn = [...enKeys].filter((k) => !bnKeys.has(k));
 
 if (missingInEn.length || missingInBn.length) {
   console.error('Translation mismatch!');
@@ -553,6 +551,7 @@ if (missingInEn.length || missingInBn.length) {
 ## Output to Project Orchestrator
 
 When done, report:
+
 ```
 ✅ i18n Implementation: [Feature]
 
