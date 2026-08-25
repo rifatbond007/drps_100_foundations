@@ -164,10 +164,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   events: {
     async signIn({ user, account }) {
       if (account?.provider === 'google' && user.email) {
-        const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          select: { id: true, lastLoginAt: true, createdAt: true },
+        });
         if (dbUser) {
-          await prisma.user.update({ where: { id: dbUser.id }, data: { lastLoginAt: new Date() } });
+          // First sign-in: lastLoginAt is still null AND createdAt is within
+          // the last few seconds (avoid double-firing if a user's session
+          // was force-revoked and they're signing back in after a long gap).
+          const isFreshRegistration =
+            dbUser.lastLoginAt === null && Date.now() - dbUser.createdAt.getTime() < 60_000;
+
+          await prisma.user.update({
+            where: { id: dbUser.id },
+            data: { lastLoginAt: new Date() },
+          });
           await logSecurityEvent({ action: 'USER_LOGIN', userId: dbUser.id });
+          if (isFreshRegistration) {
+            await logSecurityEvent({
+              action: 'USER_REGISTERED',
+              userId: dbUser.id,
+              details: { provider: account.provider, providerAccountId: account.providerAccountId },
+            });
+          }
         }
       }
     },
