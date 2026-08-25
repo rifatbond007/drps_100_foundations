@@ -62,9 +62,10 @@ const accountSection: NavSection = {
  * navbar's "Dashboard" auto-selected "Users" because both routed to
  * /admin/users).
  *
- * Admin now gets only the Admin section (Users + Reports). The redundant
- * Main "Dashboard" entry that pointed at /admin/users is gone, so there
- * is no collision with the sidebar Users entry.
+ * Admin now gets three separate items, each on its own route:
+ *   - Dashboard  → /admin/dashboard  (stat cards + shortcuts)
+ *   - Users      → /admin/users      (management table)
+ *   - Reports    → /admin/reports    (charts + CSV export)
  */
 function buildSections(isAdmin: boolean): NavSection[] {
   if (isAdmin) {
@@ -72,6 +73,7 @@ function buildSections(isAdmin: boolean): NavSection[] {
       {
         headingKey: 'sections.admin',
         items: [
+          { href: '/admin/dashboard', labelKey: 'dashboard', icon: Home },
           { href: '/admin/users', labelKey: 'users', icon: Users },
           { href: '/admin/reports', labelKey: 'reports', icon: BarChart },
         ],

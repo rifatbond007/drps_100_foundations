@@ -186,6 +186,12 @@
   },
   "admin": {
     "title": "Admin panel",
+    "dashboard": {
+      "manageUsers": "Manage users",
+      "manageUsersDesc": "Ban, unban, and search all registered users",
+      "viewReports": "View reports",
+      "viewReportsDesc": "Donation trends and CSV export"
+    },
     "users": {
       "title": "User management",
       "subtitle": "All registered users",

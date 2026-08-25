@@ -35,12 +35,18 @@ export async function Header({ locale }: { locale: string }) {
           </Link>
           {isLoggedIn && isAdmin && (
             <>
-              {/* Each link points to a distinct route — a previous version
-                  mapped both "Dashboard" and "Users" to /admin/users, which
-                  caused the sidebar's Users entry to light up at the same
-                  time as the navbar's Dashboard entry. The admin sidebar
-                  already shows Users + Reports, so the header just mirrors
-                  those two links for top-level navigation. */}
+              {/* Admin nav: three distinct routes — clicking one item
+                  highlights only that item in the sidebar (the active-state
+                  highlighter uses prefix-match, so route collisions cause
+                  double-highlighting). Dashboard lands on the stat-card
+                  overview; Users is the management table; Reports is the
+                  charts + CSV page. */}
+              <Link
+                href={`/${locale}/admin/dashboard`}
+                className="text-sm font-medium hover:underline"
+              >
+                {t('dashboard')}
+              </Link>
               <Link href={`/${locale}/admin/users`} className="text-sm font-medium hover:underline">
                 {t('users')}
               </Link>
