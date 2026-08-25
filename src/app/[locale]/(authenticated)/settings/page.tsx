@@ -332,7 +332,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Save + status */}
-      <div className="flex items-center justify-between gap-4 pt-2">
+      <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
         <div
           className={cn(
             'flex items-center gap-2 text-sm',
