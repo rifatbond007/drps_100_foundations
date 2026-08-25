@@ -5,6 +5,7 @@
  * - Adds custom fields to session via callbacks
  * - Creates User on first sign-in
  * - Logs audit events
+ * - Auto-promotes a configured admin email to ADMIN role on sign-in
  */
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
@@ -20,6 +21,24 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
 }
 
 /**
+ * Comma-separated list of emails that should be promoted to ADMIN on any
+ * sign-in (handles first-time signup AND existing USER accounts).
+ *
+ * Defaults to the foundation admin email if unset.
+ */
+export const ADMIN_EMAILS: readonly string[] = (
+  process.env.ADMIN_EMAILS ?? 'drps19foundation.org@gmail.com'
+)
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+export function isAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.trim().toLowerCase());
+}
+
+/**
  * signIn callback — extracted so it can be unit-tested in isolation.
  * Returns false to block sign-in (NextAuth surfaces the configured error page).
  */
@@ -32,17 +51,32 @@ export async function signInCallback({
 }): Promise<boolean> {
   if (account?.provider !== 'google') return false;
 
-  const existing = await prisma.user.findUnique({ where: { email: user.email! } });
+  const email = user.email!;
+  const existing = await prisma.user.findUnique({ where: { email } });
   if (!existing) {
     await prisma.user.create({
       data: {
-        email: user.email!,
+        email,
         name: user.name || '',
         avatarUrl: user.image,
         emailVerified: new Date(),
         profileCompleted: false,
+        // Pre-seed ADMIN role if this email is on the allowlist
+        role: isAdminEmail(email) ? 'ADMIN' : 'USER',
         settings: { create: {} },
       },
+    });
+  } else if (isAdminEmail(email) && existing.role !== 'ADMIN') {
+    // Idempotent promotion — safe to run on every sign-in.
+    // Bump tokenVersion so any cached JWT is invalidated.
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: { role: 'ADMIN', tokenVersion: { increment: 1 } },
+    });
+    await logSecurityEvent({
+      action: 'USER_PROMOTED_TO_ADMIN',
+      userId: existing.id,
+      details: { reason: 'admin_email_allowlist', email },
     });
   }
 
@@ -50,7 +84,7 @@ export async function signInCallback({
   // user whose row was deleted between OAuth roundtrip and callback
   // is still blocked on re-sign-in.
   const current = await prisma.user.findUnique({
-    where: { email: user.email! },
+    where: { email },
     select: { id: true, isBanned: true, bannedReason: true },
   });
 
