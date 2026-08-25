@@ -7,11 +7,23 @@
  * - Logs audit events
  * - Auto-promotes a configured admin email to ADMIN role on sign-in
  */
+import dns from 'node:dns';
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 import { logSecurityEvent } from '@/lib/audit';
+
+// Force IPv4-first DNS resolution app-wide. On networks where Google is
+// reachable via AAAA records but the IPv6 path is broken/blackholed,
+// Node's global undici fetch hangs on the IPv6 socket until its ~30s
+// timeout fires, surfacing as `CallbackRouteError: ETIMEDOUT` from the
+// /api/auth/callback/google handler. Preferring IPv4 keeps the OAuth
+// roundtrip reliable on those networks without changing behaviour on
+// IPv6-only paths (A lookups still succeed as fallback).
+// `setDefaultResultOrder` only affects `dns.lookup()`; it does not
+// override explicit `verbatim` lookups or per-call families.
+dns.setDefaultResultOrder('ipv4first');
 
 if (!process.env.NEXTAUTH_SECRET) {
   throw new Error('NEXTAUTH_SECRET must be set');
