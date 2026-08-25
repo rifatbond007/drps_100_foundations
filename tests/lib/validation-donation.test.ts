@@ -33,7 +33,7 @@ describe('createDonationSchema', () => {
 
   it('rejects unknown purpose', () => {
     expect(() =>
-      createDonationSchema.parse({ ...validBase, purpose: 'NOT_A_REAL_PURPOSE' }),
+      createDonationSchema.parse({ ...validBase, purpose: 'NOT_A_REAL_PURPOSE' })
     ).toThrow();
   });
 
@@ -45,16 +45,11 @@ describe('createDonationSchema', () => {
 
   it('rejects non-UUID idempotency key', () => {
     expect(() =>
-      createDonationSchema.parse({ ...validBase, idempotencyKey: 'not-a-uuid' }),
+      createDonationSchema.parse({ ...validBase, idempotencyKey: 'not-a-uuid' })
     ).toThrow();
   });
 
   it('exports the canonical purpose list', () => {
-    expect(DONATION_PURPOSES).toEqual([
-      'GENERAL_FUND',
-      'EDUCATION',
-      'MEDICAL',
-      'EMERGENCY',
-    ]);
+    expect(DONATION_PURPOSES).toEqual(['GENERAL_FUND', 'EDUCATION', 'MEDICAL', 'EMERGENCY']);
   });
 });

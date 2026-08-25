@@ -34,9 +34,7 @@ export default async function CompleteProfilePage({
         <p className="mt-2 text-sm text-muted-foreground">{t('subtitle')}</p>
       </div>
       <div className="rounded-lg border bg-card p-6 shadow-sm">
-        <ProfileCompletionForm
-          defaultLanguage={session.user.languagePref === 'EN' ? 'EN' : 'BN'}
-        />
+        <ProfileCompletionForm defaultLanguage={session.user.languagePref === 'EN' ? 'EN' : 'BN'} />
       </div>
     </div>
   );

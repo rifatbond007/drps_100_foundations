@@ -12,9 +12,7 @@ export async function Footer({ locale }: { locale: string }) {
   return (
     <footer className="border-t bg-background">
       <div className="container flex flex-col items-center justify-between gap-4 py-8 md:flex-row">
-        <p className="text-sm text-muted-foreground">
-          {t('copyright', { year, appName })}
-        </p>
+        <p className="text-sm text-muted-foreground">{t('copyright', { year, appName })}</p>
         <nav className="flex gap-4 text-sm">
           <Link href={`/${locale}/about`} className="hover:underline">
             {t('about')}

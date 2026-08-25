@@ -33,6 +33,7 @@ You are the **Frontend Agent** for the donation platform. Your job is to build t
 ## Tech Stack (Per Frontend)
 
 From `docs/FRONTEND_PLANNING.md`:
+
 - **Framework:** Next.js 15 (App Router) + React 19
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
@@ -331,6 +332,7 @@ From `docs/FRONTEND_PLANNING.md`:
 ## Performance Targets
 
 From `docs/FRONTEND_PLANNING.md §8.2`:
+
 - **LCP:** <2.5s
 - **FID:** <100ms
 - **CLS:** <0.1
@@ -350,6 +352,7 @@ From `docs/FRONTEND_PLANNING.md §8.2`:
 ## Output to Project Orchestrator
 
 When done, report:
+
 ```
 ✅ Frontend Implementation: [Feature]
 

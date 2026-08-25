@@ -45,7 +45,7 @@ export function fail(error: unknown): NextResponse<ApiError> {
         message: 'Invalid input',
         details: error.flatten(),
       },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -60,7 +60,7 @@ export function fail(error: unknown): NextResponse<ApiError> {
           message: error.message,
           stack: error.stack,
         },
-        'AppError in API route',
+        'AppError in API route'
       );
       return NextResponse.json(
         {
@@ -69,13 +69,13 @@ export function fail(error: unknown): NextResponse<ApiError> {
           message: error.safeMessage,
           errorId,
         },
-        { status: error.statusCode },
+        { status: error.statusCode }
       );
     }
     // Dev: echo real message for DX
     return NextResponse.json(
       { success: false, error: error.code, message: error.message },
-      { status: error.statusCode },
+      { status: error.statusCode }
     );
   }
 
@@ -90,13 +90,10 @@ export function fail(error: unknown): NextResponse<ApiError> {
         message: 'Something went wrong',
         errorId,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
   // Dev: include the real error string
   const message = error instanceof Error ? error.message : String(error);
-  return NextResponse.json(
-    { success: false, error: 'INTERNAL_ERROR', message },
-    { status: 500 },
-  );
+  return NextResponse.json({ success: false, error: 'INTERNAL_ERROR', message }, { status: 500 });
 }
