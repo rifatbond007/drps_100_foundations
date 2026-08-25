@@ -102,7 +102,7 @@ export function UserMenu({ locale, name, email, avatarUrl }: Props) {
         <div
           role="menu"
           aria-label="User menu"
-          className="absolute right-0 mt-2 w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+          className="bg-popover text-popover-foreground absolute right-0 mt-2 w-56 rounded-md border p-1 shadow-md"
         >
           <div className="border-b px-3 py-2 text-sm">
             <p className="font-medium leading-tight">{name}</p>
