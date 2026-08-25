@@ -1,22 +1,39 @@
 /**
  * Google login button.
+ *
+ * Uses `signIn(..., { redirect: true })` so the browser performs a full
+ * top-level navigation to Google's account chooser instead of a fetch.
+ * That's what the user expects when clicking "Sign in with Google" —
+ * fetch-based signIn returns the OAuth URL but the page stays put, which
+ * looks like the click did nothing.
+ *
+ * `callbackUrl` defaults to /{locale}/dashboard and is appended to the
+ * OAuth state so NextAuth can route the user after the callback.
  */
 'use client';
 
 import { signIn } from 'next-auth/react';
+import { useLocale } from 'next-intl';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
 export function LoginButton({ callbackUrl }: { callbackUrl?: string }) {
   const t = useTranslations('auth');
+  const locale = useLocale();
+  const fallback = `/${locale}/dashboard`;
+
+  const handleClick = () => {
+    // Fire-and-forget: signIn() with redirect:true returns a Promise but
+    // triggers a window.location change we don't want to await — awaiting
+    // it would block the click handler and (worse) swallow the navigation.
+    void signIn('google', {
+      callbackUrl: callbackUrl ?? fallback,
+      redirect: true,
+    });
+  };
 
   return (
-    <Button
-      size="lg"
-      variant="outline"
-      onClick={() => signIn('google', { callbackUrl: callbackUrl ?? '/dashboard' })}
-      className="w-full"
-    >
+    <Button type="button" size="lg" variant="outline" onClick={handleClick} className="w-full">
       <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
         <path
           fill="#4285F4"
