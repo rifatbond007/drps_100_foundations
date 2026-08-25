@@ -14,6 +14,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { locales, defaultLocale } from '@/lib/i18n/config';
+import { edgeRateLimit } from '@/lib/security/edge-rate-limit';
 
 const intlMiddleware = createIntlMiddleware({
   locales: [...locales],
@@ -72,6 +73,30 @@ export default async function middleware(request: NextRequest) {
     pathname.startsWith('/api/auth') ||
     pathname === '/api/health' ||
     pathname.startsWith('/api/donations/webhook');
+
+  // Edge-compatible rate limit on auth endpoints (per-IP sliding window).
+  // No-op when UPSTASH_REDIS_REST_URL is unset (local dev + CI without creds).
+  if (pathname.startsWith('/api/auth')) {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      'anon';
+    const rl = await edgeRateLimit(ip, 'LOGIN');
+    if (!rl.allowed) {
+      const retryAfter = Math.max(1, Math.ceil((rl.resetAt.getTime() - Date.now()) / 1000));
+      return NextResponse.json(
+        { success: false, error: 'RATE_LIMIT_EXCEEDED', message: 'Too many attempts. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(retryAfter),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rl.resetAt.getTime()),
+          },
+        },
+      );
+    }
+  }
 
   if (isPublicApi) {
     return NextResponse.next();
