@@ -29,3 +29,5 @@ vi.mock('next/navigation', () => ({
 process.env.NEXTAUTH_SECRET = 'test-secret-at-least-32-characters-long-xxxx';
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
 process.env.REDIS_URL = 'redis://localhost:6379';
+process.env.GOOGLE_CLIENT_ID = 'test-google-client-id';
+process.env.GOOGLE_CLIENT_SECRET = 'test-google-client-secret';
