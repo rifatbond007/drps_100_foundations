@@ -7,16 +7,10 @@ import { Sidebar } from '@/components/layout/Sidebar';
  * Admin layout — guards all /admin/* routes.
  * Requires role === 'ADMIN'.
  *
- * Layout strategy:
- *   - The site Header is `sticky top-0` with h-16 (4rem). Below it, this
- *     layout fills the remaining viewport (`h-[calc(100vh-4rem)]`) so
- *     the sidebar + main content share a fixed-height area that scrolls
- *     internally instead of pushing the whole page downward.
- *   - The Sidebar scrolls its nav internally (`overflow-y-auto` inside
- *     an `aside.h-full`) so a long user list never grows the page.
- *   - The main column gets `overflow-y-auto` so page content (Users
- *     table, Reports charts, Dashboard stat cards) scrolls within its
- *     own region while the sidebar stays pinned.
+ * Height (100vh) is controlled by the locale layout (body is locked to
+ * h-screen with overflow-hidden; <main> is flex-1 with internal scroll).
+ * Width is whatever the main area gives it. This layout just fills the
+ * scroll region with a 2-column flex container (sidebar + page content).
  */
 export default async function AdminLayout({
   children,
@@ -33,9 +27,9 @@ export default async function AdminLayout({
   if (session.user.role !== 'ADMIN') redirect(`/${locale}/dashboard`);
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-4rem)] w-full max-w-7xl gap-0 px-4 py-0">
+    <div className="mx-auto flex h-full w-full max-w-7xl gap-0 px-4">
       <Sidebar isAdmin />
-      <main className="min-h-0 flex-1 overflow-y-auto px-4 py-8">{children}</main>
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-8">{children}</div>
     </div>
   );
 }
