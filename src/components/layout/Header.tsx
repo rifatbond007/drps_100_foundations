@@ -1,12 +1,17 @@
 /**
  * Site header. Server component.
+ *
+ * The "Sign in" button calls `signIn('google', { redirect: true })`
+ * directly via the client-side `SignInButton`, so a click sends the
+ * user straight to Google's account chooser — no intermediate
+ * /{locale}/login page.
  */
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/next-auth';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { SignOutButton } from './SignOutButton';
-import { Button } from '@/components/ui/button';
+import { SignInButton } from './SignInButton';
+import { UserMenu } from './UserMenu';
 
 export async function Header({ locale }: { locale: string }) {
   // Nav strings live in the `nav` namespace, not `common` — keys like
@@ -45,11 +50,14 @@ export async function Header({ locale }: { locale: string }) {
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           {isLoggedIn ? (
-            <SignOutButton label={t('logout')} />
+            <UserMenu
+              locale={locale}
+              name={session.user.name}
+              email={session.user.email}
+              avatarUrl={session.user.image ?? null}
+            />
           ) : (
-            <Button asChild size="sm">
-              <Link href={`/${locale}/login`}>{t('login')}</Link>
-            </Button>
+            <SignInButton locale={locale} label={t('login')} />
           )}
         </div>
       </div>

@@ -75,7 +75,7 @@ export async function signInCallback({
  */
 export async function jwtCallback(params: {
   token: Record<string, unknown>;
-  user?: { email?: string | null } | null;
+  user?: { email?: string | null; name?: string | null; image?: string | null } | null;
 }): Promise<Record<string, unknown>> {
   const { token, user } = params;
 
@@ -91,6 +91,11 @@ export async function jwtCallback(params: {
         languagePref: true,
         isBanned: true,
         tokenVersion: true,
+        // Pull avatarUrl + name from DB so they're guaranteed to land on
+        // the JWT even when the OAuth `user` object isn't forwarded here
+        // (which can happen with adapter-based JWT sessions in next-auth v5).
+        name: true,
+        avatarUrl: true,
       },
     });
     if (dbUser) {
@@ -100,6 +105,9 @@ export async function jwtCallback(params: {
       token.languagePref = dbUser.languagePref;
       token.isBanned = dbUser.isBanned;
       token.tokenVersion = dbUser.tokenVersion ?? 0;
+      // Prefer OAuth provider values on first sign-in; fall back to DB.
+      token.name = user.name ?? dbUser.name;
+      token.image = user.image ?? dbUser.avatarUrl;
     }
     return token;
   }
@@ -120,6 +128,8 @@ export async function jwtCallback(params: {
       languagePref: true,
       tokenVersion: true,
       deletedAt: true,
+      name: true,
+      avatarUrl: true,
     },
   });
 
@@ -133,6 +143,12 @@ export async function jwtCallback(params: {
   token.role = dbUser.role;
   token.profileCompleted = dbUser.profileCompleted;
   token.languagePref = dbUser.languagePref;
+  // Refresh name/image on every ban-check DB roundtrip (every 60s) so
+  // profile updates via /api/users/profile show up in the navbar without
+  // a forced sign-out. Only overwrite when DB has a value — never blank
+  // out a populated token field with null.
+  if (dbUser.name) token.name = dbUser.name;
+  if (dbUser.avatarUrl) token.image = dbUser.avatarUrl;
 
   return token;
 }
@@ -154,6 +170,11 @@ export function sessionCallback(params: any): any {
     session.user.profileCompleted = Boolean(token.profileCompleted);
     session.user.languagePref = (token.languagePref as 'BN' | 'EN') ?? 'BN';
     session.user.isBanned = Boolean(token.isBanned);
+    // Carry OAuth profile fields from JWT → session so the navbar avatar
+    // renders. next-auth v5 does not auto-propagate these through the
+    // custom callbacks we wired; we have to copy them explicitly.
+    if (typeof token.name === 'string') session.user.name = token.name;
+    if (typeof token.image === 'string') session.user.image = token.image;
   }
   return session;
 }

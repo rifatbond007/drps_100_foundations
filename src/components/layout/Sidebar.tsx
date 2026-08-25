@@ -26,15 +26,15 @@ const items: NavItem[] = [
 
 export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const locale = useLocale();
-  const t = useTranslations('navigation');
+  const t = useTranslations('nav');
   const pathname = usePathname();
 
   const allItems = [
     ...items,
     ...(isAdmin
       ? [
-          { href: '/admin/users', labelKey: 'adminUsers', icon: Users, adminOnly: true },
-          { href: '/admin/reports', labelKey: 'adminReports', icon: BarChart, adminOnly: true },
+          { href: '/admin/users', labelKey: 'users', icon: Users, adminOnly: true },
+          { href: '/admin/reports', labelKey: 'reports', icon: BarChart, adminOnly: true },
         ]
       : []),
   ];
