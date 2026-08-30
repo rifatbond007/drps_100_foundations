@@ -75,8 +75,6 @@
     "subtitle": "Summary of your donations",
     "greeting": "Hi, {name}",
     "loadingProfile": "Loading your dashboard…",
-    "completeProfileBanner": "Complete your profile to enable donations",
-    "completeProfileCta": "Complete profile",
     "profileStatsTitle": "Your donations at a glance",
     "totalDonated": "Total donated",
     "last30Days": "Last 30 days",
@@ -121,6 +119,23 @@
       "title": "Donation failed",
       "subtitle": "Sorry, your donation could not be processed.",
       "tryAgain": "Try again",
+      "backToDashboard": "Back to dashboard"
+    },
+    "checkout": {
+      "title": "Confirm payment",
+      "subtitle": "Review your donation and click Pay to confirm.",
+      "testModeBadge": "Test mode",
+      "testModeNotice": "This is a test payment — no real money will be charged. Replace PAYMENT_PROVIDER=bkash in .env to use the real gateway.",
+      "loading": "Loading donation…",
+      "missingId": "Invalid checkout session — please return to the donate page.",
+      "notFound": "Donation not found.",
+      "amount": "Amount",
+      "donor": "Donor",
+      "purpose": "Purpose",
+      "paymentId": "Payment ID",
+      "pay": "Pay now",
+      "cancel": "Cancel",
+      "processing": "Processing…",
       "backToDashboard": "Back to dashboard"
     },
     "errors": {
@@ -259,6 +274,7 @@
       "loading": "Loading reports…",
       "error": "Failed to load reports",
       "empty": "No donations recorded yet",
+      "refresh": "Refresh",
       "months": "Last 12 months",
       "purposes": {
         "GENERAL_FUND": "General fund",

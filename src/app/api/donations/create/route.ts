@@ -1,53 +1,177 @@
 /**
  * POST /api/donations/create
  *
- * Creates a pending donation and initiates bKash payment.
+ * Creates a PENDING donation and starts a (dummy) payment session.
  *
- * SKELETON — full implementation arrives with payment-agent phase.
+ * Flow:
+ *   1. requireActiveUser (auth + ban + soft-delete checks)
+ *   2. Role guard — admins cannot donate (UX is /donate redirects them
+ *      too; this is defense in depth)
+ *   3. Rate-limit per user (RATE_LIMITS.DONATION_CREATE: 3 / 5 min)
+ *   4. Zod-validate body
+ *   5. Idempotency check via Redis keyed on `idempotencyKey`
+ *   6. Insert Donation(PENDING) with bkashPaymentId populated by the
+ *      dummy provider
+ *   7. Cache the idempotency response so a retry returns the same body
+ *   8. Audit log DONATION_INITIATED
+ *   9. Return { donationId, paymentId, redirectUrl }
  *
- * Role guard: admins (`role === 'ADMIN'`) are forbidden from donating.
- * This is enforced server-side so a crafted request from an admin
- * account can't bypass the UI's client-side redirect.
+ * Profile completion is intentionally NOT required here — users may
+ * donate without finishing onboarding and edit their profile from
+ * /settings at any time.
+ *
+ * Provider is selected via `getPaymentClient()` from
+ * src/lib/payment/types.ts. Default is Dummy; set PAYMENT_PROVIDER=bkash
+ * to switch to the (still-skeleton) bKash real provider.
  */
+import { z } from 'zod';
+import { headers } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
-import { auth } from '@/lib/auth/next-auth';
+import { prisma } from '@/lib/prisma';
+import { requireActiveUser } from '@/lib/auth/session';
+import { ok, fail } from '@/lib/api/helpers';
+import { rateLimit, requireRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { redis } from '@/lib/redis';
+import { logSecurityEvent } from '@/lib/audit';
+import { PaymentError } from '@/lib/errors';
+import { createDonationSchema } from '@/lib/validation/donation';
+import { getPaymentClient } from '@/lib/payment/types';
+import { logger } from '@/lib/logger';
 
-export async function POST(_request: NextRequest) {
-  // 0. Role guard — must come before any side-effects. Cheap, no DB hit.
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json(
-      { success: false, error: 'UNAUTHORIZED', message: 'Sign in to donate' },
-      { status: 401 }
+const IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60; // 24h
+
+export async function POST(request: NextRequest) {
+  try {
+    // 1. Auth + ban + soft-delete
+    const session = await requireActiveUser();
+
+    // 2. Role guard — admins cannot donate (UX is /donate redirects them
+    //    too; this is defense in depth).
+    if (session.user.role === 'ADMIN') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'FORBIDDEN',
+          message: 'Admins cannot donate',
+        },
+        { status: 403 }
+      );
+    }
+
+    // 3. Rate limit per user
+    const rl = await rateLimit(
+      `donation:create:${session.user.id}`,
+      RATE_LIMITS.DONATION_CREATE.max,
+      RATE_LIMITS.DONATION_CREATE.windowSeconds
     );
-  }
-  if (session.user.role === 'ADMIN') {
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'FORBIDDEN',
-        message: 'Admins cannot donate. Sign in with a regular user account to contribute.',
+    requireRateLimit(rl);
+
+    // 4. Zod-validate body
+    let body: z.infer<typeof createDonationSchema>;
+    try {
+      body = createDonationSchema.parse(await request.json());
+    } catch (error) {
+      if (error instanceof z.ZodError) return fail(error);
+      throw error;
+    }
+
+    // 5. Idempotency (response cache)
+    const cached = await redis.get(`idem:donation:${body.idempotencyKey}`);
+    if (cached) {
+      // Replay the cached response verbatim — guarantees an idempotent
+      // retry from the UI doesn't double-charge.
+      return NextResponse.json(JSON.parse(cached));
+    }
+
+    // 6. Build callback URL. The dummy checkout page redirects back here
+    //    with ?status=success|failure; the real bKash would too.
+    const h = await headers();
+    const host = h.get('host') ?? 'localhost:3000';
+    const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https');
+    const callbackUrl = `${proto}://${host}/api/donations/callback`;
+
+    // 7. Create the donation row first so the paymentId can be tied
+    //    to it. We pass a placeholder bkashPaymentId that the payment
+    //    provider will confirm; if it can't, we delete the row in the
+    //    catch block to avoid orphaned PENDING donations.
+    const placeholderPaymentId = `pending-${crypto.randomUUID()}`;
+    const donation = await prisma.donation.create({
+      data: {
+        userId: session.user.id,
+        amount: body.amount.toString(),
+        currency: 'BDT',
+        purpose: body.purpose,
+        isAnonymous: body.isAnonymous,
+        status: 'PENDING',
+        bkashPaymentId: placeholderPaymentId,
+        paymentMethod: 'dummy',
       },
-      { status: 403 }
-    );
-  }
+    });
 
-  // TODO(payment-agent): implement
-  // 1. rateLimit per user
-  // 2. validate input via createDonationSchema
-  // 3. ban + profileCompleted checks
-  // 4. idempotency check (Redis)
-  // 5. prisma.donation.create({ status: PENDING })
-  // 6. bkashClient.createPayment(...)
-  // 7. update donation with bkashPaymentId
-  // 8. cache idempotency response
-  // 9. audit log
-  return NextResponse.json(
-    {
-      success: false,
-      error: 'NOT_IMPLEMENTED',
-      message: 'Donation create arrives with payment-agent phase',
-    },
-    { status: 501 }
-  );
+    // 8. Start the payment. With the dummy provider this is in-process
+    //    and can't fail for transport reasons; with a real provider it
+    //    can fail (network, bad credentials, etc.) and we'd need to
+    //    mark the donation FAILED and audit-log.
+    let payment;
+    try {
+      const client = getPaymentClient();
+      payment = await client.createPayment({
+        amount: body.amount,
+        callbackUrl,
+        donationId: donation.id,
+      });
+    } catch (error) {
+      // Mark the just-created donation as FAILED so it doesn't sit in
+      // PENDING forever and pollute admin reports.
+      await prisma.donation.update({
+        where: { id: donation.id },
+        data: {
+          status: 'FAILED',
+          failureReason: 'payment_provider_error',
+          completedAt: new Date(),
+        },
+      });
+      throw new PaymentError(error instanceof Error ? error.message : 'Payment provider error');
+    }
+
+    // 9. Persist the real paymentId from the provider.
+    await prisma.donation.update({
+      where: { id: donation.id },
+      data: { bkashPaymentId: payment.paymentId },
+    });
+
+    // 10. Audit + idempotency cache
+    await logSecurityEvent({
+      action: 'DONATION_INITIATED',
+      userId: session.user.id,
+      details: {
+        donationId: donation.id,
+        amount: donation.amount.toString(),
+        purpose: donation.purpose,
+        paymentMethod: 'dummy',
+      },
+    });
+
+    const responseBody = {
+      success: true,
+      data: {
+        donationId: donation.id,
+        paymentId: payment.paymentId,
+        // For dummy: in-app /donate/checkout. For real: third-party URL.
+        redirectUrl: payment.redirectUrl,
+      },
+    };
+
+    await redis.set(
+      `idem:donation:${body.idempotencyKey}`,
+      JSON.stringify(responseBody),
+      'EX',
+      IDEMPOTENCY_TTL_SECONDS
+    );
+
+    return ok(responseBody.data);
+  } catch (error) {
+    logger.error({ error }, 'donations.create failed');
+    return fail(error);
+  }
 }
