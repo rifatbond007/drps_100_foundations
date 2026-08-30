@@ -95,11 +95,7 @@ export function ReportsPanel() {
 
   return (
     <div className="space-y-6">
-
       <div className="flex flex-wrap items-center justify-end gap-2">
-
-      <div className="flex items-center justify-end gap-2">
-
         <Button
           variant="outline"
           size="sm"
