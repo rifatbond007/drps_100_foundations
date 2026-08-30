@@ -29,9 +29,7 @@ export default async function BlogPage({ params }: { params: Promise<{ locale: s
       <h1 className="mt-6 text-balance text-4xl font-bold tracking-tight sm:text-5xl">
         {t('title')}
       </h1>
-      <p className="mt-4 max-w-2xl text-balance text-lg text-muted-foreground">
-        {t('subtitle')}
-      </p>
+      <p className="mt-4 max-w-2xl text-balance text-lg text-muted-foreground">{t('subtitle')}</p>
 
       <div className="mt-10 rounded-xl border bg-card p-8 text-left shadow-sm">
         <h2 className="text-xl font-semibold">{t('comingSoonTitle')}</h2>
