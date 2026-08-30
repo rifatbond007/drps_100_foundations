@@ -84,6 +84,7 @@
     "loginWithGoogle": "Sign in with Google",
     "loginTerms": "By signing in you agree to our terms of service",
     "logout": "Sign out",
+    "errorTitle": "Sign-in error",
     "profileCompletion": {
       "title": "Complete your profile",
       "subtitle": "Provide a few details to start donating",
@@ -97,12 +98,15 @@
       }
     },
     "errors": {
-      "OAuthSignin": "Could not start sign in",
-      "OAuthCallback": "Could not process provider response",
-      "OAuthAccountNotLinked": "This email is already linked to another method",
-      "AccessDenied": "Access denied",
-      "Verification": "Verification link has expired",
-      "Default": "An error occurred"
+      "configuration": "Server is misconfigured. Please contact support.",
+      "accessDenied": "Access denied. If you believe this is a mistake, please contact support.",
+      "verification": "The sign-in link has expired or has already been used.",
+      "oauthSignin": "Could not start sign in with the provider.",
+      "oauthCallback": "Could not process the provider's response. Please try again.",
+      "oauthCreateAccount": "Could not create an account for this provider.",
+      "oauthAccountNotLinked": "This email is already linked to a different sign-in method.",
+      "callback": "Sign-in callback failed. Please close this tab and try again.",
+      "default": "An unexpected sign-in error occurred. Please try again."
     }
   },
   "dashboard": {
