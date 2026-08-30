@@ -64,3 +64,6 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# One-off analysis artifacts (e.g. AUDIT_REPORT.md from code reviews)
+AUDIT_REPORT.md

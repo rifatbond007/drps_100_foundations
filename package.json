@@ -37,7 +37,8 @@
     "docker:dev:full": "docker compose -f docker-compose.dev.yml --profile full up",
     "docker:prod": "docker compose up -d",
     "docker:logs": "docker compose logs -f",
-    "analyze": "ANALYZE=true pnpm build"
+    "analyze": "ANALYZE=true pnpm build",
+    "prepare": "husky"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
@@ -103,7 +104,6 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
       "prettier --write"
     ],
     "*.{json,md,yml,yaml}": [

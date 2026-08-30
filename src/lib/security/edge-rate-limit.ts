@@ -16,7 +16,18 @@
  *   bucket values stay the source of truth — this file re-declares them
  *   to avoid a runtime-import cycle (Node code can't be imported from Edge).
  */
-import { Redis } from '@upstash/redis';
+// Import the Cloudflare (Edge-runtime-safe, fetch-based) build of the
+// Upstash Redis client instead of the default `nodejs` entry. The node
+// entry references `process.version`, which is undefined in the Edge
+// runtime and triggers a Next.js build warning:
+//
+//   A Node.js API is used (process.version at line: 240) which is not
+//   supported in the Edge Runtime.
+//
+// The `/cloudflare` entry exposes the same `Redis` constructor and is
+// fully compatible with Upstash's REST API — no socket/Node APIs used.
+// See https://upstash.com/docs/oss/sdks/ts/redis/edge
+import { Redis } from '@upstash/redis/cloudflare';
 import { Ratelimit } from '@upstash/ratelimit';
 
 export interface EdgeRateLimitResult {
