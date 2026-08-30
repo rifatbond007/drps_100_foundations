@@ -117,7 +117,7 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" asChild>
             <Link href={`/${locale}/settings`}>
               <SettingsIcon className="mr-2 h-4 w-4" />
@@ -168,7 +168,7 @@ export default function DashboardPage() {
 
       {/* Recent donations */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0">
           <CardTitle className="text-base">{t('recentDonations')}</CardTitle>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/${locale}/history`}>

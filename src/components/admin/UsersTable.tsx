@@ -250,7 +250,13 @@ export function UsersTable() {
         )}
 
         {/* Table */}
-        <div className="overflow-x-auto rounded-md border">
+        <div className="relative overflow-x-auto rounded-md border">
+          {/* Mobile-only right-edge scroll hint. md:hidden hides it on tablet+
+              where the table fits without horizontal scroll. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute right-0 top-0 z-10 h-full w-8 bg-gradient-to-l from-background to-transparent md:hidden"
+          />
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
@@ -336,7 +342,7 @@ export function UsersTable() {
 
         {/* Pagination */}
         {data && data.pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
             <span className="text-muted-foreground">
               {t('pagination.page', {
                 page: data.pagination.page,
