@@ -1,0 +1,4 @@
+# Runs ESLint --fix + Prettier on staged files (per the `lint-staged`
+# block in package.json). pnpm lint-staged reads the config from
+# package.json automatically; no flags required.
+pnpm exec lint-staged

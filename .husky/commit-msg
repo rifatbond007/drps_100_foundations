@@ -1,0 +1,4 @@
+# Enforce Conventional Commits per the `commitlint` block in
+# package.json (extends @commitlint/config-conventional with strict
+# header rules: lowercase, no period, <=72 chars, etc.).
+pnpm exec commitlint --edit "$1"
