@@ -1,13 +1,16 @@
 /**
  * Middleware: i18n routing + auth + role guards.
  *
- * There is no /{locale}/login page — clicking "Sign in" in the header
- * calls `signIn('google')` directly via the SignInButton client component,
- * which navigates the browser to Google's account chooser. Middleware
- * never has to route users TO a login page; it only has to enforce that
- * protected routes have a session.
+ * There IS a /{locale}/login page — but only as a NextAuth error target.
+ * Under the happy path, clicking "Sign in" in the header calls
+ * `signIn('google')` directly via the SignInButton client component,
+ * which navigates the browser to Google's account chooser without ever
+ * visiting /login. The /login page only renders when NextAuth itself
+ * redirects — e.g. after a failed OAuth callback (PKCE mismatch from a
+ * dev-server restart) — and it must remain auth-free so the redirect
+ * target is reachable.
  *
- * There is no /{locale}/complete-profile page either. Profile fields
+ * There is no /{locale}/complete-profile page. Profile fields
  * (phone, languagePref) are collected lazily — at the point they're
  * actually needed (donate flow). So authenticated-but-incomplete users
  * can browse fully-protected pages; the donate action will prompt for
@@ -117,12 +120,17 @@ export default async function middleware(request: NextRequest) {
   // Run i18n middleware first (sets locale cookie, Vary header)
   const intlResponse = intlMiddleware(request);
 
-  // Auth-free pages: locale root, /about, root, next assets.
-  // (login / complete-profile routes were removed — clicking "Sign in"
-  // triggers Google OAuth directly.)
+  // Auth-free pages: locale root, /about, /login, root, next assets.
+  // /login must be reachable without a session so NextAuth can redirect
+  // failed OAuth callbacks (?error=...) back to a renderable page instead
+  // of 404'ing. Clicking "Sign in" in the header still calls
+  // signIn('google') directly and never visits this page — but if the
+  // OAuth roundtrip fails (e.g. PKCE mismatch after a dev-server
+  // restart), NextAuth bounces the browser here.
   const isAuthFreePath =
     pathname === `/${locale}` ||
     pathname === `/${locale}/about` ||
+    pathname === `/${locale}/login` ||
     pathname.startsWith('/_next') ||
     pathname === '/';
 
