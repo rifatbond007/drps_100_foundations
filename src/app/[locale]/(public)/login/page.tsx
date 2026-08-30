@@ -19,7 +19,7 @@
  * include `/{locale}/login` — otherwise an unauthenticated visitor would
  * be redirected away before this page could render.
  */
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { signIn } from 'next-auth/react';
@@ -40,6 +40,19 @@ const ERROR_KEYS: Record<string, string> = {
 };
 
 export default function LoginPage() {
+  // useSearchParams() requires a <Suspense> boundary so Next.js can
+  // statically prerender /[locale]/login. Without this wrapper the
+  // build fails with: "useSearchParams() should be wrapped in a suspense
+  // boundary at page '/[locale]/login'". LoginPageInner is the original
+  // page body — split out so it can be deferred inside Suspense.
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
+  );
+}
+
+function LoginPageInner() {
   const locale = useLocale();
   const t = useTranslations('auth');
   const tErrors = useTranslations('auth.errors');
