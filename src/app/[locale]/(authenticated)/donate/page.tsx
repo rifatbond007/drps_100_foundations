@@ -10,15 +10,16 @@ import { DonationHistoryList } from '@/components/donation/DonationHistoryList';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
+import { PAYMENT_INSTRUCTIONS } from '@/lib/payment';
 
 /**
  * Donate page (client component).
  *
- * Flow:
+ * Manual bKash flow:
  *   1. User picks an amount + purpose
- *   2. Submit → POST /api/donations/create (auth, idempotency, dummy
- *      provider redirect)
- *   3. Redirect to the returned redirectUrl (dummy: /donate/checkout)
+ *   2. Submit → POST /api/donations/create (auth + idempotency)
+ *   3. Response carries donationId + nextStep: "submit-trx"
+ *   4. Redirect to /donate/submit?id=<donationId> with payment instructions
  *
  * Admins are redirected to /admin/users (role guard is also enforced
  * server-side at /api/donations/create as defense in depth).
@@ -55,17 +56,15 @@ export default function DonatePage() {
       const idempotencyKey = crypto.randomUUID();
       const res = await apiClient.post<{
         donationId: string;
-        paymentId: string;
-        redirectUrl: string;
+        paymentMethod: string;
+        nextStep: 'submit-trx';
       }>('/donations/create', {
         amount,
         purpose,
         isAnonymous: false,
         idempotencyKey,
       });
-      // redirectUrl is provider-supplied: dummy = in-app /donate/checkout
-      // route; bKash would be a third-party URL.
-      window.location.href = res.redirectUrl;
+      router.push(`/${locale}/donate/submit?id=${res.donationId}`);
     } catch (e) {
       setError(e instanceof ApiClientError ? e.message : 'Could not start donation');
       setSubmitting(false);

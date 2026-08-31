@@ -160,22 +160,31 @@
       "tryAgain": "Try again",
       "backToDashboard": "Back to dashboard"
     },
-    "checkout": {
-      "title": "Confirm payment",
-      "subtitle": "Review your donation and click Pay to confirm.",
-      "testModeBadge": "Test mode",
-      "testModeNotice": "This is a test payment — no real money will be charged. Replace PAYMENT_PROVIDER=bkash in .env to use the real gateway.",
-      "loading": "Loading donation…",
-      "missingId": "Invalid checkout session — please return to the donate page.",
-      "notFound": "Donation not found.",
-      "amount": "Amount",
-      "donor": "Donor",
-      "purpose": "Purpose",
-      "paymentId": "Payment ID",
-      "pay": "Pay now",
-      "cancel": "Cancel",
-      "processing": "Processing…",
+    "pending": {
+      "title": "Donation submitted for review",
+      "subtitle": "We received your bKash transaction details. An admin will verify and approve your donation within 24 hours.",
+      "viewHistory": "View history",
       "backToDashboard": "Back to dashboard"
+    },
+    "submit": {
+      "title": "Send money via bKash",
+      "subtitle": "Follow the steps below, then submit your transaction ID.",
+      "amount": "Amount",
+      "purpose": "Purpose",
+      "instructionsHeader": "Steps to complete your donation",
+      "step1": "Open your bKash app and choose {method} → Send Money.",
+      "step2": "Send the exact amount to {number}",
+      "copy": "Copy number",
+      "step3": "Use the reference: {hint}",
+      "step4": "After sending, come back here and submit the TrxID + your bKash number below.",
+      "trxLabel": "bKash TrxID",
+      "trxPlaceholder": "e.g. TRX123ABC456",
+      "trxHelp": "Find this in your bKash app under Transaction History.",
+      "phoneLabel": "Your bKash phone number",
+      "phonePlaceholder": "01XXXXXXXXX",
+      "phoneHelp": "The number registered to your bKash account (where you sent from).",
+      "submit": "Submit for review",
+      "reviewNote": "We never store or share your bKash phone. Admin only uses it to verify the transaction in the bKash app."
     },
     "errors": {
       "minAmount": "Minimum donation is 10 BDT",
@@ -320,6 +329,36 @@
         "EDUCATION": "Education",
         "MEDICAL": "Medical",
         "EMERGENCY": "Emergency"
+      }
+    },
+    "donations": {
+      "title": "Donation review",
+      "subtitle": "Verify donor-submitted bKash TrxIDs and approve or reject.",
+      "filterAll": "All",
+      "filterPending": "Awaiting review",
+      "filterApproved": "Approved",
+      "filterRejected": "Rejected",
+      "donor": "Donor",
+      "anonymous": "Anonymous donor",
+      "trxId": "TrxID",
+      "senderPhone": "Sender bKash",
+      "amount": "Amount",
+      "purpose": "Purpose",
+      "submittedAt": "Submitted",
+      "actions": "Actions",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approveTitle": "Approve donation",
+      "approveDescription": "Confirm you verified the TrxID matches the amount in your bKash app.",
+      "rejectTitle": "Reject donation",
+      "rejectDescription": "Tell the donor why this was rejected so they can resubmit correctly.",
+      "noteLabel": "Note (visible to donor)",
+      "cancel": "Cancel",
+      "empty": "No donations waiting for review",
+      "toasts": {
+        "approved": "Donation approved",
+        "rejected": "Donation rejected",
+        "error": "Action failed: {message}"
       }
     }
   },
