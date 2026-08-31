@@ -1,18 +1,16 @@
 /**
  * Tests for POST /api/donations/create.
  *
- * Verifies:
+ * Manual bKash flow (no payment provider call):
  *  - 401 when unauthenticated
  *  - 403 when role === 'ADMIN'
  *  - 200 even when profile is incomplete (profile completion is NOT a
- *    requirement for donating — users can finish / edit later from
- *    /settings)
+ *    requirement for donating)
  *  - 400 on bad payload (amount out of range, bad purpose)
- *  - 200 happy path: creates Donation(PENDING), calls dummy payment
- *    provider, returns { donationId, paymentId, redirectUrl }
- *  - Idempotency: a duplicate POST with the same idempotencyKey
- *    returns the cached response without a second DB write
- *  - Marks donation FAILED if the payment provider throws
+ *  - 200 happy path: creates Donation(PENDING), returns
+ *    { donationId, paymentMethod, nextStep: 'submit-trx' }
+ *  - Idempotency: a duplicate POST with the same idempotencyKey returns
+ *    the cached response without a second DB write
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NextRequest } from 'next/server';
@@ -34,14 +32,7 @@ const mocks = vi.hoisted(() => ({
   },
   rateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 2, resetAt: new Date() }),
   requireRateLimit: vi.fn(),
-  dummyPaymentClient: {
-    createPayment: vi.fn(),
-  },
   logSecurityEvent: vi.fn().mockResolvedValue(undefined),
-  // Return a value when crypto.randomUUID is called in the route —
-  // vitest runs in Node 20+ where crypto is global, so this is
-  // just a safety net for older runtimes.
-  randomUUID: vi.fn().mockReturnValue('uuid-1'),
 }));
 
 vi.mock('@/lib/auth/session', () => ({ requireActiveUser: mocks.requireActiveUser }));
@@ -54,24 +45,20 @@ vi.mock('@/lib/rate-limit', () => ({
     DONATION_CREATE: { max: 3, windowSeconds: 300 },
   },
 }));
-vi.mock('@/lib/payment/types', () => ({ getPaymentClient: () => mocks.dummyPaymentClient }));
 vi.mock('@/lib/audit', () => ({ logSecurityEvent: mocks.logSecurityEvent }));
-vi.mock('@/lib/payment/bkash', () => ({ bkashClient: {} }));
-// `next/headers` requires a request scope at runtime, which doesn't exist
-// in vitest. Provide a minimal Map-like shim that returns the host header
-// the route expects so the callback URL builds without throwing.
-vi.mock('next/headers', () => ({
-  headers: async () => ({
-    get(name: string) {
-      if (name === 'host') return 'localhost:3000';
-      if (name === 'x-forwarded-proto') return 'http';
-      return null;
-    },
-  }),
+vi.mock('@/lib/logger', () => ({
+  logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
+}));
+// No payment-provider client is mocked here — manual flow means the
+// route never calls one. Test fails fast if we accidentally re-introduce
+// the dependency.
+vi.mock('@/lib/payment', () => ({
+  PAYMENT_METHOD: 'manual_bkash',
+  PAYMENT_INSTRUCTIONS: { method: 'bKash (Personal)', number: '01616413419', referenceHint: '' },
 }));
 
 import { POST } from '@/app/api/donations/create/route';
-import { UnauthorizedError, ForbiddenError, PaymentError } from '@/lib/errors';
+import { UnauthorizedError, ForbiddenError } from '@/lib/errors';
 
 const VALID_BODY = {
   amount: 500,
@@ -81,9 +68,6 @@ const VALID_BODY = {
 };
 
 function buildReq(body: unknown): NextRequest {
-  // The route expects NextRequest (which extends Request). The global
-  // Request satisfies the surface the route uses here (json() +
-  // headers), so a cast is safe for unit-test purposes.
   return new Request('http://localhost/api/donations/create', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -107,32 +91,27 @@ describe('POST /api/donations/create', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 200 when profile is incomplete (profile is NOT required to donate)', async () => {
-    mocks.requireActiveUser.mockResolvedValueOnce({
-      user: { id: 'u1', role: 'USER', profileCompleted: false, languagePref: 'BN' },
-    });
-    mocks.prisma.donation.create.mockResolvedValueOnce({ id: 'd1', amount: '500' });
-    mocks.dummyPaymentClient.createPayment.mockResolvedValueOnce({
-      paymentId: 'DUMMY-d1',
-      amount: '500.00',
-      currency: 'BDT',
-      redirectUrl: '/donate/checkout?donationId=d1&paymentId=DUMMY-d1',
-      merchantInvoiceNumber: 'd1',
-    });
-
-    const res = await POST(buildReq(VALID_BODY));
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.success).toBe(true);
-    expect(body.data.donationId).toBe('d1');
-  });
-
   it('returns 403 when role === ADMIN', async () => {
     mocks.requireActiveUser.mockResolvedValueOnce({
       user: { id: 'a1', role: 'ADMIN', profileCompleted: true, languagePref: 'BN' },
     });
     const res = await POST(buildReq(VALID_BODY));
     expect(res.status).toBe(403);
+  });
+
+  it('returns 200 when profile is incomplete (profile is NOT required to donate)', async () => {
+    mocks.requireActiveUser.mockResolvedValueOnce({
+      user: { id: 'u1', role: 'USER', profileCompleted: false, languagePref: 'BN' },
+    });
+    mocks.prisma.donation.create.mockResolvedValueOnce({ id: 'd1', amount: '500' });
+
+    const res = await POST(buildReq(VALID_BODY));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.data.donationId).toBe('d1');
+    expect(body.data.paymentMethod).toBe('manual_bkash');
+    expect(body.data.nextStep).toBe('submit-trx');
   });
 
   it('returns 400 on invalid amount', async () => {
@@ -153,18 +132,11 @@ describe('POST /api/donations/create', () => {
     expect(res.status).toBe(400);
   });
 
-  it('happy path: creates donation, calls dummy provider, returns redirectUrl', async () => {
+  it('happy path: creates PENDING donation, returns submit-trx next step', async () => {
     mocks.requireActiveUser.mockResolvedValueOnce({
       user: { id: 'u1', role: 'USER', profileCompleted: true, languagePref: 'BN' },
     });
     mocks.prisma.donation.create.mockResolvedValueOnce({ id: 'd1', amount: '500' });
-    mocks.dummyPaymentClient.createPayment.mockResolvedValueOnce({
-      paymentId: 'DUMMY-d1',
-      amount: '500.00',
-      currency: 'BDT',
-      redirectUrl: '/donate/checkout?donationId=d1&paymentId=DUMMY-d1',
-      merchantInvoiceNumber: 'd1',
-    });
 
     const res = await POST(buildReq(VALID_BODY));
     expect(res.status).toBe(200);
@@ -172,15 +144,24 @@ describe('POST /api/donations/create', () => {
     expect(body.success).toBe(true);
     expect(body.data).toMatchObject({
       donationId: 'd1',
-      paymentId: 'DUMMY-d1',
-      redirectUrl: '/donate/checkout?donationId=d1&paymentId=DUMMY-d1',
+      paymentMethod: 'manual_bkash',
+      nextStep: 'submit-trx',
     });
 
-    // Persists the provider-assigned paymentId onto the donation row.
+    // The donation is inserted as PENDING with the manual payment method.
+    expect(mocks.prisma.donation.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: 'PENDING',
+          paymentMethod: 'manual_bkash',
+        }),
+      })
+    );
+    // paymentId mirrors donationId so the field stays non-null.
     expect(mocks.prisma.donation.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'd1' },
-        data: { bkashPaymentId: 'DUMMY-d1' },
+        data: { bkashPaymentId: 'd1' },
       })
     );
     // Audit log fired.
@@ -192,7 +173,7 @@ describe('POST /api/donations/create', () => {
   it('idempotent: duplicate idempotencyKey returns cached response, no second create', async () => {
     const cached = {
       success: true,
-      data: { donationId: 'd1', paymentId: 'DUMMY-d1', redirectUrl: '/x' },
+      data: { donationId: 'd1', paymentMethod: 'manual_bkash', nextStep: 'submit-trx' },
     };
     mocks.redis.get.mockResolvedValueOnce(JSON.stringify(cached));
     mocks.requireActiveUser.mockResolvedValueOnce({
@@ -203,35 +184,10 @@ describe('POST /api/donations/create', () => {
     expect(res.status).toBe(200);
     expect(mocks.prisma.donation.create).not.toHaveBeenCalled();
   });
-
-  it('marks donation FAILED when payment provider throws', async () => {
-    mocks.requireActiveUser.mockResolvedValueOnce({
-      user: { id: 'u1', role: 'USER', profileCompleted: true, languagePref: 'BN' },
-    });
-    mocks.prisma.donation.create.mockResolvedValueOnce({ id: 'd1', amount: '500' });
-    mocks.dummyPaymentClient.createPayment.mockRejectedValueOnce(new Error('upstream timeout'));
-    mocks.prisma.donation.update.mockResolvedValueOnce({ id: 'd1' });
-
-    const res = await POST(buildReq(VALID_BODY));
-    expect(res.status).toBe(502);
-    const body = await res.json();
-    expect(body.error).toBe('PAYMENT_ERROR');
-    // The just-created PENDING row gets flipped to FAILED.
-    expect(mocks.prisma.donation.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: 'd1' },
-        data: expect.objectContaining({ status: 'FAILED' }),
-      })
-    );
-  });
 });
 
-describe('PaymentError safe behavior', () => {
-  it('throws PaymentError when provider fails', () => {
-    const e = new PaymentError('internal');
-    expect(e.statusCode).toBe(502);
-    expect(e.safeMessage).toMatch(/payment could not be processed/i);
-    // ForbiddenError still constructed for typecheck parity
+describe('Error shape parity', () => {
+  it('ForbiddenError is an Error subclass (parity with previous suite)', () => {
     expect(new ForbiddenError('x')).toBeInstanceOf(Error);
   });
 });
