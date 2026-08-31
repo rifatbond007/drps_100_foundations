@@ -86,10 +86,7 @@ export default async function middleware(request: NextRequest) {
   const locale = isLocalePath ? (firstSegment as (typeof locales)[number]) : defaultLocale;
 
   // Public API routes — no auth check, no intl middleware
-  const isPublicApi =
-    pathname.startsWith('/api/auth') ||
-    pathname === '/api/health' ||
-    pathname.startsWith('/api/donations/webhook');
+  const isPublicApi = pathname.startsWith('/api/auth') || pathname === '/api/health';
 
   // Edge-compatible rate limit on auth endpoints (per-IP sliding window).
   // No-op when UPSTASH_REDIS_REST_URL is unset (local dev + CI without creds).

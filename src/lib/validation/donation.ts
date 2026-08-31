@@ -4,6 +4,11 @@
  */
 import { z } from 'zod';
 
+// BD phone number — matches 01XXXXXXXXX (11 digits, starts with 01).
+// Used both for User.phone and Donation.senderPhone so a donor's saved
+// phone is a hint when they submit TrxID.
+const BD_PHONE_REGEX = /^01[3-9]\d{8}$/;
+
 export const DONATION_PURPOSES = ['GENERAL_FUND', 'EDUCATION', 'MEDICAL', 'EMERGENCY'] as const;
 
 export const createDonationSchema = z.object({
@@ -21,6 +26,33 @@ export const createDonationSchema = z.object({
 });
 
 export type CreateDonationInput = z.infer<typeof createDonationSchema>;
+
+/**
+ * Manual bKash submission — donor typed these in after sending money
+ * to BKASH_RECEIVER_NUMBER. Stored on Donation.trxId / .senderPhone.
+ */
+export const submitTrxSchema = z.object({
+  trxId: z
+    .string()
+    .trim()
+    .min(6, 'TrxID too short')
+    .max(40, 'TrxID too long')
+    // bKash TrxIDs are alphanumeric. Be permissive about case so we
+    // don't reject legitimate IDs that include lower-case.
+    .regex(/^[A-Za-z0-9]+$/, 'TrxID must be alphanumeric'),
+  senderPhone: z.string().trim().regex(BD_PHONE_REGEX, 'Phone must be 11 digits starting with 01'),
+});
+
+export type SubmitTrxInput = z.infer<typeof submitTrxSchema>;
+
+/**
+ * Admin review — optional note + approve/reject decision.
+ */
+export const adminReviewSchema = z.object({
+  adminNote: z.string().trim().max(500).optional(),
+});
+
+export type AdminReviewInput = z.infer<typeof adminReviewSchema>;
 
 export const donationHistoryQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

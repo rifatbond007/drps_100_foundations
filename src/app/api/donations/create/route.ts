@@ -1,31 +1,28 @@
 /**
  * POST /api/donations/create
  *
- * Creates a PENDING donation and starts a (dummy) payment session.
+ * Creates a PENDING donation. The donor will then send money to the
+ * foundation's personal bKash number (BKASH_RECEIVER_NUMBER) and submit
+ * the TrxID through /donate/submit, which calls /api/donations/[id]/
+ * submit-trx to attach the TrxID. An admin reviews + approves from
+ * /admin/donations.
  *
  * Flow:
  *   1. requireActiveUser (auth + ban + soft-delete checks)
- *   2. Role guard — admins cannot donate (UX is /donate redirects them
- *      too; this is defense in depth)
+ *   2. Role guard — admins cannot donate
  *   3. Rate-limit per user (RATE_LIMITS.DONATION_CREATE: 3 / 5 min)
  *   4. Zod-validate body
  *   5. Idempotency check via Redis keyed on `idempotencyKey`
- *   6. Insert Donation(PENDING) with bkashPaymentId populated by the
- *      dummy provider
+ *   6. Insert Donation(PENDING) with paymentMethod = "manual_bkash"
  *   7. Cache the idempotency response so a retry returns the same body
  *   8. Audit log DONATION_INITIATED
- *   9. Return { donationId, paymentId, redirectUrl }
+ *   9. Return { donationId, paymentMethod, nextStep: "submit-trx" }
  *
  * Profile completion is intentionally NOT required here — users may
  * donate without finishing onboarding and edit their profile from
  * /settings at any time.
- *
- * Provider is selected via `getPaymentClient()` from
- * src/lib/payment/types.ts. Default is Dummy; set PAYMENT_PROVIDER=bkash
- * to switch to the (still-skeleton) bKash real provider.
  */
 import { z } from 'zod';
-import { headers } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireActiveUser } from '@/lib/auth/session';
@@ -33,10 +30,9 @@ import { ok, fail } from '@/lib/api/helpers';
 import { rateLimit, requireRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { redis } from '@/lib/redis';
 import { logSecurityEvent } from '@/lib/audit';
-import { PaymentError } from '@/lib/errors';
 import { createDonationSchema } from '@/lib/validation/donation';
-import { getPaymentClient } from '@/lib/payment/types';
 import { logger } from '@/lib/logger';
+import { PAYMENT_METHOD } from '@/lib/payment';
 
 const IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60; // 24h
 
@@ -83,18 +79,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(JSON.parse(cached));
     }
 
-    // 6. Build callback URL. The dummy checkout page redirects back here
-    //    with ?status=success|failure; the real bKash would too.
-    const h = await headers();
-    const host = h.get('host') ?? 'localhost:3000';
-    const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https');
-    const callbackUrl = `${proto}://${host}/api/donations/callback`;
-
-    // 7. Create the donation row first so the paymentId can be tied
-    //    to it. We pass a placeholder bkashPaymentId that the payment
-    //    provider will confirm; if it can't, we delete the row in the
-    //    catch block to avoid orphaned PENDING donations.
-    const placeholderPaymentId = `pending-${crypto.randomUUID()}`;
+    // 6. Insert Donation(PENDING). No gateway call — manual flow means
+    //    the donor sends money out-of-band and submits the TrxID next.
     const donation = await prisma.donation.create({
       data: {
         userId: session.user.id,
@@ -103,44 +89,24 @@ export async function POST(request: NextRequest) {
         purpose: body.purpose,
         isAnonymous: body.isAnonymous,
         status: 'PENDING',
-        bkashPaymentId: placeholderPaymentId,
-        paymentMethod: 'dummy',
+        // Use the donation id itself as the "payment id" so the field is
+        // non-null from the start. The bkashTransactionId field will be
+        // populated later (by /submit-trx for the donor's submitted
+        // TrxID, then promoted to the real TrxID on admin approval).
+        bkashPaymentId: undefined, // will be set below
+        paymentMethod: PAYMENT_METHOD,
       },
     });
 
-    // 8. Start the payment. With the dummy provider this is in-process
-    //    and can't fail for transport reasons; with a real provider it
-    //    can fail (network, bad credentials, etc.) and we'd need to
-    //    mark the donation FAILED and audit-log.
-    let payment;
-    try {
-      const client = getPaymentClient();
-      payment = await client.createPayment({
-        amount: body.amount,
-        callbackUrl,
-        donationId: donation.id,
-      });
-    } catch (error) {
-      // Mark the just-created donation as FAILED so it doesn't sit in
-      // PENDING forever and pollute admin reports.
-      await prisma.donation.update({
-        where: { id: donation.id },
-        data: {
-          status: 'FAILED',
-          failureReason: 'payment_provider_error',
-          completedAt: new Date(),
-        },
-      });
-      throw new PaymentError(error instanceof Error ? error.message : 'Payment provider error');
-    }
-
-    // 9. Persist the real paymentId from the provider.
+    // Persist paymentId = donationId for stable lookup. Use update so the
+    // @unique constraint on bkashPaymentId applies and we surface any
+    // collision (extremely unlikely with cuid() but defensive).
     await prisma.donation.update({
       where: { id: donation.id },
-      data: { bkashPaymentId: payment.paymentId },
+      data: { bkashPaymentId: donation.id },
     });
 
-    // 10. Audit + idempotency cache
+    // 7. Audit + idempotency cache
     await logSecurityEvent({
       action: 'DONATION_INITIATED',
       userId: session.user.id,
@@ -148,7 +114,7 @@ export async function POST(request: NextRequest) {
         donationId: donation.id,
         amount: donation.amount.toString(),
         purpose: donation.purpose,
-        paymentMethod: 'dummy',
+        paymentMethod: PAYMENT_METHOD,
       },
     });
 
@@ -156,9 +122,11 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         donationId: donation.id,
-        paymentId: payment.paymentId,
-        // For dummy: in-app /donate/checkout. For real: third-party URL.
-        redirectUrl: payment.redirectUrl,
+        paymentMethod: PAYMENT_METHOD,
+        // Hint to the client — there's no automatic redirect anymore.
+        // The donate page will route the donor to /donate/submit?id=...
+        // to collect TrxID + sender phone.
+        nextStep: 'submit-trx' as const,
       },
     };
 
