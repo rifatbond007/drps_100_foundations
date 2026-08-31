@@ -10,7 +10,6 @@ import { DonationHistoryList } from '@/components/donation/DonationHistoryList';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
-import { PAYMENT_INSTRUCTIONS } from '@/lib/payment';
 
 /**
  * Donate page (client component).

@@ -27,6 +27,7 @@
     "admin": "অ্যাডমিন",
     "users": "ব্যবহারকারী",
     "reports": "রিপোর্ট",
+    "donations": "পর্যালোচনা",
     "login": "লগইন",
     "logout": "লগআউট",
     "sections": {
@@ -253,7 +254,9 @@
       "manageUsers": "ব্যবহারকারী ব্যবস্থাপনা",
       "manageUsersDesc": "নিষিদ্ধ, মুক্ত এবং অনুসন্ধান",
       "viewReports": "রিপোর্ট দেখুন",
-      "viewReportsDesc": "দানের প্রবণতা এবং CSV রপ্তানি"
+      "viewReportsDesc": "দানের প্রবণতা এবং CSV রপ্তানি",
+      "reviewDonations": "দান পর্যালোচনা",
+      "reviewDonationsDesc": "বিকাশ ট্রানজ্যাকশন আইডি যাচাই করুন"
     },
     "users": {
       "title": "ব্যবহারকারী ব্যবস্থাপনা",

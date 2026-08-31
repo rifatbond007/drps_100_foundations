@@ -12,7 +12,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
-import { Home, Heart, History, UserCircle, Users, BarChart, LogOut } from 'lucide-react';
+import {
+  Home,
+  Heart,
+  History,
+  UserCircle,
+  Users,
+  BarChart,
+  ClipboardCheck,
+  LogOut,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -66,6 +75,7 @@ const accountSection: NavSection = {
  *   - Dashboard  → /admin/dashboard  (stat cards + shortcuts)
  *   - Users      → /admin/users      (management table)
  *   - Reports    → /admin/reports    (charts + CSV export)
+ *   - Awaiting review → /admin/donations (manual bKash TrxID approval queue)
  */
 function buildSections(isAdmin: boolean): NavSection[] {
   if (isAdmin) {
@@ -76,6 +86,7 @@ function buildSections(isAdmin: boolean): NavSection[] {
           { href: '/admin/dashboard', labelKey: 'dashboard', icon: Home },
           { href: '/admin/users', labelKey: 'users', icon: Users },
           { href: '/admin/reports', labelKey: 'reports', icon: BarChart },
+          { href: '/admin/donations', labelKey: 'donations', icon: ClipboardCheck },
         ],
       },
     ];

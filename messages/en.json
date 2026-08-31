@@ -27,6 +27,7 @@
     "admin": "Admin",
     "users": "Users",
     "reports": "Reports",
+    "donations": "Awaiting review",
     "login": "Sign in",
     "logout": "Sign out",
     "sections": {
@@ -253,7 +254,9 @@
       "manageUsers": "Manage users",
       "manageUsersDesc": "Ban, unban, and search all registered users",
       "viewReports": "View reports",
-      "viewReportsDesc": "Donation trends and CSV export"
+      "viewReportsDesc": "Donation trends and CSV export",
+      "reviewDonations": "Review donations",
+      "reviewDonationsDesc": "Verify donor-submitted bKash TrxIDs"
     },
     "users": {
       "title": "User management",
