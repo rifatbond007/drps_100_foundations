@@ -6,12 +6,22 @@ import { requireAuth } from '@/lib/auth/session';
 /**
  * Authenticated layout — guards all child routes.
  *
- * The locale layout already locks <body> to h-screen with overflow-
- * hidden and gives <main> `min-h-0 flex-1 overflow-y-auto`. This
- * layout fills that scroll region with a 2-column flex container
- * (sidebar + page content). Width is whatever the main area gives it
- * (full width minus the sidebar); height is constrained to 100vh by
- * the locale layout so only the inner columns scroll vertically.
+ * The locale layout locks <body> to exactly 100dvh and gives <main>
+ * `h-[90vh] overflow-y-auto` — that's the only scrollable surface on
+ * the page. This layout fills the main scroll region with a 2-column
+ * flex container: a sticky sidebar pinned to the navbar's bottom edge
+ * on the left, and the page content on the right.
+ *
+ * Important: the content column does NOT add its own overflow-y-auto.
+ * The parent <main> already scrolls, and nesting another scrollable
+ * region would create a double scrollbar. Pages here flow vertically
+ * inside <main>; the sidebar scrolls internally only if its own nav
+ * list grows taller than 90vh.
+ *
+ * The outer wrapper uses the same `container` class as the navbar, so
+ * the sidebar + content row has the same max-width (1280px) and the
+ * same horizontal padding as the navbar above it — on wide screens
+ * the dashboard no longer stretches edge-to-edge.
  *
  * No longer redirects incomplete-profile users to /complete-profile —
  * profile fields are collected lazily at point of use (the donate page
@@ -35,9 +45,9 @@ export default async function AuthenticatedLayout({
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-7xl gap-0 px-4">
+    <div className="container flex h-full w-full gap-0">
       <Sidebar isAdmin={session.user.role === 'ADMIN'} />
-      <div className="min-h-0 flex-1 overflow-y-auto py-8">{children}</div>
+      <div className="min-h-0 flex-1 py-4">{children}</div>
     </div>
   );
 }

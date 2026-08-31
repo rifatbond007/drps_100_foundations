@@ -38,6 +38,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         bkashTransactionId: true,
         createdAt: true,
         completedAt: true,
+        trxId: true,
+        trxSubmittedAt: true,
+        adminNote: true,
       },
     });
 
@@ -58,6 +61,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         bkashTransactionId: donation.bkashTransactionId,
         createdAt: donation.createdAt.toISOString(),
         completedAt: donation.completedAt ? donation.completedAt.toISOString() : null,
+        trxId: donation.trxId,
+        trxSubmittedAt: donation.trxSubmittedAt ? donation.trxSubmittedAt.toISOString() : null,
+        adminNote: donation.adminNote,
       },
     });
   } catch (error) {

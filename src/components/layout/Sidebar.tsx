@@ -12,7 +12,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
-import { Home, Heart, History, UserCircle, Users, BarChart, LogOut } from 'lucide-react';
+import {
+  Home,
+  Heart,
+  History,
+  UserCircle,
+  Users,
+  BarChart,
+  ClipboardCheck,
+  LogOut,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -66,6 +75,7 @@ const accountSection: NavSection = {
  *   - Dashboard  → /admin/dashboard  (stat cards + shortcuts)
  *   - Users      → /admin/users      (management table)
  *   - Reports    → /admin/reports    (charts + CSV export)
+ *   - Awaiting review → /admin/donations (manual bKash TrxID approval queue)
  */
 function buildSections(isAdmin: boolean): NavSection[] {
   if (isAdmin) {
@@ -76,6 +86,7 @@ function buildSections(isAdmin: boolean): NavSection[] {
           { href: '/admin/dashboard', labelKey: 'dashboard', icon: Home },
           { href: '/admin/users', labelKey: 'users', icon: Users },
           { href: '/admin/reports', labelKey: 'reports', icon: BarChart },
+          { href: '/admin/donations', labelKey: 'donations', icon: ClipboardCheck },
         ],
       },
     ];
@@ -95,7 +106,14 @@ export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   };
 
   return (
-    <aside className="hidden h-full w-64 shrink-0 flex-col overflow-y-auto border-r bg-muted/30 md:flex">
+    // `sticky top-16` pins the sidebar to the navbar's bottom edge so
+    // scrolling page content moves underneath it. `h-[90vh]` matches
+    // <main>'s content area exactly, so the sidebar fills the same
+    // 90vh the page content lives in (100vh - ~10vh header+footer).
+    // The inner `overflow-y-auto` lets long nav lists scroll inside
+    // the sidebar when the viewport is short. Mobile breakpoint
+    // (`hidden md:flex`) hides the sidebar on phones.
+    <aside className="sticky top-16 hidden h-[90vh] w-64 shrink-0 flex-col overflow-y-auto border-r bg-muted/30 md:flex">
       {/* Top section: scrollable nav. min-h-0 lets flex-1 actually shrink
           below its content height so overflow-y-auto can take over on
           short viewports / many sections. */}

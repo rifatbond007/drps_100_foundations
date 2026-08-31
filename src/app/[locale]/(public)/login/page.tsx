@@ -58,7 +58,7 @@ function LoginPageInner() {
   const tErrors = useTranslations('auth.errors');
   const searchParams = useSearchParams();
   const errorParam = searchParams.get('error');
-  const callbackUrl = searchParams.get('callbackUrl') ?? `/${locale}/dashboard`;
+  const callbackUrl = searchParams.get('callbackUrl') ?? `/${locale}`;
 
   useEffect(() => {
     if (!errorParam) {

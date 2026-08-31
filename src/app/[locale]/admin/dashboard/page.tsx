@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { Users, BarChart } from 'lucide-react';
+import { Users, BarChart, ClipboardCheck } from 'lucide-react';
 import { CardDescription, CardTitle } from '@/components/ui/card';
 import { AdminStatsCard } from '@/components/admin/AdminStatsCard';
 import { AdminTotalsLive } from '@/components/admin/AdminTotalsLive';
@@ -31,7 +31,7 @@ export default async function AdminDashboardPage({
     <div className="space-y-6">
       <AdminTotalsLive locale={safeLocale} />
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
           href={`/${locale}/admin/users`}
           className="group rounded-lg border bg-card p-5 transition-colors hover:bg-accent"
@@ -58,6 +58,23 @@ export default async function AdminDashboardPage({
             <div>
               <CardTitle className="text-base group-hover:underline">{t('viewReports')}</CardTitle>
               <CardDescription className="text-xs">{t('viewReportsDesc')}</CardDescription>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href={`/${locale}/admin/donations`}
+          className="group rounded-lg border bg-card p-5 transition-colors hover:bg-accent"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <ClipboardCheck className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-base group-hover:underline">
+                {t('reviewDonations')}
+              </CardTitle>
+              <CardDescription className="text-xs">{t('reviewDonationsDesc')}</CardDescription>
             </div>
           </div>
         </Link>

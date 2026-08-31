@@ -29,6 +29,7 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { locales, defaultLocale } from '@/lib/i18n/config';
 import { edgeRateLimit } from '@/lib/security/edge-rate-limit';
+import { getAuthSecret } from '@/lib/auth/secret';
 
 const intlMiddleware = createIntlMiddleware({
   locales: [...locales],
@@ -37,7 +38,13 @@ const intlMiddleware = createIntlMiddleware({
   localeDetection: true,
 });
 
-const SECRET = process.env.NEXTAUTH_SECRET ?? '';
+// Resolve the secret lazily (inside the middleware function), not at
+// module top. `next build` evaluates middleware.ts during build; if we
+// bound SECRET at import time, a missing NEXTAUTH_SECRET in the build
+// env would crash the build on Vercel. Calling getAuthSecret() per
+// request still gives the Edge + Node runtimes the same key and turns
+// a missing/empty env var into a loud runtime error instead of a
+// silent `getToken() === null` that drops users back to the home page.
 
 /**
  * Copy cookies/Set-Cookie + key headers (Vary) from `source` onto a redirect.
@@ -80,10 +87,7 @@ export default async function middleware(request: NextRequest) {
   const locale = isLocalePath ? (firstSegment as (typeof locales)[number]) : defaultLocale;
 
   // Public API routes — no auth check, no intl middleware
-  const isPublicApi =
-    pathname.startsWith('/api/auth') ||
-    pathname === '/api/health' ||
-    pathname.startsWith('/api/donations/webhook');
+  const isPublicApi = pathname.startsWith('/api/auth') || pathname === '/api/health';
 
   // Edge-compatible rate limit on auth endpoints (per-IP sliding window).
   // No-op when UPSTASH_REDIS_REST_URL is unset (local dev + CI without creds).
@@ -138,7 +142,7 @@ export default async function middleware(request: NextRequest) {
     return intlResponse;
   }
 
-  const token = await getToken({ req: request, secret: SECRET });
+  const token = await getToken({ req: request, secret: getAuthSecret() });
   const isLoggedIn = !!token;
   const userRole = token?.role as string | undefined;
 

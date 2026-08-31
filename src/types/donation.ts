@@ -16,6 +16,13 @@ export interface Donation {
   bkashTransactionId: string | null;
   createdAt: string;
   completedAt: string | null;
+  // Manual bKash fields (added when we moved off the bKash auto-flow).
+  // trxId is non-null as soon as the donor has submitted their bKash
+  // TrxID via /api/donations/[id]/submit-trx. adminNote is populated
+  // when an admin rejects the donation.
+  trxId: string | null;
+  trxSubmittedAt: string | null;
+  adminNote: string | null;
 }
 
 export interface DonationHistoryResponse {

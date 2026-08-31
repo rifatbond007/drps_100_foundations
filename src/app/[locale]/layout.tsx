@@ -37,16 +37,20 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={direction} suppressHydrationWarning>
       {/*
-        Body uses min-h-[100dvh] (dynamic viewport) so the layout fits
-        mobile browser chrome. The <main> region is the only
-        overflow-y-auto surface — Header + Footer are shrink-0
-        sticky/fixed boundaries and never scroll.
+        Body is locked to exactly 100dvh (not min-h-) so the page never
+        scrolls itself. Header + Footer occupy ~10vh combined and stay
+        pinned; <main> is exactly 90vh and is the only scrollable surface.
+
+        100vh = 90vh (main) + 10vh (header + footer). On a 1080px viewport
+        that's ~972px content, ~64px header, ~44px footer. The content
+        area scrolls internally when pages are taller than 90vh (e.g.
+        settings, history lists) — the navbar and footer stay put.
       */}
-      <body className="flex min-h-[100dvh] flex-col bg-background font-sans antialiased">
+      <body className="flex h-[100dvh] flex-col overflow-hidden bg-background font-sans antialiased">
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Providers>
             <Header locale={locale} />
-            <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</main>
+            <main className="h-[90vh] min-h-0 flex-1 overflow-y-auto">{children}</main>
             <Footer locale={locale} />
           </Providers>
         </NextIntlClientProvider>

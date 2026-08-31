@@ -180,34 +180,34 @@ export default function SettingsPage() {
   const profileEmail = profile?.email ?? user.email ?? null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="text-muted-foreground">{t('subtitle')}</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
       </div>
 
       {/* Identity card (read-only) */}
       <Card>
-        <CardContent className="flex items-center gap-4 py-6">
+        <CardContent className="flex items-center gap-4 py-3">
           <Avatar
             src={profile?.avatarUrl ?? user.image ?? null}
             name={profileName}
             email={profileEmail}
-            size="lg"
+            size="md"
           />
           <div>
-            <div className="text-lg font-semibold">{profileName ?? '—'}</div>
-            <div className="text-sm text-muted-foreground">{profileEmail ?? '—'}</div>
+            <div className="text-base font-semibold">{profileName ?? '—'}</div>
+            <div className="text-xs text-muted-foreground">{profileEmail ?? '—'}</div>
           </div>
         </CardContent>
       </Card>
 
       {/* Profile form */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t('profile')}</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">{t('profile')}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {profileLoading ? (
             <div className="text-sm text-muted-foreground">{tCommon('loading')}</div>
           ) : (
@@ -272,10 +272,10 @@ export default function SettingsPage() {
 
       {/* Appearance + Notifications form */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t('appearance')}</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">{t('appearance')}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {settingsLoading ? (
             <div className="text-sm text-muted-foreground">{tCommon('loading')}</div>
           ) : settingsLoadError ? (
@@ -308,11 +308,11 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t('notifications')}</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">{t('notifications')}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <label className="flex items-center justify-between gap-4 rounded-md border p-3">
+        <CardContent className="space-y-2">
+          <label className="flex items-center justify-between gap-4 rounded-md border p-2">
             <span className="text-sm">{t('emailNotifications')}</span>
             <input
               type="checkbox"
@@ -320,7 +320,7 @@ export default function SettingsPage() {
               {...settingsForm.register('emailNotifications')}
             />
           </label>
-          <label className="flex items-center justify-between gap-4 rounded-md border p-3">
+          <label className="flex items-center justify-between gap-4 rounded-md border p-2">
             <span className="text-sm">{t('donationReceipts')}</span>
             <input
               type="checkbox"
@@ -332,7 +332,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Save + status */}
-      <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
         <div
           className={cn(
             'flex items-center gap-2 text-sm',

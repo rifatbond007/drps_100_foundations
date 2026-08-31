@@ -64,6 +64,9 @@ export async function GET(request: Request) {
       bkashTransactionId: d.bkashTransactionId,
       createdAt: d.createdAt.toISOString(),
       completedAt: d.completedAt ? d.completedAt.toISOString() : null,
+      trxId: d.trxId,
+      trxSubmittedAt: d.trxSubmittedAt ? d.trxSubmittedAt.toISOString() : null,
+      adminNote: d.adminNote,
     }));
 
     const body: DonationHistoryResponse = {
