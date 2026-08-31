@@ -116,11 +116,12 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  accounts  Account[]
-  sessions  Session[]
-  donations Donation[]
-  auditLogs AuditLog[]
-  settings  UserSettings?
+  accounts          Account[]
+  sessions          Session[]
+  donations         Donation[]
+  reviewedDonations Donation[]    @relation("DonationReviewer")
+  auditLogs         AuditLog[]
+  settings          UserSettings?
 
   @@index([email])
   @@index([role])
@@ -138,22 +139,42 @@ model Donation {
   purpose            DonationPurpose
   status             DonationStatus  @default(PENDING)
   isAnonymous        Boolean         @default(false)
+  // Manual bKash flow: the bKash personal number we ask the donor to
+  // send to is fixed (BKASH_RECEIVER_NUMBER env), so we keep the same
+  // field names for parity with the previous bKash PGW integration —
+  // `bkashPaymentId` is the donation id itself, `bkashTransactionId`
+  // is the user-entered TrxID once admin approves.
   bkashPaymentId     String?         @unique
   bkashTransactionId String?         @unique
-  paymentMethod      String?         @default("bkash")
+  paymentMethod      String?         @default("manual_bkash")
   failureReason      String?
+  // ── Manual payment submission fields ──
+  // The TrxID the donor typed in after sending money to our personal
+  // bKash number. Populated by /api/donations/[id]/submit-trx.
+  trxId              String?
+  // bKash phone number the donor sent FROM (verified by admin against
+  // the bKash app). Same validation as User.phone.
+  senderPhone        String?
+  trxSubmittedAt     DateTime?
+  // Admin review trail — who approved/rejected this donation and when.
+  reviewedById       String?
+  reviewedAt         DateTime?
+  adminNote          String?
   metadata           Json?
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
   completedAt        DateTime?
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user       User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  reviewedBy User? @relation("DonationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([status])
   @@index([createdAt])
   @@index([userId, status, createdAt])
   @@index([bkashPaymentId])
+  @@index([status, createdAt])
+  @@index([reviewedById])
 }
 
 model AuditLog {
