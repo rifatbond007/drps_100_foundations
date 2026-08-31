@@ -34,7 +34,12 @@ export function SignInButton({ locale, label }: Props) {
   };
 
   return (
-    <Button type="button" size="sm" onClick={handleClick} className="gap-2">
+    <Button
+      type="button"
+      size="sm"
+      onClick={handleClick}
+      className="h-9 gap-2 rounded-full px-4 text-sm shadow-sm transition-shadow hover:shadow-md"
+    >
       <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
         <path
           fill="#4285F4"

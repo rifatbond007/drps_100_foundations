@@ -83,6 +83,8 @@
     "loginTitle": "Welcome",
     "loginSubtitle": "Sign in with your Google account to continue",
     "loginWithGoogle": "Sign in with Google",
+    "loggingIn": "Redirecting to Google…",
+    "signupHint": "First time here? The same button creates your account.",
     "loginTerms": "By signing in you agree to our terms of service",
     "logout": "Sign out",
     "errorTitle": "Sign-in error",
@@ -95,7 +97,10 @@
       "submit": "Save profile",
       "errors": {
         "invalidPhone": "Please enter a valid Bangladeshi phone number",
-        "submitFailed": "Failed to save profile"
+        "submitFailed": "Failed to save profile",
+        "unauthorized": "Please sign in to save your profile",
+        "networkError": "Network error. Please check your connection and try again.",
+        "saving": "Saving…"
       }
     },
     "errors": {
@@ -174,7 +179,7 @@
       "purpose": "Purpose",
       "instructionsHeader": "Steps to complete your donation",
       "step1": "Open your bKash app and choose {method} → Send Money.",
-      "step2": "Send the exact amount to {number}",
+      "step2": "Send the exact amount to <b>{number}</b>",
       "copy": "Copy number",
       "step3": "Use the reference: {hint}",
       "step4": "After sending, come back here and submit the TrxID + your bKash number below.",

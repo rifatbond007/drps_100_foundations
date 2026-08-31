@@ -89,15 +89,15 @@ export function UserMenu({ locale, name, email, avatarUrl, isAdmin = false }: Pr
           <img
             src={avatarUrl}
             alt={name}
-            width={32}
-            height={32}
-            className="h-8 w-8 rounded-full object-cover"
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-full object-cover"
             referrerPolicy="no-referrer"
           />
         ) : (
           <span
             aria-hidden="true"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
           >
             {initials}
           </span>

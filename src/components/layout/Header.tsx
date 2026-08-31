@@ -1,13 +1,17 @@
 /**
  * Site header. Server component.
  *
- * Two-row layout:
- *   - Top row (always shown, public): brand on the left, `PublicNav`
- *     (Home/About/Blog/Alumni) centered/left, language switcher + auth
- *     control on the right.
- *   - Bottom row (donors only): shows context-specific links — signed-in
- *     donors see Dashboard / Donate / History. Admins and signed-out users
- *     see nothing extra here (admins use the sidebar for admin navigation).
+ * Single-row layout, responsive:
+ *   - Mobile (<md): brand on the left, three-dot menu trigger on the
+ *     right. Public nav, language switcher, and auth control all live
+ *     inside the mobile drawer (`MobileMenu`) so the navbar itself
+ *     stays compact.
+ *   - Desktop (≥md): brand + `PublicNav` centered + language switcher
+ *     + auth control on the right.
+ *
+ * Authenticated users reach their dashboard, settings, and admin pages
+ * from the profile-picture dropdown in `UserMenu` on desktop, or from
+ * the Account/Admin section of the mobile drawer on phones.
  *
  * The "Sign in" button calls `signIn('google', { redirect: true })`
  * directly via the client-side `SignInButton`, so a click sends the
@@ -15,13 +19,14 @@
  * /{locale}/login page.
  */
 import Link from 'next/link';
-import { Heart } from 'lucide-react';
+import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/next-auth';
 import { PublicNav } from '@/components/marketing/PublicNav';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { SignInButton } from './SignInButton';
 import { UserMenu } from './UserMenu';
+import { MobileMenu } from './MobileMenu';
 
 export async function Header({ locale }: { locale: string }) {
   // The "nav" namespace owns every label rendered here (about, dashboard,
@@ -34,17 +39,44 @@ export async function Header({ locale }: { locale: string }) {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      {/* Row 1 — always public: brand + PublicNav + auth control */}
-      <div className="container flex h-16 items-center justify-between gap-4">
+      <div className="container flex h-16 items-center justify-between gap-3">
         <Link
           href={`/${locale}`}
-          className="flex shrink-0 items-center gap-2"
+          className="group flex shrink-0 items-center gap-3 rounded-md outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           aria-label={t('home')}
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Heart className="h-4 w-4 fill-primary/30" />
+          {/*
+            Foundation crest. Source PNG is 1254×1254 — next/image will
+            serve a properly-sized WebP. `priority` because the logo is
+            the LCP element on every page. h-9 (36px) on mobile, h-10
+            (40px) on ≥sm. The white parts of the source PNG are
+            transparent, so the circular crest sits cleanly on the
+            navbar's translucent white background.
+          */}
+          <Image
+            src="/images/logo.png"
+            alt="DRPS Batch-19 Foundation"
+            width={40}
+            height={40}
+            priority
+            sizes="(min-width: 640px) 40px, 36px"
+            className="h-9 w-9 shrink-0 sm:h-10 sm:w-10"
+          />
+          {/*
+            Wordmark + tagline. Hidden on the smallest screens so the
+            logo alone carries the brand; visible from sm up where
+            horizontal space allows it. Tracking-tight tightens the
+            kerning so the Bangla glyphs read as a unit rather than
+            separate characters.
+          */}
+          <span className="hidden flex-col leading-tight sm:flex">
+            <span className="text-base font-bold tracking-tight text-foreground lg:text-lg">
+              দান প্ল্যাটফর্ম
+            </span>
+            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground lg:text-xs">
+              DRPS Batch-19 Foundation
+            </span>
           </span>
-          <span className="text-base font-bold sm:text-lg">দান প্ল্যাটফর্ম</span>
         </Link>
 
         {/* Public nav — hidden on small screens to leave room for the auth control. */}
@@ -52,7 +84,11 @@ export async function Header({ locale }: { locale: string }) {
           <PublicNav />
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        {/*
+          Desktop right cluster: language switcher + auth. Hidden on
+          mobile because those controls live inside MobileMenu instead.
+        */}
+        <div className="hidden shrink-0 items-center gap-2 md:flex">
           <LanguageSwitcher />
           {isLoggedIn ? (
             <UserMenu
@@ -66,36 +102,46 @@ export async function Header({ locale }: { locale: string }) {
             <SignInButton locale={locale} label={t('login')} />
           )}
         </div>
-      </div>
 
-      {/* Row 2 — donor context row. Admins intentionally do NOT get a
-          second row here; their Dashboard / Users / Reports links live in
-          the sidebar so they don't crowd the public marketing nav. On
-          mobile this scrolls horizontally so all items remain reachable. */}
-      {isLoggedIn && !isAdmin && (
-        <div className="border-t bg-muted/40">
-          <div className="container flex h-12 items-center gap-1 overflow-x-auto">
-            <Link
-              href={`/${locale}/dashboard`}
-              className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              {t('dashboard')}
-            </Link>
-            <Link
-              href={`/${locale}/donate`}
-              className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              {t('donate')}
-            </Link>
-            <Link
-              href={`/${locale}/history`}
-              className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              {t('history')}
-            </Link>
-          </div>
+        {/*
+          Mobile right cluster: just the three-dot menu trigger. The
+          full nav + auth + language switcher slide in from the right
+          when tapped. Only visible <md so it doesn't duplicate the
+          desktop controls.
+        */}
+        <div className="flex shrink-0 items-center md:hidden">
+          <MobileMenu
+            locale={locale}
+            labels={{
+              home: t('home'),
+              about: t('about'),
+              blog: t('blog'),
+              alumni: t('alumni'),
+              dashboard: t('dashboard'),
+              settings: t('settings'),
+              history: t('history'),
+              users: t('users'),
+              reports: t('reports'),
+              donations: t('donations'),
+              sectionsMain: t('sections.main'),
+              sectionsAccount: t('sections.account'),
+              sectionsAdmin: t('sections.admin'),
+              login: t('login'),
+              logout: t('logout'),
+            }}
+            session={
+              isLoggedIn
+                ? {
+                    name: session.user.name,
+                    email: session.user.email,
+                    image: session.user.image ?? null,
+                    role: isAdmin ? 'ADMIN' : 'USER',
+                  }
+                : null
+            }
+          />
         </div>
-      )}
+      </div>
     </header>
   );
 }

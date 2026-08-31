@@ -115,16 +115,20 @@ export default function SubmitTrxPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-4 py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Phone className="h-5 w-5" />
+    // `h-full` so the card fits the auth layout's content column (90vh
+    // minus its own padding). When the form + instructions are taller
+    // than that, the inner CardContent scrolls instead of pushing the
+    // submit button below the viewport.
+    <div className="mx-auto flex h-full max-w-md flex-col gap-3 py-2">
+      <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <CardHeader className="shrink-0 pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Phone className="h-4 w-4" />
             {t('title')}
           </CardTitle>
-          <CardDescription>{t('subtitle')}</CardDescription>
+          <CardDescription className="text-xs">{t('subtitle')}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="min-h-0 space-y-3 overflow-y-auto pr-2">
           {loading && (
             <div className="py-8 text-center text-sm text-muted-foreground">
               {tCommon('loading')}
@@ -137,25 +141,28 @@ export default function SubmitTrxPage() {
           )}
           {donation && !loading && !loadError && (
             <>
-              <div className="space-y-2 rounded-md border bg-muted/40 p-4">
-                <div className="flex items-center justify-between text-sm">
+              <div className="space-y-1 rounded-md border bg-muted/40 p-3 text-sm">
+                <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">{t('amount')}</span>
-                  <span className="text-xl font-bold">
+                  <span className="text-lg font-bold">
                     {formatBDT(donation.amount, (locale === 'en' ? 'en' : 'bn') as 'bn' | 'en')}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">{t('purpose')}</span>
                   <span className="font-medium">{donation.purpose}</span>
                 </div>
               </div>
 
-              <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm">
+              <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs">
                 <div className="font-semibold text-amber-900">{t('instructionsHeader')}</div>
-                <ol className="mt-2 list-decimal space-y-1 pl-5 text-amber-900">
+                <ol className="mt-1 list-decimal space-y-0.5 pl-5 text-amber-900">
                   <li>{t('step1', { method: PAYMENT_INSTRUCTIONS.method })}</li>
                   <li>
-                    {t('step2', { number: PAYMENT_INSTRUCTIONS.number })}{' '}
+                    {t.rich('step2', {
+                      number: PAYMENT_INSTRUCTIONS.number,
+                      b: (chunks) => <strong className="font-bold tracking-wide">{chunks}</strong>,
+                    })}{' '}
                     <button
                       type="button"
                       onClick={copyNumber}
@@ -170,7 +177,7 @@ export default function SubmitTrxPage() {
                 </ol>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div className="space-y-2">
                   <Label htmlFor="trxId">{t('trxLabel')}</Label>
                   <Input
@@ -219,8 +226,8 @@ export default function SubmitTrxPage() {
         </CardContent>
       </Card>
 
-      <div className="flex items-start gap-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-xs text-blue-900">
-        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+      <div className="flex shrink-0 items-start gap-2 rounded-md border border-blue-200 bg-blue-50 p-2 text-xs text-blue-900">
+        <ShieldCheck className="mt-0.5 h-3 w-3 shrink-0" />
         <p>{t('reviewNote')}</p>
       </div>
     </div>
