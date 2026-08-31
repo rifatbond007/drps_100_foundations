@@ -2,8 +2,10 @@
  * Google sign-in button.
  *
  * Click → straight to Google's account chooser. No intermediate
- * /{locale}/login page. The callbackUrl defaults to /{locale}/dashboard
- * so a successful OAuth roundtrip lands the user on their dashboard.
+ * /{locale}/login page. The callbackUrl defaults to /{locale} (the
+ * locale landing page) — the user picks where to go next from the
+ * public nav. Deep-link callers can override via the `?callbackUrl=…`
+ * query param handled by /login.
  *
  * Uses `signIn(..., { redirect: true })` so the browser does a full
  * top-level navigation — fetch-based signIn returns the OAuth URL but
@@ -26,7 +28,7 @@ interface Props {
 export function SignInButton({ locale, label }: Props) {
   const handleClick = () => {
     void signIn('google', {
-      callbackUrl: `/${locale}/dashboard`,
+      callbackUrl: `/${locale}`,
       redirect: true,
     });
   };

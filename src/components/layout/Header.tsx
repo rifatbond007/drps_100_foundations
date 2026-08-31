@@ -24,9 +24,9 @@ import { SignInButton } from './SignInButton';
 import { UserMenu } from './UserMenu';
 
 export async function Header({ locale }: { locale: string }) {
-  // Nav strings live in the `nav` namespace, not `common` — keys like
-  // `about`, `dashboard`, `donate`, `history`, `login`, `logout` are
-  // navigation labels, not generic UI strings.
+  // The "nav" namespace owns every label rendered here (about, dashboard,
+  // donate, history, login, logout). Using `common` would make the keys
+  // fall through to themselves, since they don't live under common.
   const t = await getTranslations({ locale, namespace: 'nav' });
   const session = await auth();
   const isLoggedIn = !!session?.user;
