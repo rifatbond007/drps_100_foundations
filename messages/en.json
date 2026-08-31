@@ -212,7 +212,11 @@
       "EDUCATION": "Education",
       "MEDICAL": "Medical",
       "EMERGENCY": "Emergency"
-    }
+    },
+    "awaitingReview": "Awaiting review",
+    "trxNotSubmitted": "TrxID not submitted yet",
+    "submitTrx": "Submit TrxID",
+    "adminNoteLabel": "Reason from admin"
   },
   "settings": {
     "title": "Settings",

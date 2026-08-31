@@ -212,7 +212,11 @@
       "EDUCATION": "শিক্ষা",
       "MEDICAL": "চিকিৎসা",
       "EMERGENCY": "জরুরি"
-    }
+    },
+    "awaitingReview": "পর্যালোচনাধীন",
+    "trxNotSubmitted": "এখনও TrxID জমা দেওয়া হয়নি",
+    "submitTrx": "TrxID জমা দিন",
+    "adminNoteLabel": "অ্যাডমিনের কারণ"
   },
   "settings": {
     "title": "সেটিংস",
