@@ -29,6 +29,7 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { locales, defaultLocale } from '@/lib/i18n/config';
 import { edgeRateLimit } from '@/lib/security/edge-rate-limit';
+import { NEXTAUTH_SECRET } from '@/lib/auth/secret';
 
 const intlMiddleware = createIntlMiddleware({
   locales: [...locales],
@@ -37,7 +38,12 @@ const intlMiddleware = createIntlMiddleware({
   localeDetection: true,
 });
 
-const SECRET = process.env.NEXTAUTH_SECRET ?? '';
+// `NEXTAUTH_SECRET` is validated at import time by `@/lib/auth/secret`.
+// Using it here (instead of `process.env.NEXTAUTH_SECRET ?? ''`) ensures
+// the Edge runtime and the Node runtime sign/verify with the same key
+// and turns a missing/empty env var into a loud build error instead of
+// a silent `getToken() === null` that drops users back to the home page.
+const SECRET = NEXTAUTH_SECRET;
 
 /**
  * Copy cookies/Set-Cookie + key headers (Vary) from `source` onto a redirect.

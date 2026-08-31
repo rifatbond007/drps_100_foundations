@@ -13,6 +13,7 @@ import Google from 'next-auth/providers/google';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 import { logSecurityEvent } from '@/lib/audit';
+import { NEXTAUTH_SECRET } from '@/lib/auth/secret';
 
 // Force IPv4-first DNS resolution app-wide. On networks where Google is
 // reachable via AAAA records but the IPv6 path is broken/blackholed,
@@ -25,12 +26,13 @@ import { logSecurityEvent } from '@/lib/audit';
 // override explicit `verbatim` lookups or per-call families.
 dns.setDefaultResultOrder('ipv4first');
 
-if (!process.env.NEXTAUTH_SECRET) {
-  throw new Error('NEXTAUTH_SECRET must be set');
-}
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set');
 }
+// NEXTAUTH_SECRET is validated by `@/lib/auth/secret` at import time —
+// referencing it here ensures the import stays live (and forces the
+// throw if the env var is missing).
+void NEXTAUTH_SECRET;
 
 /**
  * Comma-separated list of emails that should be promoted to ADMIN on any
@@ -295,7 +297,15 @@ export async function signOutEvent(message: any): Promise<void> {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: NEXTAUTH_SECRET,
+  // Vercel terminates TLS and proxies the request, so the request URL
+  // NextAuth sees differs from the public URL. Without `trustHost`,
+  // NextAuth v5 mis-derives the session-cookie name (Secure vs non-Secure
+  // variant) and the `useSecureCookies` flag, causing `getToken()` in
+  // middleware.ts to return `null` on protected routes even though the
+  // cookie is set — surfacing as a redirect to `/${locale}?from=...`.
+  // Also matches `AUTH_TRUST_HOST=true` if set in the Vercel env.
+  trustHost: true,
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',
