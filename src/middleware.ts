@@ -29,7 +29,7 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { locales, defaultLocale } from '@/lib/i18n/config';
 import { edgeRateLimit } from '@/lib/security/edge-rate-limit';
-import { NEXTAUTH_SECRET } from '@/lib/auth/secret';
+import { getAuthSecret } from '@/lib/auth/secret';
 
 const intlMiddleware = createIntlMiddleware({
   locales: [...locales],
@@ -38,12 +38,13 @@ const intlMiddleware = createIntlMiddleware({
   localeDetection: true,
 });
 
-// `NEXTAUTH_SECRET` is validated at import time by `@/lib/auth/secret`.
-// Using it here (instead of `process.env.NEXTAUTH_SECRET ?? ''`) ensures
-// the Edge runtime and the Node runtime sign/verify with the same key
-// and turns a missing/empty env var into a loud build error instead of
-// a silent `getToken() === null` that drops users back to the home page.
-const SECRET = NEXTAUTH_SECRET;
+// Resolve the secret lazily (inside the middleware function), not at
+// module top. `next build` evaluates middleware.ts during build; if we
+// bound SECRET at import time, a missing NEXTAUTH_SECRET in the build
+// env would crash the build on Vercel. Calling getAuthSecret() per
+// request still gives the Edge + Node runtimes the same key and turns
+// a missing/empty env var into a loud runtime error instead of a
+// silent `getToken() === null` that drops users back to the home page.
 
 /**
  * Copy cookies/Set-Cookie + key headers (Vary) from `source` onto a redirect.
@@ -141,7 +142,7 @@ export default async function middleware(request: NextRequest) {
     return intlResponse;
   }
 
-  const token = await getToken({ req: request, secret: SECRET });
+  const token = await getToken({ req: request, secret: getAuthSecret() });
   const isLoggedIn = !!token;
   const userRole = token?.role as string | undefined;
 

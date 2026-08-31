@@ -13,7 +13,6 @@ import Google from 'next-auth/providers/google';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 import { logSecurityEvent } from '@/lib/audit';
-import { NEXTAUTH_SECRET } from '@/lib/auth/secret';
 
 // Force IPv4-first DNS resolution app-wide. On networks where Google is
 // reachable via AAAA records but the IPv6 path is broken/blackholed,
@@ -26,13 +25,22 @@ import { NEXTAUTH_SECRET } from '@/lib/auth/secret';
 // override explicit `verbatim` lookups or per-call families.
 dns.setDefaultResultOrder('ipv4first');
 
-if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-  throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set');
-}
-// NEXTAUTH_SECRET is validated by `@/lib/auth/secret` at import time —
-// referencing it here ensures the import stays live (and forces the
-// throw if the env var is missing).
-void NEXTAUTH_SECRET;
+// Intentionally do not validate GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET
+// at module top. `next build` evaluates this module during page-data
+// collection; a throw here would crash Vercel builds when those vars
+// aren't present in the build env. NextAuth's Google provider treats
+// `clientId` / `clientSecret` as optional and throws a Configuration
+// error on first sign-in attempt if missing — same protection, deferred
+// to runtime.
+// NEXTAUTH_SECRET is intentionally NOT validated at module-load time.
+// `next build` evaluates route modules during page-data collection —
+// evaluating a throw here would break Vercel builds when the env var
+// isn't available in the build environment (env vars on Vercel are
+// injected at runtime, not build). NextAuth reads `secret` lazily and
+// throws MissingSecretError on the first request that needs to
+// sign/verify a JWT — same protection, deferred to runtime.
+// `src/lib/auth/secret.ts` keeps `getAuthSecret()` for callers that
+// want a louder error message in their own logs.
 
 /**
  * Comma-separated list of emails that should be promoted to ADMIN on any
@@ -297,7 +305,12 @@ export async function signOutEvent(message: any): Promise<void> {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  secret: NEXTAUTH_SECRET,
+  // Pass the raw env var (undefined is OK at build time). NextAuth
+  // only reads `secret` when signing/verifying a JWT — i.e. at
+  // request time, after Vercel has injected env vars. If it's still
+  // missing then, NextAuth throws MissingSecretError, which is the
+  // runtime protection we want.
+  secret: process.env.NEXTAUTH_SECRET,
   // Vercel terminates TLS and proxies the request, so the request URL
   // NextAuth sees differs from the public URL. Without `trustHost`,
   // NextAuth v5 mis-derives the session-cookie name (Secure vs non-Secure
@@ -313,6 +326,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   providers: [
     Google({
+      // Pass through the raw env var. The Google provider type allows
+      // undefined (validated at first sign-in attempt), and reading
+      // process.env here keeps build-time module-load crash-free even
+      // when the build env is missing the credentials. They MUST be
+      // set in the runtime env or sign-in will fail loudly.
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       // Email is the only auth identity — single OAuth provider, so allowing
