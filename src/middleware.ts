@@ -30,6 +30,7 @@ import { getToken } from 'next-auth/jwt';
 import { locales, defaultLocale } from '@/lib/i18n/config';
 import { edgeRateLimit } from '@/lib/security/edge-rate-limit';
 import { getAuthSecret } from '@/lib/auth/secret';
+import { getSessionCookieNames, isSecureCookieName } from '@/lib/utils/cookie-name';
 
 const intlMiddleware = createIntlMiddleware({
   locales: [...locales],
@@ -142,7 +143,37 @@ export default async function middleware(request: NextRequest) {
     return intlResponse;
   }
 
-  const token = await getToken({ req: request, secret: getAuthSecret() });
+  // Detect secure-cookie variant from the actual request protocol — matches
+  // what NextAuth itself does when SETTING the cookie. Without this, getToken()
+  // defaults to looking for the plain `authjs.session-token` cookie (no
+  // __Secure- prefix), which never exists on HTTPS deployments like Vercel.
+  // Result: getToken() returns null on every protected route and middleware
+  // bounces authenticated users back to /${locale}?from=… even though the
+  // session is valid. Affects next-auth@5.0.0-beta.25 — see
+  // https://github.com/nextauthjs/next-auth/issues/11043
+  //
+  // Try BOTH the secure-prefixed and plain cookie names because NextAuth's
+  // `useSecureCookies` derivation is not 100% reliable on Vercel's proxy:
+  // depending on the order of the OAuth callback vs. subsequent navigations,
+  // it can set a plain `authjs.session-token` even on an HTTPS deployment.
+  // We probe both names and use the first one that resolves to a valid token.
+  // (Order: prefer the secure-prefixed variant when the request is HTTPS,
+  // since that's what NextAuth SHOULD have set.)
+  const cookieNames = getSessionCookieNames(request.nextUrl.protocol);
+
+  let token: Awaited<ReturnType<typeof getToken>> = null;
+  for (const name of cookieNames) {
+    const candidate = await getToken({
+      req: request,
+      secret: getAuthSecret(),
+      secureCookie: isSecureCookieName(name),
+      cookieName: name,
+    });
+    if (candidate) {
+      token = candidate;
+      break;
+    }
+  }
   const isLoggedIn = !!token;
   const userRole = token?.role as string | undefined;
 
