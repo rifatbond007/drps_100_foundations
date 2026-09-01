@@ -142,7 +142,23 @@ export default async function middleware(request: NextRequest) {
     return intlResponse;
   }
 
-  const token = await getToken({ req: request, secret: getAuthSecret() });
+  // Detect secure-cookie variant from the actual request protocol — matches
+  // what NextAuth itself does when SETTING the cookie. Without this, getToken()
+  // defaults to looking for the plain `authjs.session-token` cookie (no
+  // __Secure- prefix), which never exists on HTTPS deployments like Vercel.
+  // Result: getToken() returns null on every protected route and middleware
+  // bounces authenticated users back to /${locale}?from=… even though the
+  // session is valid. Affects next-auth@5.0.0-beta.25 — see
+  // https://github.com/nextauthjs/next-auth/issues/11043
+  const isSecure = request.nextUrl.protocol === 'https:';
+  const cookieName = `${isSecure ? '__Secure-' : ''}authjs.session-token`;
+
+  const token = await getToken({
+    req: request,
+    secret: getAuthSecret(),
+    secureCookie: isSecure,
+    cookieName,
+  });
   const isLoggedIn = !!token;
   const userRole = token?.role as string | undefined;
 
