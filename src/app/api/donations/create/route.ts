@@ -71,8 +71,23 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    // 5. Idempotency (response cache)
-    const cached = await redis.get(`idem:donation:${body.idempotencyKey}`);
+    // 5. Idempotency (response cache). If Redis is unreachable we
+    // proceed without the cache — a retried POST would create a second
+    // PENDING row (visible to admin + donor in history), but refusing
+    // every donation when Redis is down is worse for donors. The
+    // warning is loud enough for ops to notice.
+    let cached: string | null = null;
+    try {
+      cached = await redis.get(`idem:donation:${body.idempotencyKey}`);
+    } catch (error) {
+      logger.warn(
+        {
+          err: error instanceof Error ? error.message : String(error),
+          idempotencyKey: body.idempotencyKey,
+        },
+        'donations.create: idempotency cache unavailable, proceeding without dedupe'
+      );
+    }
     if (cached) {
       // Replay the cached response verbatim — guarantees an idempotent
       // retry from the UI doesn't double-charge.
@@ -130,12 +145,25 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    await redis.set(
-      `idem:donation:${body.idempotencyKey}`,
-      JSON.stringify(responseBody),
-      'EX',
-      IDEMPOTENCY_TTL_SECONDS
-    );
+    await redis
+      .set(
+        `idem:donation:${body.idempotencyKey}`,
+        JSON.stringify(responseBody),
+        'EX',
+        IDEMPOTENCY_TTL_SECONDS
+      )
+      .catch((error) => {
+        // Cache-write failure is non-fatal — the donation is already
+        // persisted. We just lose dedupe for any retries of this exact
+        // idempotencyKey. Log loudly so ops can spot Redis outages.
+        logger.warn(
+          {
+            err: error instanceof Error ? error.message : String(error),
+            idempotencyKey: body.idempotencyKey,
+          },
+          'donations.create: idempotency cache write failed'
+        );
+      });
 
     return ok(responseBody.data);
   } catch (error) {
