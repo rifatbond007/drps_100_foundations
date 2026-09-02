@@ -3,12 +3,8 @@ import { DonationsReviewTable } from '@/components/admin/DonationsReviewTable';
 
 /**
  * /admin/donations — review queue for manually-submitted bKash TrxIDs.
- *
- * Layout decision: no h1 here on purpose. The admin sidebar already
- * shows the active page, and the table's own "Donation review" title
- * (sourced from the admin.donations i18n namespace and rendered by the
- * browser via t()) sits above the filter row. Two competing titles
- * would be visual noise.
+ * The page just hosts the table component; the table handles its own
+ * header + filter row.
  */
 export default async function AdminDonationsPage({
   params,
@@ -21,10 +17,10 @@ export default async function AdminDonationsPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="text-muted-foreground">{t('subtitle')}</p>
-      </div>
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+      </header>
       <DonationsReviewTable />
     </div>
   );

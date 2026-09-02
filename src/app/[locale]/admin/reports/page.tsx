@@ -1,21 +1,9 @@
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { ReportsPanel } from '@/components/admin/ReportsPanel';
 
 // Force-dynamic so Next.js never tries to statically cache this route.
-// Combined with the TanStack Query hook inside ReportsPanel
-// (staleTime: 0 + refetchOnMount: 'always') this guarantees the
-// visualizations reflect new donations the moment they land, even when
-// the admin navigates back to /admin/reports from another tab without a
-// hard refresh.
 export const dynamic = 'force-dynamic';
 
-/**
- * /admin/reports — donation analytics.
- *
- * No h1 / subtitle here: total stats live in /admin/dashboard above all
- * admin pages, so this page just hosts the visualizations (by-purpose
- * bar + by-month line), the manual refresh button, and the CSV export.
- */
 export default async function AdminReportsPage({
   params,
 }: {
@@ -23,6 +11,15 @@ export default async function AdminReportsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations('admin.reports');
 
-  return <ReportsPanel />;
+  return (
+    <div className="space-y-6">
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+      </header>
+      <ReportsPanel />
+    </div>
+  );
 }

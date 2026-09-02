@@ -3,41 +3,33 @@
 /**
  * Mobile menu drawer. Shown only below the `md` breakpoint.
  *
- * Trigger: three-dot icon button on the right of the navbar. Clicking
- * it opens a right-side drawer that contains the same nav, auth, and
- * language controls that the desktop layout shows in a single row.
- *
- * Drawer contents (top to bottom):
- *   1. Header bar (title + close button).
- *   2. Auth block — avatar/name/email for signed-in users, or a
- *      full-width "Sign in" pill for guests.
- *   3. Main section — Home / About / Blog / Alumni.
- *   4. Account section — Dashboard / Settings / History (users).
- *   5. Admin section — Dashboard / Users / Reports / Donations (admins).
- *   6. Language section — বাংলা / English pill toggle.
- *   7. Footer — Sign out for signed-in users.
+ * Editorial register layout:
+ *   - Auth block pinned at the top (identity strip, not a card).
+ *   - Sections in the middle as labelled registers: a section header
+ *     (small uppercase eyebrow) followed by an unbroken list of items
+ *     separated by hairline rules. The active item is marked by an
+ *     inset emerald left bar (border-l-2), not by a chip background.
+ *     Tap targets are tall (h-12) for thumbs.
+ *   - Language toggle + sign-out pinned at the bottom as a sticky footer
+ *     so the user never has to scroll past a long nav list to find them.
  *
  * Implementation notes:
- *   - The drawer is **portaled to document.body** so it escapes any
- *     positioning context from the navbar (the navbar is `sticky`
- *     with `backdrop-blur`, which can sometimes interfere with
- *     absolutely-positioned descendants in subtle ways). Rendering
- *     at the body root guarantees a known ancestor.
+ *   - The drawer is portaled to document.body so it escapes the navbar's
+ *     `sticky` + `backdrop-blur` ancestor.
  *   - Always mounted; visibility/opacity is the only state. Uses
- *     `translate-x-full` ↔ `translate-x-0` + `transition-transform`
- *     for the slide animation — no keyframe plugin dependency.
+ *     `translate-x-full` ↔ `translate-x-0` + `transition-transform` for
+ *     the slide animation.
  *   - Body scroll lock + Escape key handling while open.
- *   - SSR-safe: the portal target (`document.body`) is only accessed
- *     inside `useEffect`, so the first render outputs nothing.
+ *   - SSR-safe: the portal target (document.body) is only accessed
+ *     inside useEffect, so the first render outputs nothing.
  */
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { MoreVertical, X, LogOut } from 'lucide-react';
+import { X, LogOut, Globe } from 'lucide-react';
 import { signOut } from 'next-auth/react';
-import { Button } from '@/components/ui/button';
 import { locales, type Locale } from '@/lib/i18n/config';
 import { cn } from '@/lib/utils';
 
@@ -49,6 +41,7 @@ interface Props {
     blog: string;
     alumni: string;
     dashboard: string;
+    donate: string;
     settings: string;
     history: string;
     users: string;
@@ -59,6 +52,7 @@ interface Props {
     sectionsAdmin: string;
     login: string;
     logout: string;
+    language: string;
   };
   session: {
     name: string;
@@ -73,12 +67,10 @@ export function MobileMenu({ locale, labels, session }: Props) {
   const pathname = usePathname();
   const currentLocale = useLocale() as Locale;
   const [open, setOpen] = useState(false);
-  /*
-    `mounted` flips to true on the first client effect. Without this
-    gate `createPortal(..., document.body)` would crash during SSR
-    because `document` is undefined. The trigger button still renders
-    during SSR; only the drawer body is gated.
-  */
+  // mounted flips to true on the first client effect. Without this gate,
+  // createPortal(..., document.body) crashes during SSR because document
+  // is undefined. The trigger button still renders during SSR; only the
+  // drawer body is gated.
   const [mounted, setMounted] = useState(false);
 
   const isLoggedIn = !!session;
@@ -135,11 +127,14 @@ export function MobileMenu({ locale, labels, session }: Props) {
   };
 
   /*
-    Drawer body. Portaled to <body> to escape the navbar's positioning
-    context. `fixed inset-0` covers the full viewport; the panel uses
-    `inset-y-0 right-0` + `h-screen` so its height is always the
-    viewport height regardless of how nested `h-full` resolves.
-  */
+   * Drawer body. Portaled to <body> to escape the navbar's positioning
+   * context. The panel uses `inset-y-0 right-0` + `h-screen` so its
+   * height is the viewport height regardless of how nested `h-full`
+   * resolves.
+   *
+   * Internal layout is three rows: sticky auth header, scrollable nav
+   * middle, sticky footer for language + sign-out.
+   */
   const drawer =
     mounted &&
     ((
@@ -155,7 +150,7 @@ export function MobileMenu({ locale, labels, session }: Props) {
           tabIndex={open ? 0 : -1}
           aria-label="Close menu"
           onClick={() => setOpen(false)}
-          className="absolute inset-0 bg-black/50"
+          className="absolute inset-0 bg-black/60"
         />
 
         <aside
@@ -163,131 +158,129 @@ export function MobileMenu({ locale, labels, session }: Props) {
           aria-modal="true"
           aria-label="Mobile menu"
           className={cn(
-            'absolute inset-y-0 right-0 flex h-screen w-[85%] max-w-xs flex-col bg-background shadow-2xl transition-transform duration-200 ease-out',
+            'absolute inset-y-0 right-0 flex h-screen w-full max-w-sm flex-col bg-background shadow-2xl transition-transform duration-200 ease-out',
             open ? 'translate-x-0' : 'translate-x-full'
           )}
         >
-          {/* Header bar */}
-          <div className="flex h-16 shrink-0 items-center justify-between border-b px-4">
-            <h2 className="text-base font-semibold">Menu</h2>
+          {/* ─── Sticky auth header ────────────────────────────── */}
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
+            {isLoggedIn ? (
+              <div className="flex min-w-0 items-center gap-3">
+                {session?.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={session.image}
+                    alt={session.name}
+                    width={36}
+                    height={36}
+                    className="h-9 w-9 rounded-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
+                  >
+                    {initials}
+                  </span>
+                )}
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-foreground">{session?.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">{session?.email}</p>
+                </div>
+              </div>
+            ) : (
+              <Link
+                href={`/${locale}/login`}
+                onClick={() => setOpen(false)}
+                className="inline-flex h-10 items-center bg-primary px-5 text-sm font-semibold text-primary-foreground"
+              >
+                {labels.login}
+              </Link>
+            )}
+
             <button
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Close menu"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="-mr-2 flex h-10 w-10 items-center justify-center text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
 
-          {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto">
-            {/* Auth block */}
-            <div className="border-b px-4 py-4">
-              {isLoggedIn ? (
-                <div className="flex items-center gap-3">
-                  {session?.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={session.image}
-                      alt={session.name}
-                      width={40}
-                      height={40}
-                      className="h-10 w-10 rounded-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <span
-                      aria-hidden="true"
-                      className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
-                    >
-                      {initials}
-                    </span>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-foreground">
-                      {session?.name}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">{session?.email}</p>
-                  </div>
-                </div>
-              ) : (
-                <Button asChild className="w-full rounded-full" size="lg">
-                  <Link href={`/${locale}/login`} onClick={() => setOpen(false)}>
-                    {labels.login}
-                  </Link>
-                </Button>
-              )}
-            </div>
-
-            {/* Main section */}
+          {/* ─── Nav register ──────────────────────────────────── */}
+          <nav className="flex-1 overflow-y-auto">
+            {/* Main public section */}
             <Section title={labels.sectionsMain}>
-              <DrawerLink href={`/${locale}`} active={isActive(`/${locale}`)}>
+              <DrawerItem href={`/${locale}`} active={isActive(`/${locale}`)}>
                 {labels.home}
-              </DrawerLink>
-              <DrawerLink href={`/${locale}/about`} active={isActive(`/${locale}/about`)}>
+              </DrawerItem>
+              <DrawerItem href={`/${locale}/about`} active={isActive(`/${locale}/about`)}>
                 {labels.about}
-              </DrawerLink>
-              <DrawerLink href={`/${locale}/blog`} active={isActive(`/${locale}/blog`)}>
+              </DrawerItem>
+              <DrawerItem href={`/${locale}/blog`} active={isActive(`/${locale}/blog`)}>
                 {labels.blog}
-              </DrawerLink>
-              <DrawerLink href={`/${locale}/alumni`} active={isActive(`/${locale}/alumni`)}>
+              </DrawerItem>
+              <DrawerItem href={`/${locale}/alumni`} active={isActive(`/${locale}/alumni`)}>
                 {labels.alumni}
-              </DrawerLink>
+              </DrawerItem>
             </Section>
 
-            {/* Account section */}
-            {isLoggedIn && (
+            {/* Account (signed-in users only) */}
+            {isLoggedIn && !isAdmin && (
               <Section title={labels.sectionsAccount}>
-                <DrawerLink href={`/${locale}/dashboard`} active={isActive(`/${locale}/dashboard`)}>
+                <DrawerItem href={`/${locale}/dashboard`} active={isActive(`/${locale}/dashboard`)}>
                   {labels.dashboard}
-                </DrawerLink>
-                {!isAdmin && (
-                  <DrawerLink href={`/${locale}/settings`} active={isActive(`/${locale}/settings`)}>
-                    {labels.settings}
-                  </DrawerLink>
-                )}
-                {!isAdmin && (
-                  <DrawerLink href={`/${locale}/history`} active={isActive(`/${locale}/history`)}>
-                    {labels.history}
-                  </DrawerLink>
-                )}
+                </DrawerItem>
+                <DrawerItem href={`/${locale}/donate`} active={isActive(`/${locale}/donate`)}>
+                  {labels.donate}
+                </DrawerItem>
+                <DrawerItem href={`/${locale}/history`} active={isActive(`/${locale}/history`)}>
+                  {labels.history}
+                </DrawerItem>
+                <DrawerItem href={`/${locale}/settings`} active={isActive(`/${locale}/settings`)}>
+                  {labels.settings}
+                </DrawerItem>
               </Section>
             )}
 
-            {/* Admin section */}
+            {/* Admin (admins only) */}
             {isAdmin && (
               <Section title={labels.sectionsAdmin}>
-                <DrawerLink
+                <DrawerItem
                   href={`/${locale}/admin/dashboard`}
                   active={isActive(`/${locale}/admin/dashboard`)}
                 >
                   {labels.dashboard}
-                </DrawerLink>
-                <DrawerLink
+                </DrawerItem>
+                <DrawerItem
                   href={`/${locale}/admin/users`}
                   active={isActive(`/${locale}/admin/users`)}
                 >
                   {labels.users}
-                </DrawerLink>
-                <DrawerLink
+                </DrawerItem>
+                <DrawerItem
                   href={`/${locale}/admin/reports`}
                   active={isActive(`/${locale}/admin/reports`)}
                 >
                   {labels.reports}
-                </DrawerLink>
-                <DrawerLink
+                </DrawerItem>
+                <DrawerItem
                   href={`/${locale}/admin/donations`}
                   active={isActive(`/${locale}/admin/donations`)}
                 >
                   {labels.donations}
-                </DrawerLink>
+                </DrawerItem>
               </Section>
             )}
+          </nav>
 
-            {/* Language section */}
-            <Section title="Language">
-              <div className="flex gap-2 px-4 pb-2">
+          {/* ─── Sticky footer: language + sign-out ─────────────── */}
+          <div className="shrink-0 border-t border-border bg-background">
+            <div className="flex items-center gap-2 px-4 py-3">
+              <Globe className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <div className="flex flex-1 gap-2">
                 {locales.map((l) => {
                   const active = l === currentLocale;
                   return (
@@ -297,10 +290,10 @@ export function MobileMenu({ locale, labels, session }: Props) {
                       onClick={() => handleLocaleChange(l)}
                       aria-pressed={active}
                       className={cn(
-                        'h-9 flex-1 rounded-full text-sm font-semibold transition-colors',
+                        'h-10 flex-1 border text-sm font-semibold transition-colors',
                         active
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'border-border bg-background text-foreground hover:bg-accent'
                       )}
                     >
                       {l === 'bn' ? 'বাংলা' : 'English'}
@@ -308,23 +301,18 @@ export function MobileMenu({ locale, labels, session }: Props) {
                   );
                 })}
               </div>
-            </Section>
-          </div>
-
-          {/* Footer — sign out for logged-in users */}
-          {isLoggedIn && (
-            <div className="shrink-0 border-t p-3">
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full justify-start gap-2 rounded-full"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4" aria-hidden="true" />
-                {labels.logout}
-              </Button>
             </div>
-          )}
+            {isLoggedIn && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex h-12 w-full items-center gap-3 border-t border-border px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                <LogOut className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                {labels.logout}
+              </button>
+            )}
+          </div>
         </aside>
       </div>
     ) as React.ReactElement);
@@ -337,36 +325,44 @@ export function MobileMenu({ locale, labels, session }: Props) {
         onClick={() => setOpen(true)}
         aria-label="Open menu"
         aria-expanded={open}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-background text-foreground transition-colors hover:bg-accent active:bg-accent/80 md:hidden"
+        className="flex h-10 w-10 shrink-0 items-center justify-center text-foreground transition-colors hover:bg-accent md:hidden"
       >
-        <MoreVertical className="h-5 w-5" aria-hidden="true" />
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 22 22"
+          aria-hidden="true"
+          className="stroke-current"
+          fill="none"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+        >
+          <path d="M3 6h16M3 11h16M3 16h16" />
+        </svg>
       </button>
 
-      {/*
-        Portal the drawer to document.body so it isn't constrained by
-        the navbar's `sticky` + `backdrop-blur` ancestor (which can
-        subtly affect absolutely-positioned descendants' height
-        calculations in some browsers).
-      */}
       {mounted && drawer ? createPortal(drawer, document.body) : null}
     </>
   );
 }
 
-/** Section heading inside the drawer. */
+/** Section heading inside the drawer. Tight spacing, full-width hairline
+ *  rule below it so the register of items reads as its own column. */
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="border-b py-3">
-      <p className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <div>
+      <p className="px-4 pb-2 pt-5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         {title}
       </p>
-      <div className="flex flex-col">{children}</div>
+      <ul className="border-y border-border">{children}</ul>
     </div>
   );
 }
 
-/** Single nav link inside the drawer. Larger tap target for thumbs. */
-function DrawerLink({
+/** Single nav row. Hairline divider between siblings is provided by
+ *  `border-b border-border last:border-b-0` so the register reads as
+ *  one continuous column. */
+function DrawerItem({
   href,
   active,
   children,
@@ -376,16 +372,20 @@ function DrawerLink({
   children: React.ReactNode;
 }) {
   return (
-    <Link
-      href={href}
-      className={cn(
-        'flex h-11 items-center px-4 text-sm font-medium transition-colors',
-        active
-          ? 'bg-primary/10 text-primary'
-          : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-      )}
-    >
-      {children}
-    </Link>
+    <li className="border-b border-border last:border-b-0">
+      <Link
+        href={href}
+        aria-current={active ? 'page' : undefined}
+        className={cn(
+          'relative flex h-12 items-center pl-4 pr-4 text-base font-medium transition-colors',
+          'border-l-2',
+          active
+            ? 'border-l-primary bg-primary/5 text-foreground'
+            : 'border-l-transparent text-foreground hover:bg-accent'
+        )}
+      >
+        {children}
+      </Link>
+    </li>
   );
 }

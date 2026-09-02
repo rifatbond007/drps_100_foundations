@@ -1,236 +1,193 @@
 /**
- * Authenticated dashboard — real data from /api/users/profile +
- * /api/donations/history. Client component because TanStack Query
- * runs in the browser. Auth is guaranteed by the (authenticated)
- * layout (server component) which calls requireAuth() before
- * rendering children.
+ * Authenticated dashboard.
+ *
+ * Four hairline-border cards summarise the donor's account at a glance:
+ * total donated (BDT, lifetime successful), donation count, last donation
+ * amount + date, and pending donations awaiting bKash confirmation.
+ *
+ * Each card has the same structure: an uppercase eyebrow label on top,
+ * a tabular big number or short value below. Cards are 1-up on mobile
+ * and 2-up on small screens, 4-up on lg+. The recent-donations register
+ * sits below the cards so the page still tells the story of "what you
+ * did" rather than only "what you have."
  */
 'use client';
 
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
-import { Heart, History as HistoryIcon, Settings as SettingsIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar } from '@/components/ui/avatar';
 import { useProfile } from '@/lib/hooks/use-profile';
 import { useDonationHistory } from '@/lib/hooks/use-donations';
 import { useAuth } from '@/lib/hooks/use-auth';
-import { formatBDT } from '@/lib/utils';
-import { cn } from '@/lib/utils';
+import { formatBDT, cn } from '@/lib/utils';
 
-function StatCard({
-  title,
-  value,
-  subtitle,
-  loading,
-}: {
-  title: string;
-  value: string;
-  subtitle?: string;
-  loading?: boolean;
-}) {
+function StatusLabel({ status }: { status: string }) {
+  const tHistory = useTranslations('history');
+  return <span>{tHistory(`status.${status}`)}</span>;
+}
+
+function StatCard({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <>
-            <Skeleton className="mb-2 h-8 w-24" />
-            <Skeleton className="h-3 w-16" />
-          </>
-        ) : (
-          <>
-            <div className="text-2xl font-bold">{value}</div>
-            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <div className="border border-border bg-background p-4">
+      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+      <div className="mt-2 text-xl font-bold tabular-nums text-foreground sm:text-2xl">
+        {children}
+      </div>
+    </div>
   );
 }
 
 export default function DashboardPage() {
   const locale = useLocale();
   const t = useTranslations('dashboard');
-  const tCommon = useTranslations('common');
   const tHistory = useTranslations('history');
 
   const { user } = useAuth();
   const { data: profile, isLoading: profileLoading, error: profileError } = useProfile();
-  const {
-    data: history,
-    isLoading: historyLoading,
-    error: historyError,
-  } = useDonationHistory(user?.id);
-
-  const recentDonations = (history?.donations ?? []).slice(0, 5);
+  const { data: history, isLoading: historyLoading } = useDonationHistory(user?.id);
 
   if (profileError) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-        <Card>
-          <CardContent className="py-12 text-center text-destructive">
-            {t('loadFailed')}
-            <div className="mt-2 text-sm text-muted-foreground">{profileError.message}</div>
-          </CardContent>
-        </Card>
-      </div>
+      <p
+        role="alert"
+        className="border-l-2 border-destructive bg-destructive/5 px-3 py-2 text-sm text-destructive"
+      >
+        {t('loadFailed')}
+      </p>
     );
   }
 
   const displayName = profile?.name ?? user?.name ?? user?.email ?? '';
-  const avatarUrl = profile?.avatarUrl ?? user?.image ?? null;
-  const email = profile?.email ?? user?.email ?? '';
+  const localePref = (profile?.languagePref.toLowerCase() as 'bn' | 'en') ?? 'bn';
+
+  const donations = history?.donations ?? [];
+  const successDonations = donations.filter((d) => d.status === 'SUCCESS');
+  const pendingDonations = donations.filter((d) => d.status === 'PENDING');
+  const total = successDonations.reduce((sum, d) => sum + Number(d.amount), 0);
+  const lastDonation = successDonations[0];
 
   return (
-    <div className="space-y-6">
-      {/* Greeting header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <Avatar
-            src={avatarUrl}
-            name={profile?.name ?? user?.name ?? null}
-            email={email}
-            size="lg"
-          />
-          <div>
-            {profileLoading ? (
-              <>
-                <Skeleton className="mb-2 h-8 w-48" />
-                <Skeleton className="h-3 w-32" />
-              </>
-            ) : (
-              <>
-                <h1 className="text-3xl font-bold tracking-tight">
-                  {t('greeting', { name: displayName || tCommon('appName') })}
-                </h1>
-                <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
-                {email && (
-                  <p className="mt-1 text-xs text-muted-foreground">{t('signedInAs', { email })}</p>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" asChild>
-            <Link href={`/${locale}/settings`}>
-              <SettingsIcon className="mr-2 h-4 w-4" />
-              {t('editProfile')}
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href={`/${locale}/donate`}>
-              <Heart className="mr-2 h-4 w-4" />
-              {t('donateCtaSecondary')}
-            </Link>
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-8">
+      {/* Greeting */}
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {t('greeting', { name: displayName || '' })}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+      </header>
 
-      {/* Stats */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold">{t('profileStatsTitle')}</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          <StatCard
-            title={t('totalDonated')}
-            value={formatBDT(
-              profile?.totalDonated ?? '0',
-              (profile?.languagePref.toLowerCase() as 'bn' | 'en') ?? 'bn'
-            )}
-            subtitle={t('allTime')}
-            loading={profileLoading}
-          />
-          <StatCard
-            title={t('donationCount')}
-            value={String(profile?.donationCount ?? 0)}
-            subtitle={t('allTime')}
-            loading={profileLoading}
-          />
-          <StatCard
-            title={t('lastDonation')}
-            value={
-              recentDonations[0]
-                ? new Date(recentDonations[0].createdAt).toLocaleDateString(
-                    profile?.languagePref === 'EN' ? 'en-US' : 'bn-BD'
-                  )
-                : t('never')
-            }
-            loading={profileLoading || historyLoading}
-          />
-        </div>
-      </div>
+      {/* Stat cards */}
+      <section
+        aria-label={t('profileStatsTitle')}
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        <StatCard label={t('totalDonated')}>
+          {profileLoading || historyLoading ? (
+            <span className="text-muted-foreground">—</span>
+          ) : (
+            formatBDT(String(total), localePref)
+          )}
+        </StatCard>
 
-      {/* Recent donations */}
-      <Card>
-        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0">
-          <CardTitle className="text-base">{t('recentDonations')}</CardTitle>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/${locale}/history`}>
-              <HistoryIcon className="mr-2 h-4 w-4" />
-              {t('viewAllDonations')}
-            </Link>
-          </Button>
-        </CardHeader>
-        <CardContent className="pt-0">
+        <StatCard label={t('donationCount')}>
           {historyLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-          ) : historyError ? (
-            <div className="py-6 text-center text-sm text-destructive">
-              {tHistory('loadingFailed', { message: historyError.message })}
-            </div>
-          ) : recentDonations.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              {tHistory('noDonations')}
+            <span className="text-muted-foreground">—</span>
+          ) : (
+            successDonations.length.toLocaleString(locale === 'en' ? 'en-US' : 'bn-BD')
+          )}
+        </StatCard>
+
+        <StatCard label={t('lastDonation')}>
+          {historyLoading ? (
+            <span className="text-muted-foreground">—</span>
+          ) : lastDonation ? (
+            <div className="flex flex-col">
+              <span>{formatBDT(lastDonation.amount, localePref)}</span>
+              <span className="mt-1 text-xs font-normal text-muted-foreground">
+                {new Date(lastDonation.createdAt).toLocaleDateString(
+                  locale === 'en' ? 'en-US' : 'bn-BD'
+                )}
+              </span>
             </div>
           ) : (
-            <ul className="divide-y">
-              {recentDonations.map((d) => (
-                <li key={d.id} className="flex items-center justify-between py-3 text-sm">
-                  <div>
-                    <div className="font-semibold">
-                      {formatBDT(
-                        d.amount,
-                        (profile?.languagePref.toLowerCase() as 'bn' | 'en') ?? 'bn'
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {tHistory(`purposes.${d.purpose}`)}
-                    </div>
+            <span className="text-sm font-normal text-muted-foreground">{t('never')}</span>
+          )}
+        </StatCard>
+
+        <StatCard label={t('pendingDonations')}>
+          {historyLoading ? (
+            <span className="text-muted-foreground">—</span>
+          ) : (
+            <span className="flex items-baseline gap-2">
+              <span>
+                {pendingDonations.length.toLocaleString(locale === 'en' ? 'en-US' : 'bn-BD')}
+              </span>
+              {pendingDonations.length > 0 && (
+                <span className="text-[10px] font-medium uppercase tracking-wider text-admin">
+                  {tHistory('status.PENDING')}
+                </span>
+              )}
+            </span>
+          )}
+        </StatCard>
+      </section>
+
+      {/* Recent donations */}
+      <section>
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold text-foreground">{t('recentDonations')}</h2>
+          <Link
+            href={`/${locale}/history`}
+            className="text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            {t('viewAllDonations')} →
+          </Link>
+        </div>
+
+        {historyLoading ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">…</p>
+        ) : donations.length === 0 ? (
+          <div className="border-t border-border py-8 text-center">
+            <p className="text-sm text-muted-foreground">{tHistory('noDonations')}</p>
+            <Button asChild size="sm" className="mt-4">
+              <Link href={`/${locale}/donate`}>{t('donateCta')}</Link>
+            </Button>
+          </div>
+        ) : (
+          <ol className="border-t border-border">
+            {donations.slice(0, 5).map((d) => (
+              <li
+                key={d.id}
+                className="flex items-baseline justify-between gap-4 border-b border-border py-3"
+              >
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium text-foreground">
+                    {formatBDT(d.amount, localePref)}
                   </div>
-                  <div className="text-right">
-                    <div
+                  <div className="text-xs text-muted-foreground">
+                    {tHistory(`purposes.${d.purpose}`)} ·{' '}
+                    <span
                       className={cn(
-                        'text-xs font-medium',
-                        d.status === 'SUCCESS' && 'text-green-600',
+                        d.status === 'SUCCESS' && 'text-primary',
                         d.status === 'FAILED' && 'text-destructive',
-                        d.status === 'PENDING' && 'text-yellow-600',
+                        d.status === 'PENDING' && 'text-admin',
                         d.status === 'CANCELLED' && 'text-muted-foreground'
                       )}
                     >
-                      {tHistory(`status.${d.status}`)}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(d.createdAt).toLocaleDateString(
-                        profile?.languagePref === 'EN' ? 'en-US' : 'bn-BD'
-                      )}
-                    </div>
+                      <StatusLabel status={d.status} />
+                    </span>
                   </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+                </div>
+                <time className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                  {new Date(d.createdAt).toLocaleDateString(locale === 'en' ? 'en-US' : 'bn-BD')}
+                </time>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
     </div>
   );
 }

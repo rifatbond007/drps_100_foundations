@@ -2,46 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Design tokens.
+ *
+ * The palette is intentionally small and intentional — Bangladesh-foundation
+ * green (primary), warm off-white paper, soft ink, mustard for admin,
+ * bKash pink only on payment surfaces. Each role has a single representative
+ * colour; everything else is grey-on-paper.
+ *
+ * HSL is used so any tool that reads hsl(var(--primary)) can tweak the
+ * value in one place.
+ */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --primary: 142 71% 29%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142 71% 29%;
-    --radius: 0.5rem;
+    /* Surfaces */
+    --background: 36 26% 96%;          /* paper #FBF9F4 */
+    --foreground: 162 30% 9%;          /* ink #0E1B17 */
+    --card: 0 0% 100%;                /* white card on paper */
+    --card-foreground: 162 30% 9%;
+    --secondary: 36 18% 92%;           /* slightly darker than paper */
+    --secondary-foreground: 162 30% 9%;
+    --muted: 36 18% 92%;
+    --muted-foreground: 162 12% 38%;
+    --accent: 36 18% 92%;
+    --accent-foreground: 162 30% 9%;
+
+    /* Borders — hairline rules */
+    --border: 36 14% 84%;
+    --input: 36 14% 84%;
+    --ring: 162 80% 26%;              /* emerald focus */
+
+    /* Foundation green */
+    --primary: 162 80% 26%;           /* emerald #0E7A5A */
+    --primary-foreground: 36 26% 98%;
+
+    /* bKash — payment surfaces only */
+    --bkash: 332 88% 48%;             /* bKash pink #E2136E */
+    --bkash-foreground: 0 0% 100%;
+
+    /* Status */
+    --destructive: 0 72% 42%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Admin — mustard */
+    --admin: 36 75% 45%;              /* mustard #C98B1A */
+    --admin-foreground: 36 26% 98%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --primary: 142 71% 45%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142 71% 45%;
+    --background: 162 30% 8%;
+    --foreground: 36 18% 94%;
+    --card: 162 28% 11%;
+    --card-foreground: 36 18% 94%;
+    --secondary: 162 24% 14%;
+    --secondary-foreground: 36 18% 94%;
+    --muted: 162 24% 14%;
+    --muted-foreground: 162 12% 64%;
+    --accent: 162 24% 14%;
+    --accent-foreground: 36 18% 94%;
+    --border: 162 18% 22%;
+    --input: 162 18% 22%;
+    --ring: 162 60% 42%;
+    --primary: 162 60% 42%;
+    --primary-foreground: 162 30% 9%;
+    --bkash: 332 80% 56%;
+    --bkash-foreground: 0 0% 100%;
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --admin: 36 75% 52%;
+    --admin-foreground: 162 30% 9%;
   }
 }
 
@@ -51,16 +80,22 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    font-feature-settings: 'rlig' 1, 'calt' 1, 'tnum' 1;
   }
-  html[dir='rtl'] body,
-  html[lang='bn'] body {
-    font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  /* Hind Siliguri ships Latin + Bengali in one file so a single
+   * font-family works for both — no per-locale swap needed. */
+  body {
+    font-family: var(--font-hind), system-ui, sans-serif;
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  /* Register rules — a hairline divider with a touch of breathing room,
+   * used between rows in tables and lists instead of card chrome. */
+  .rule {
+    @apply border-border;
   }
 }

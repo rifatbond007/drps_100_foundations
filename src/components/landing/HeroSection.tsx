@@ -1,181 +1,116 @@
+/**
+ * Landing hero — pass three.
+ *
+ * One bold move, typographic:
+ *
+ *   The headline is a split display. The noun fills the column at
+ *   7xl-9xl in display weight; the verb sits directly below it at
+ *   3xl-4xl in light weight with loosened tracking. The contrast is
+ *   size + weight, not colour.
+ *
+ *   The previous version carried a top strip with a "Raised today"
+ *   figure on the right edge. That figure was redundant with the
+ *   Activity section directly below — two numbers for the same idea
+ *   on the same screen. Removed. Activity is now the only place the
+ *   raised-so-far figure lives, and the hero is just the headline.
+ *
+ * Restraint:
+ *   - No motion. No orchestrated reveal.
+ *   - The bKash pink appears in exactly two places: the "send to"
+ *     destination inside step 02, and a single 4px bar at the very
+ *     bottom of the hero. That bar is the page's only saturated
+ *     chromatic stroke — the donor's eye lands on it and follows it
+ *     to the payment path on the next page.
+ *   - The 01/02/03 sequence is compressed into a single register
+ *     line. Numbers sit to the left of each label, not above it.
+ */
 import Link from 'next/link';
-import {
-  ShieldCheck,
-  Sparkles,
-  ArrowRight,
-  Lock,
-  BadgeCheck,
-  ScrollText,
-  Heart,
-} from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 
-/**
- * Landing hero. Server component.
- *
- * Composition:
- *   - Two-column on ≥lg: left = eyebrow badge + headline + highlight pill
- *     + single primary CTA. Right = a "trust card" stacked over a soft
- *     accent panel, listing the three trust signals with icons.
- *   - Single-column on <lg: left column first, trust card below.
- *
- * Single CTA — "Donate now" is the only decision the page asks for.
- * Removing the secondary "Learn more" button eliminates the choice and
- * keeps the focal point clean. The PublicNav already exposes About, so
- * users who want to read more have an obvious path.
- *
- * Sizing: targets the 90vh content area set by the locale layout. The
- * section uses `h-full` so `items-center` resolves against the full
- * viewport content column, and the inner grid is vertically centered.
- */
 export async function HeroSection({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'landing' });
 
   return (
     <section
-      aria-labelledby="hero-title"
-      className="flex h-full w-full items-center justify-center bg-background"
+      id="hero"
+      className="relative flex min-h-[calc(100dvh-3.5rem)] flex-col border-b border-border bg-background"
     >
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 py-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16 lg:py-16">
-        {/* ───────────────────────── Left: pitch ───────────────────────── */}
-        <div className="flex flex-col items-start text-left">
-          {/*
-            Eyebrow badge. Sits above the headline as a small trust
-            signal — the donor count is the "social proof" that earns
-            the headline its weight. Inline-flex so the pill hugs its
-            content; ring-1 keeps the border crisp on the muted surface.
-          */}
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            {t('heroBadge')}
+      {/* ── Hero body: split headline + subtitle + CTA ─────────── */}
+      <div className="container flex flex-1 flex-col justify-center py-14 sm:py-20 lg:py-24">
+        {/* Split display. The first line is the noun, full-width at
+         *  display size. The second line is the verb, smaller and
+         *  lighter, with loosened tracking and a quiet ink-colour
+         *  period at the end. The two lines together are the
+         *  visual object — they are NOT a sentence to be parsed. */}
+        <h1 className="max-w-5xl">
+          <span className="block text-5xl font-bold leading-[0.95] tracking-tight text-foreground sm:text-7xl lg:text-8xl xl:text-9xl">
+            {t('heroHeadlineL1')}
           </span>
+          <span className="mt-2 block text-3xl font-light leading-[1.1] tracking-wide text-foreground/80 sm:text-4xl lg:text-5xl">
+            {t('heroHeadlineL2')}
+          </span>
+        </h1>
 
-          {/*
-            Headline. `text-balance` evens out the line breaks so the
-            second line isn't noticeably shorter than the first — this
-            matters because the headline is the dominant element on
-            the page.
-          */}
-          <h1
-            id="hero-title"
-            className="mt-5 text-balance text-4xl font-semibold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl"
+        {/* A short hairline that sits flush with the headline — the
+         *  same gesture that ended the previous hero, refined. It
+         *  visually signs the headline as a single object. */}
+        <div className="mt-8 h-px w-24 bg-foreground sm:w-32" aria-hidden="true" />
+
+        <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+          {t('heroSubtitle')}
+        </p>
+
+        {/* Primary CTA + quiet text-link secondary. The secondary
+         *  shares the CTA's baseline; the primary has no arrow. */}
+        <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
+          <Button asChild size="lg" className="h-14 px-10 text-base">
+            <Link href={`/${locale}/donate`}>{t('donateCta')}</Link>
+          </Button>
+          <Link
+            href={`/${locale}/about`}
+            className="text-sm font-medium text-foreground underline-offset-4 hover:text-primary hover:underline"
           >
-            {t('heroTitle')}
-          </h1>
-
-          <p className="mt-5 max-w-xl text-balance text-base leading-relaxed text-muted-foreground sm:text-lg">
-            {t('heroSubtitle')}
-          </p>
-
-          {/*
-            Highlight pill. Echoes the eyebrow's rounded shape but uses
-            a stronger surface (bg-foreground/5 + ring) so it reads as
-            a value-prop statement rather than a tag.
-          */}
-          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-foreground/5 px-4 py-2 text-sm font-medium text-foreground ring-1 ring-foreground/10">
-            <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t('heroHighlight')}
-          </div>
-
-          {/*
-            Single primary CTA. Right-arrow affordance signals forward
-            motion; rounded-full matches the navbar pill controls so
-            the page reads as one visual system. `shadow-lg` is
-            intentional at the focal point only — the trust card on
-            the right stays shadow-free so the CTA is unambiguously
-            the primary action.
-          */}
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Button
-              asChild
-              size="lg"
-              className="group h-12 rounded-full px-7 text-base shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/25"
-            >
-              <Link href={`/${locale}/donate`}>
-                {t('donateCta')}
-                <ArrowRight
-                  className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5"
-                  aria-hidden="true"
-                />
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        {/* ───────────────────────── Right: trust card ───────────────────────── */}
-        <div className="relative mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
-          {/*
-            Soft accent panel behind the card. Slightly offset down/right
-            so the card appears to float — same trick Tailwind UI uses
-            for "stacked" marketing sections. Uses bg-primary/8 (defined
-            in the page palette) so the two panels share a hue family
-            without competing.
-          */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 translate-x-3 translate-y-3 rounded-3xl bg-primary/10"
-          />
-
-          {/*
-            Trust card. border + bg-card so it pops on the white section;
-            shadow-xl lifts it above the accent panel behind. Inside: a
-            short header + three labeled rows with Lucide icons. Each row
-            has its own subtle separator via divide-y on the list.
-          */}
-          <div className="relative rounded-3xl border bg-card p-6 shadow-xl sm:p-8">
-            <div className="flex items-center gap-3">
-              {/*
-                Heart icon in a tinted square — anchors the card with a
-                warm, donor-centric focal point instead of duplicating
-                one of the row icons below. Paired with the eyebrow's
-                Sparkles so the page reads as one continuous motif.
-              */}
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Heart className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-foreground">{t('trustBadges.secure')}</p>
-                <p className="text-xs text-muted-foreground">{t('heroHighlight')}</p>
-              </div>
-            </div>
-
-            <div className="my-5 h-px bg-border" aria-hidden="true" />
-
-            <ul className="divide-y divide-border">
-              <TrustRow
-                icon={<Lock className="h-4 w-4" aria-hidden="true" />}
-                label={t('trustBadges.secure')}
-              />
-              <TrustRow
-                icon={<BadgeCheck className="h-4 w-4" aria-hidden="true" />}
-                label={t('trustBadges.verified')}
-              />
-              <TrustRow
-                icon={<ScrollText className="h-4 w-4" aria-hidden="true" />}
-                label={t('trustBadges.transparent')}
-              />
-            </ul>
-          </div>
+            {t('howItWorks')} →
+          </Link>
         </div>
       </div>
+
+      {/* ── Bottom register: 3-step process on a hairline row ──── */}
+      <div className="border-t border-border">
+        <ol className="container flex flex-col divide-y divide-border sm:flex-row sm:divide-x sm:divide-y-0">
+          <Step n="01" title={t('step1Title')} />
+          <Step n="02" title={t('step2Title')} accent="bkash" />
+          <Step n="03" title={t('step3Title')} />
+        </ol>
+      </div>
+
+      {/* The page's only saturated pink stroke. A single 4px
+       *  horizontal bar pinned to the bottom edge of the hero,
+       *  full-width. It's the colour signal that the payment path
+       *  lives below the fold. */}
+      <div aria-hidden="true" className="h-1 w-full bg-bkash" />
     </section>
   );
 }
 
-/**
- * Single row inside the trust card. Pure presentational — receives the
- * icon + label from the parent so the parent controls the layout and
- * spacing rhythm. Hover state matches the navbar link hover so the
- * trust card doesn't feel like an isolated widget.
- */
-function TrustRow({ icon, label }: { icon: React.ReactNode; label: string }) {
+/** A single step in the bottom register. Number sits inline to the
+ *  left of the label; on mobile each step is its own row separated
+ *  by a hairline. */
+function Step({ n, title, accent }: { n: string; title: string; accent?: 'bkash' }) {
   return (
-    <li className="flex items-center gap-3 py-3 text-sm">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-        {icon}
+    <li className="flex items-baseline gap-3 py-4 sm:flex-1 sm:py-5">
+      <span
+        className={
+          accent === 'bkash'
+            ? 'shrink-0 text-sm font-semibold tabular-nums text-bkash'
+            : 'shrink-0 text-sm font-semibold tabular-nums text-primary'
+        }
+        aria-hidden="true"
+      >
+        {n}
       </span>
-      <span className="font-medium text-foreground">{label}</span>
+      <span className="text-sm text-foreground sm:text-base">{title}</span>
     </li>
   );
 }

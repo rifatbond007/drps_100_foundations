@@ -1,5 +1,10 @@
 /**
  * Site footer. Server component.
+ *
+ * One line, centered: copyright + secondary links. No row of columns,
+ * no newsletter signup, no social icons — the foundation is small and
+ * the footer should reflect that. The locale layout pushes it to the
+ * bottom of the page via flex-column with `flex-1` on <main>.
  */
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
@@ -7,26 +12,20 @@ import { getTranslations } from 'next-intl/server';
 export async function Footer({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'footer' });
   const year = new Date().getFullYear();
-  const appName = 'Donation Platform';
 
   return (
-    // shrink-0 keeps the footer pinned at the bottom of the 100vh body
-    // even when <main> scrolls internally. Without it, the footer would
-    // get compressed by the main area's flex-1 sizing.
-    <footer className="shrink-0 border-t bg-background">
-      <div className="container flex flex-col items-center justify-between gap-4 py-6 md:flex-row">
-        <p className="text-sm text-muted-foreground">{t('copyright', { year, appName })}</p>
-        <nav className="flex gap-4 text-sm">
-          <Link href={`/${locale}/about`} className="hover:underline">
-            {t('about')}
-          </Link>
-          <Link href="/privacy" className="hover:underline">
-            {t('privacy')}
-          </Link>
-          <Link href="/terms" className="hover:underline">
-            {t('terms')}
-          </Link>
-        </nav>
+    <footer className="border-t border-border bg-background">
+      <div className="container flex flex-wrap items-center justify-center gap-x-6 gap-y-2 py-6 text-xs text-muted-foreground">
+        <span>© {year} DRPS Batch-19 Foundation</span>
+        <Link href={`/${locale}/about`} className="hover:text-foreground">
+          {t('about')}
+        </Link>
+        <Link href={`/${locale}/privacy`} className="hover:text-foreground">
+          {t('privacy')}
+        </Link>
+        <Link href={`/${locale}/terms`} className="hover:text-foreground">
+          {t('terms')}
+        </Link>
       </div>
     </footer>
   );

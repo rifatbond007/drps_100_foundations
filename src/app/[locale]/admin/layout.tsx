@@ -4,17 +4,11 @@ import { auth } from '@/lib/auth/next-auth';
 import { Sidebar } from '@/components/layout/Sidebar';
 
 /**
- * Admin layout — guards all /admin/* routes.
- * Requires role === 'ADMIN'.
+ * Admin layout — guards all /admin/* routes. Requires role === 'ADMIN'.
  *
- * The locale layout locks <body> to exactly 100dvh and gives <main>
- * `h-[90vh] overflow-y-auto`. This layout fills the main scroll region
- * with a 2-column flex container: a sticky sidebar on the left and the
- * page content on the right. The content column does NOT add its own
- * scroll — <main> handles that — to avoid a double scrollbar.
- *
- * Outer wrapper uses the same `container` class as the navbar so the
- * admin row matches the navbar's width on wide screens.
+ * Same two-column structure as the authenticated layout, but the sidebar
+ * is the admin variant of the nav items. Pages render inside the right
+ * column with their own padding so they align with the rest of the app.
  */
 export default async function AdminLayout({
   children,
@@ -31,9 +25,9 @@ export default async function AdminLayout({
   if (session.user.role !== 'ADMIN') redirect(`/${locale}/dashboard`);
 
   return (
-    <div className="container flex h-full w-full gap-0">
+    <div className="container flex w-full flex-col gap-6 py-6 md:flex-row md:gap-8 md:py-8">
       <Sidebar isAdmin />
-      <div className="min-h-0 flex-1 py-4">{children}</div>
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }

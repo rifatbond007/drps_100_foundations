@@ -1,10 +1,18 @@
 /**
  * Sidebar navigation for authenticated pages.
  *
- * Grouped into three sections when admin (Main / Account / Admin) and
- * two sections otherwise (Main / Account). Sections use translated
- * headings from `nav.sections.*`. A sign-out button at the bottom uses
- * the same signOut() pattern as the UserMenu in the header.
+ * Editorial register layout:
+ *   - One eyebrow header per area (Main / Admin) above its list of
+ *     items. The header is a small uppercase label that names what
+ *     the section is for — not a navigation step itself.
+ *   - Each list is a single register: items separated by hairline
+ *     rules, no card chrome. The active item carries an inset
+ *     emerald left bar (border-l-2 border-l-primary) and bold type.
+ *   - Hover state is a faint background tint.
+ *   - Sign-out lives at the bottom of the sidebar as a quiet hairline-
+ *     separated row.
+ *
+ * Hidden below md — the mobile drawer (MobileMenu) covers nav there.
  */
 'use client';
 
@@ -12,152 +20,107 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
-import {
-  Home,
-  Heart,
-  History,
-  UserCircle,
-  Users,
-  BarChart,
-  ClipboardCheck,
-  LogOut,
-} from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 
 interface NavItem {
   href: string;
-  labelKey: string;
-  icon: typeof Home;
+  labelKey: 'dashboard' | 'donate' | 'history' | 'profile' | 'users' | 'reports' | 'donations';
 }
 
-interface NavSection {
-  headingKey?: 'sections.main' | 'sections.account' | 'sections.admin';
-  items: NavItem[];
-}
+// Regular user — Main section only. The /donate page guards that route
+// server-side for admins; this just keeps the link out of the admin
+// sidebar.
+const userItems: NavItem[] = [
+  { href: '/dashboard', labelKey: 'dashboard' },
+  { href: '/donate', labelKey: 'donate' },
+  { href: '/history', labelKey: 'history' },
+  { href: '/settings', labelKey: 'profile' },
+];
 
-// Main section for regular users only — admins don't donate or browse
-// personal donation history, so their sidebar skips this section entirely.
-const userMainSection: NavSection = {
-  headingKey: 'sections.main',
-  items: [
-    { href: '/dashboard', labelKey: 'dashboard', icon: Home },
-    { href: '/donate', labelKey: 'donate', icon: Heart },
-    { href: '/history', labelKey: 'history', icon: History },
-  ],
-};
-
-// Account section is currently user-only. The Settings page is about
-// the signed-in user's own profile/preferences; admins manage their own
-// account the same way, so we keep this section for both roles.
-const accountSection: NavSection = {
-  headingKey: 'sections.account',
-  items: [
-    { href: '/settings', labelKey: 'profile', icon: UserCircle },
-    // Settings page handles both profile + preferences; nav uses
-    // `profile` as the label to reflect its primary purpose.
-  ],
-};
-// Note: accountSection currently points at /settings under the label
-// "Profile". If a dedicated /profile page is added later, split this.
-
-/**
- * Build sidebar sections for the given role.
- *
- * Important: every item MUST point to a distinct route. The active-item
- * highlighter uses prefix-match, so two items with the same href would
- * both light up when one is clicked (the original bug — clicking the
- * navbar's "Dashboard" auto-selected "Users" because both routed to
- * /admin/users).
- *
- * Admin now gets three separate items, each on its own route:
- *   - Dashboard  → /admin/dashboard  (stat cards + shortcuts)
- *   - Users      → /admin/users      (management table)
- *   - Reports    → /admin/reports    (charts + CSV export)
- *   - Awaiting review → /admin/donations (manual bKash TrxID approval queue)
- */
-function buildSections(isAdmin: boolean): NavSection[] {
-  if (isAdmin) {
-    return [
-      {
-        headingKey: 'sections.admin',
-        items: [
-          { href: '/admin/dashboard', labelKey: 'dashboard', icon: Home },
-          { href: '/admin/users', labelKey: 'users', icon: Users },
-          { href: '/admin/reports', labelKey: 'reports', icon: BarChart },
-          { href: '/admin/donations', labelKey: 'donations', icon: ClipboardCheck },
-        ],
-      },
-    ];
-  }
-  return [userMainSection, accountSection];
-}
+// Admin — Admin section only (admins don't see donor-facing nav here).
+const adminItems: NavItem[] = [
+  { href: '/admin/dashboard', labelKey: 'dashboard' },
+  { href: '/admin/users', labelKey: 'users' },
+  { href: '/admin/donations', labelKey: 'donations' },
+  { href: '/admin/reports', labelKey: 'reports' },
+];
 
 export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const locale = useLocale();
   const tNav = useTranslations('nav');
   const pathname = usePathname();
-
-  const sections = buildSections(isAdmin);
+  const items = isAdmin ? adminItems : userItems;
 
   const handleSignOut = () => {
     void signOut({ callbackUrl: `/${locale}` });
   };
 
   return (
-    // `sticky top-16` pins the sidebar to the navbar's bottom edge so
-    // scrolling page content moves underneath it. `h-[90vh]` matches
-    // <main>'s content area exactly, so the sidebar fills the same
-    // 90vh the page content lives in (100vh - ~10vh header+footer).
-    // The inner `overflow-y-auto` lets long nav lists scroll inside
-    // the sidebar when the viewport is short. Mobile breakpoint
-    // (`hidden md:flex`) hides the sidebar on phones.
-    <aside className="sticky top-16 hidden h-[90vh] w-64 shrink-0 flex-col overflow-y-auto border-r bg-muted/30 md:flex">
-      {/* Top section: scrollable nav. min-h-0 lets flex-1 actually shrink
-          below its content height so overflow-y-auto can take over on
-          short viewports / many sections. */}
-      <nav className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
-        {sections.map((section, idx) => (
-          <div key={section.headingKey ?? `section-${idx}`} className="space-y-1">
-            {section.headingKey && (
-              <h3 className="px-3 pb-1 pt-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {tNav(section.headingKey)}
-              </h3>
-            )}
-            {section.items.map((item) => {
-              const Icon = item.icon;
+    <aside className="hidden w-60 shrink-0 border-r border-border md:block">
+      <nav className="sticky top-14 flex max-h-[calc(100dvh-3.5rem)] flex-col">
+        <div className="flex-1 overflow-y-auto px-4 py-6">
+          <Section title={isAdmin ? tNav('sections.admin') : tNav('sections.account')}>
+            {items.map((item) => {
               const fullHref = `/${locale}${item.href}`;
               const isActive = pathname === fullHref || pathname.startsWith(`${fullHref}/`);
               return (
-                <Link
+                <Item
                   key={item.href}
                   href={fullHref}
-                  className={cn(
-                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
-                    isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-accent hover:text-accent-foreground'
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{tNav(item.labelKey)}</span>
-                </Link>
+                  active={isActive}
+                  label={tNav(item.labelKey)}
+                />
               );
             })}
-          </div>
-        ))}
-      </nav>
+          </Section>
+        </div>
 
-      {/* Bottom section: pinned sign-out. Uses shrink-0 so it never gets
-          compressed when the nav above scrolls. */}
-      <div className="shrink-0 border-t bg-background p-4">
-        <Separator className="mb-3" />
-        <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
-          <LogOut className="mr-2 h-4 w-4" />
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="flex shrink-0 items-center gap-2 border-t border-border px-4 py-3 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        >
+          <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
           {tNav('logout')}
-        </Button>
-      </div>
+        </button>
+      </nav>
     </aside>
+  );
+}
+
+/** Section heading inside the sidebar. Eyebrow label + the register of
+ *  items below it, separated by hairline rules. */
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </p>
+      <ul className="border-y border-border">{children}</ul>
+    </div>
+  );
+}
+
+/** Single sidebar row. Hairline divider between siblings is provided by
+ *  `border-b border-border last:border-b-0`. Active item carries an
+ *  inset emerald left bar. */
+function Item({ href, active, label }: { href: string; active: boolean; label: string }) {
+  return (
+    <li className="border-b border-border last:border-b-0">
+      <Link
+        href={href}
+        aria-current={active ? 'page' : undefined}
+        className={cn(
+          'relative flex h-10 items-center pl-4 pr-3 text-sm transition-colors',
+          'border-l-2',
+          active
+            ? 'border-l-primary bg-primary/5 font-semibold text-foreground'
+            : 'border-l-transparent text-muted-foreground hover:bg-accent hover:text-foreground'
+        )}
+      >
+        {label}
+      </Link>
+    </li>
   );
 }
