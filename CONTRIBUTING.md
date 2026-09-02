@@ -167,6 +167,29 @@ Every PR must include:
 
 See [docs/CI_CD_PIPELINE.md](docs/CI_CD_PIPELINE.md) for CI configuration.
 
+## 🗄️ Database schema changes
+
+**Any PR that edits `prisma/schema.prisma` MUST include a generated migration.** CI runs `pnpm db:deploy` against an ephemeral Postgres and then `pnpm db:status` — if the committed migrations don't match the schema, CI fails before the PR can merge.
+
+Workflow:
+
+```bash
+# 1. Edit prisma/schema.prisma
+# 2. Generate a migration (creates prisma/migrations/<timestamp>_<name>/migration.sql)
+pnpm prisma migrate dev --name <short_description>
+# 3. Verify the SQL is sane
+cat prisma/migrations/<timestamp>_<name>/migration.sql
+# 4. Re-run format/lint/type/test locally
+make ci-local
+# 5. Commit BOTH prisma/schema.prisma AND prisma/migrations/<timestamp>_<name>/migration.sql
+```
+
+**Never** use `prisma db push` against a shared environment — it bypasses migration history and is what caused the original prod drift. Local dev DBs may use `db push`, but production only ever sees migrations via `prisma migrate deploy`.
+
+If you need to reset your local DB after a botched migration, run `pnpm prisma migrate reset` (this drops & recreates the schema, runs all migrations, and re-seeds). **Do not** manually `DROP TABLE` — it leaves `_prisma_migrations` in a state that breaks future deploys.
+
+See [docs/CI_CD_PIPELINE.md](docs/CI_CD_PIPELINE.md#database-migrations) for the deploy-time migration flow.
+
 ## 🔒 Security
 
 - **NEVER commit secrets** — `.env` files are git-ignored

@@ -168,6 +168,6 @@ export async function POST(request: NextRequest) {
     return ok(responseBody.data);
   } catch (error) {
     logger.error({ error }, 'donations.create failed');
-    return fail(error);
+    return fail(error, { route: 'donations/create', method: 'POST' });
   }
 }

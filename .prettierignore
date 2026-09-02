@@ -25,3 +25,8 @@ pnpm-debug.log*
 .DS_Store
 *.min.js
 *.min.css
+
+# Prisma migrations — raw SQL/TOML that prettier has no parser for. Prisma
+# owns the formatting inside migration files (see `prisma format`).
+prisma/migrations/**/*.sql
+prisma/migrations/**/*.toml

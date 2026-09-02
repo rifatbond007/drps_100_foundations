@@ -1177,11 +1177,68 @@ SENDGRID_FROM_EMAIL=noreply@example.com
 LOG_LEVEL=info
 ```
 
+> **⚠️ Vercel-specific overrides** — see [§10. Database migrations](#10-database-migrations) for the env vars and Build Command override that production deploys actually use. The VPS/Docker sections below (5.x, 6.x) are the legacy deployment target and not currently active.
+
 ---
 
-## 9. Performance Monitoring
+## 10. Database migrations
 
-### 9.1 Key Metrics to Track
+Production deploys target **Vercel** (not the VPS flow described in §5–6). The original outage that prompted this section was caused by **schema drift** between the committed `prisma/schema.prisma` and the live Neon Postgres — `prisma/migrations/` was not tracked in git, so `prisma migrate deploy` was never part of the deploy pipeline. The setup below prevents recurrence.
+
+### 10.1 Migration workflow
+
+1. Contributor edits `prisma/schema.prisma`.
+2. They run `pnpm prisma migrate dev --name <descriptive>` **locally**. Prisma creates `prisma/migrations/<timestamp>_<name>/migration.sql` and applies it to the dev DB.
+3. They commit **both** `schema.prisma` and the new migration directory in the same PR.
+4. CI runs `pnpm db:deploy` against an ephemeral Postgres service (see `.github/workflows/ci.yml`). If the schema and migrations disagree, this fails before merge.
+5. On Vercel, the production build runs `pnpm db:deploy` against the **real Neon `DATABASE_URL`** before `next build`. Pending migrations apply in order; applied migrations are no-ops.
+
+### 10.2 Vercel Build Command override
+
+Vercel reads its Build Command from the project settings, not from `package.json` `prebuild`. Set:
+
+```
+pnpm db:deploy && pnpm build
+```
+
+Why this override instead of extending `prebuild`:
+
+- `prebuild: prisma generate` continues to run on **every** build (local + CI + Vercel). It's idempotent and cheap.
+- `db:deploy` is moved to a separate `pnpm` script so it can be invoked explicitly (`pnpm db:deploy`) without being triggered by the local `prebuild` lifecycle — e.g. `make ci-local` must NOT run migrations against the CI Postgres service container's URL by accident.
+- The override keeps the deployment semantics explicit: **migrations first, then build**.
+
+### 10.3 Required Vercel env vars
+
+The deploy will fail or behave incorrectly if any of these are missing. Set them in **Vercel → Project → Settings → Environment Variables** for both **Production** and **Preview**:
+
+| Variable                                              | Purpose                                                                                                                                                                                                                            | Source                                   |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `DATABASE_URL`                                        | Postgres connection (Neon)                                                                                                                                                                                                         | Neon dashboard → Connection string       |
+| `REDIS_URL`                                           | ioredis (sessions, rate-limit, idempotency). **NOT** `redis://localhost:6379` — Vercel has no localhost. `src/lib/redis.ts` throws at module-import time if `NODE_ENV=production` and this is empty.                               | Upstash / Redis Cloud / Render           |
+| `NEXTAUTH_URL`                                        | Must match deployment URL exactly (`https://drps-100-foundations.vercel.app`). Wrong value ⇒ session cookies drop `Secure` flag ⇒ middleware `getToken()` returns `null` ⇒ silent bounce from `/dashboard`, `/settings`, `/admin`. | Project URL                              |
+| `NEXTAUTH_SECRET`                                     | JWT signing secret (≥32 chars)                                                                                                                                                                                                     | `openssl rand -hex 32`                   |
+| `AUTH_TRUST_HOST=true`                                | Belt-and-suspenders with `trustHost: true` in code; needed for NextAuth v5 cookie derivation behind Vercel's proxy                                                                                                                 | constant                                 |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`           | OAuth provider                                                                                                                                                                                                                     | Google Cloud Console → OAuth credentials |
+| `BKASH_RECEIVER_NUMBER`                               | Personal bKash number donors send to. **Do NOT commit this** — it lives only here. Hardcoded fallback in `src/lib/payment/index.ts` is for emergency dev only.                                                                     | Manual                                   |
+| `ADMIN_EMAILS`                                        | Comma-separated. Users signing in with one of these are auto-promoted to ADMIN. Defaults to `drps19foundation.org@gmail.com` in dev.                                                                                               | Manual                                   |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Edge rate-limit on `/api/auth/*`. Empty is fine (no-op when unset).                                                                                                                                                                | Upstash REST API                         |
+
+### 10.4 Recovering from a botched migration
+
+If `pnpm db:deploy` fails on a Vercel build because a migration is broken in production:
+
+1. **Do not** edit the migration file in place — Prisma considers it already applied and will refuse to re-run it.
+2. **Forward-only fix:** commit a new migration that corrects the issue (`pnpm prisma migrate dev --name fix_<short_description>`).
+3. **Skip the broken migration** (last resort): `pnpm prisma migrate resolve --rolled-back <migration_name>` locally, then `prisma migrate deploy`. This marks the row as rolled-back in `_prisma_migrations` but does **not** undo the schema change in Neon. You must manually `ALTER TABLE` / `DROP` etc. via the Neon SQL editor to actually roll back.
+4. **Drop the broken migration** (only if it never reached prod): delete the directory, commit, redeploy. CI will catch it; prod was never affected.
+
+See [CONTRIBUTING.md §Database schema changes](../CONTRIBUTING.md#️-database-schema-changes) for the contributor-facing rules.
+
+---
+
+## 11. Performance Monitoring
+
+### 11.1 Key Metrics to Track
 
 - **Response Time:** API endpoint latency
 - **Error Rate:** 5xx errors per minute
@@ -1191,7 +1248,7 @@ LOG_LEVEL=info
 - **User Activity:** Active users, donations per hour
 - **Resource Usage:** CPU, memory, disk, network
 
-### 9.2 Alerting Rules
+### 11.2 Alerting Rules
 
 | Alert            | Condition                  | Severity |
 | ---------------- | -------------------------- | -------- |
