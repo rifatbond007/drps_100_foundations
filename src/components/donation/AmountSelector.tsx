@@ -1,6 +1,9 @@
 /**
  * Donation amount selector.
- * SKELETON — fleshed out by frontend-agent/payment-agent.
+ *
+ * Layout: four preset pills in a single row, then a single full-width
+ * custom input below. The selected preset uses an emerald border + filled
+ * emerald background; unselected pills are hairline-bordered.
  */
 'use client';
 
@@ -26,10 +29,10 @@ export function AmountSelector({ value, onChange }: Props) {
             type="button"
             onClick={() => onChange(amount)}
             className={cn(
-              'rounded-md border-2 py-3 text-sm font-medium transition-colors',
+              'h-11 border text-sm font-semibold tabular-nums transition-colors',
               value === amount
                 ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-input hover:border-primary/50'
+                : 'border-border bg-background hover:border-foreground'
             )}
             aria-pressed={value === amount}
           >
@@ -37,23 +40,18 @@ export function AmountSelector({ value, onChange }: Props) {
           </button>
         ))}
       </div>
-      <div className="space-y-2">
-        <label htmlFor="custom-amount" className="text-sm font-medium">
-          {t('customAmount')}
-        </label>
-        <input
-          id="custom-amount"
-          type="number"
-          min={10}
-          max={100000}
-          placeholder={t('customAmount')}
-          onChange={(e) => {
-            const v = Number(e.target.value);
-            if (Number.isFinite(v) && v >= 10) onChange(v);
-          }}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-        />
-      </div>
+      <input
+        type="number"
+        min={10}
+        max={100000}
+        placeholder={t('customAmount')}
+        onChange={(e) => {
+          const v = Number(e.target.value);
+          if (Number.isFinite(v) && v >= 10) onChange(v);
+        }}
+        className="h-11 w-full border border-border bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label={t('customAmount')}
+      />
     </div>
   );
 }

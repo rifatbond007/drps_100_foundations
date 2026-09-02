@@ -1,28 +1,18 @@
-'use client';
-
 /**
  * Admin donation review table.
  *
- * Powers /admin/donations. Shows donor-submitted bKash TrxIDs and the
- * actions to approve (→ SUCCESS) or reject (→ FAILED + reason).
+ * Powers /admin/donations: rows of pending donations, each with the
+ * donor + TrxID + sender phone + submitted-at as labels on a register.
+ * Status is a single uppercase eyebrow above the donate info; approve
+ * and reject buttons are hairline-outlined.
  *
- * Optimistic UI: when the admin clicks Approve/Reject the row vanishes
- * immediately. If the API call fails we restore the row + show a toast.
- * Avoids the "stuck spinner while waiting for refetch" problem.
+ * Approve/Reject uses optimistic UI — the row vanishes immediately, we
+ * restore on API failure. Inline error toast at the top.
  */
+'use client';
+
 import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Check, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Avatar } from '@/components/ui/avatar';
 import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
 import { cn, formatBDT } from '@/lib/utils';
@@ -58,20 +48,20 @@ interface AdminListResponse {
   pagination: { page: number; limit: number; total: number; totalPages: number };
 }
 
+const FILTERS: StatusFilter[] = ['PENDING', 'SUCCESS', 'FAILED'];
+
 export function DonationsReviewTable() {
   const t = useTranslations('admin.donations');
   const tCommon = useTranslations('common');
   const tHistory = useTranslations('history');
   const locale = useLocale();
-  const langPref = (locale === 'en' ? 'EN' : 'BN') as 'BN' | 'EN';
 
   const [status, setStatus] = useState<StatusFilter>('PENDING');
   const [items, setItems] = useState<AdminDonation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Per-row action state for the inline note dialog.
-  const [noteFor, setNoteFor] = useState<{ id: string; action: 'reject' } | null>(null);
+  const [noteFor, setNoteFor] = useState<{ id: string } | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
   const [acting, setActing] = useState<string | null>(null);
   const [toast, setToast] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
@@ -96,11 +86,10 @@ export function DonationsReviewTable() {
     void fetchList();
   }, [fetchList]);
 
-  // Auto-clear toasts after a short delay.
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3500);
-    return () => clearTimeout(t);
+    const id = setTimeout(() => setToast(null), 3500);
+    return () => clearTimeout(id);
   }, [toast]);
 
   const approve = async (id: string) => {
@@ -111,7 +100,7 @@ export function DonationsReviewTable() {
       await apiClient.post(`/admin/donations/${id}/approve`, {});
       setToast({ kind: 'ok', text: t('toasts.approved') });
     } catch (e) {
-      setItems(snapshot); // restore
+      setItems(snapshot);
       const msg = e instanceof ApiClientError ? e.message : String(e);
       setToast({ kind: 'err', text: t('toasts.error', { message: msg }) });
     } finally {
@@ -127,7 +116,7 @@ export function DonationsReviewTable() {
       await apiClient.post(`/admin/donations/${id}/reject`, { adminNote: note });
       setToast({ kind: 'ok', text: t('toasts.rejected') });
     } catch (e) {
-      setItems(snapshot); // restore
+      setItems(snapshot);
       const msg = e instanceof ApiClientError ? e.message : String(e);
       setToast({ kind: 'err', text: t('toasts.error', { message: msg }) });
     } finally {
@@ -139,182 +128,159 @@ export function DonationsReviewTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="PENDING">{t('filterPending')}</SelectItem>
-            <SelectItem value="SUCCESS">{t('filterApproved')}</SelectItem>
-            <SelectItem value="FAILED">{t('filterRejected')}</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Status filter as a row of pills, not a dropdown */}
+      <div className="flex flex-wrap gap-2">
+        {FILTERS.map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setStatus(f)}
+            aria-pressed={status === f}
+            className={cn(
+              'h-8 border px-3 text-xs font-medium transition-colors',
+              status === f
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-background hover:border-foreground'
+            )}
+          >
+            {t(`filter${f.charAt(0)}${f.slice(1).toLowerCase()}`)}
+          </button>
+        ))}
       </div>
 
       {toast && (
-        <div
+        <p
           role="status"
           aria-live="polite"
           className={cn(
-            'rounded-md border p-3 text-sm',
-            toast.kind === 'ok' && 'border-green-200 bg-green-50 text-green-800',
-            toast.kind === 'err' && 'border-red-200 bg-red-50 text-red-800'
+            'border-l-2 px-3 py-2 text-sm',
+            toast.kind === 'ok'
+              ? 'border-primary bg-primary/5 text-primary'
+              : 'border-destructive bg-destructive/5 text-destructive'
           )}
         >
           {toast.text}
-        </div>
+        </p>
       )}
 
       {loading && (
-        <Card>
-          <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            {tCommon('loading')}
-          </CardContent>
-        </Card>
+        <p className="py-10 text-center text-sm text-muted-foreground">{tCommon('loading')}</p>
       )}
 
       {error && !loading && (
-        <Card>
-          <CardContent className="py-10 text-center text-sm text-destructive">{error}</CardContent>
-        </Card>
+        <p className="border-l-2 border-destructive bg-destructive/5 px-3 py-2 text-sm text-destructive">
+          {error}
+        </p>
       )}
 
       {!loading && !error && items.length === 0 && (
-        <Card>
-          <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            {t('empty')}
-          </CardContent>
-        </Card>
+        <p className="py-10 text-center text-sm text-muted-foreground">{t('empty')}</p>
       )}
 
-      <ul className="space-y-2">
-        {items.map((d) => {
-          const isRejecting = noteFor?.id === d.id;
-          return (
-            <li key={d.id}>
-              <Card>
-                <CardContent className="space-y-3 py-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar
-                        src={d.donor?.avatarUrl ?? null}
-                        name={d.donor?.name ?? null}
-                        email={d.donor?.email ?? null}
-                        size="md"
-                      />
-                      <div>
-                        <div className="font-medium">
-                          {d.isAnonymous ? t('anonymous') : (d.donor?.name ?? '—')}
-                        </div>
-                        {!d.isAnonymous && d.donor?.email && (
-                          <div className="text-xs text-muted-foreground">{d.donor.email}</div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold">
-                        {formatBDT(d.amount, (locale === 'en' ? 'en' : 'bn') as 'bn' | 'en')}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {tHistory(`purposes.${d.purpose}`)}
-                      </div>
-                    </div>
+      {!loading && !error && items.length > 0 && (
+        <ol className="border-t border-border">
+          {items.map((d) => {
+            const isRejecting = noteFor?.id === d.id;
+            const donorName = d.isAnonymous ? t('anonymous') : (d.donor?.name ?? '—');
+            return (
+              <li key={d.id} className="border-b border-border py-4">
+                <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-baseline">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      {donorName}
+                    </p>
+                    <p className="mt-1 text-xl font-bold tabular-nums text-foreground">
+                      {formatBDT(d.amount, (locale === 'en' ? 'en' : 'bn') as 'bn' | 'en')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {tHistory(`purposes.${d.purpose}`)}
+                    </p>
                   </div>
+                  <time className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                    {d.trxSubmittedAt
+                      ? new Date(d.trxSubmittedAt).toLocaleString(
+                          locale === 'en' ? 'en-US' : 'bn-BD'
+                        )
+                      : '—'}
+                  </time>
+                </div>
 
-                  <div className="grid gap-2 text-sm sm:grid-cols-3">
-                    <div>
-                      <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                        {t('trxId')}
-                      </div>
-                      <div className="font-mono">{d.trxId ?? '—'}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                        {t('senderPhone')}
-                      </div>
-                      <div className="font-mono">{d.senderPhone ?? '—'}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                        {t('submittedAt')}
-                      </div>
-                      <div>
-                        {d.trxSubmittedAt
-                          ? new Date(d.trxSubmittedAt).toLocaleString(
-                              langPref === 'EN' ? 'en-US' : 'bn-BD'
-                            )
-                          : '—'}
-                      </div>
-                    </div>
-                  </div>
+                <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-3">
+                  <Pair label={t('trxId')} value={d.trxId ?? '—'} mono />
+                  <Pair label={t('senderPhone')} value={d.senderPhone ?? '—'} mono />
+                </dl>
 
-                  {isRejecting && (
-                    <div className="space-y-2 rounded-md border bg-muted/30 p-3">
-                      <label className="text-xs font-medium">{t('noteLabel')}</label>
-                      <textarea
-                        value={noteDraft}
-                        onChange={(e) => setNoteDraft(e.target.value)}
-                        rows={3}
-                        className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                        placeholder={t('rejectDescription')}
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setNoteFor(null);
-                            setNoteDraft('');
-                          }}
-                          disabled={acting === d.id}
-                        >
-                          {t('cancel')}
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => reject(d.id, noteDraft.trim())}
-                          disabled={acting === d.id || noteDraft.trim().length === 0}
-                        >
-                          {t('reject')}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {!isRejecting && (
+                {isRejecting && (
+                  <div className="mt-3 space-y-2 border-l-2 border-destructive bg-destructive/5 px-3 py-2">
+                    <label className="text-xs font-medium">{t('noteLabel')}</label>
+                    <textarea
+                      value={noteDraft}
+                      onChange={(e) => setNoteDraft(e.target.value)}
+                      rows={2}
+                      className="w-full border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      placeholder={t('rejectDescription')}
+                    />
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => approve(d.id)}
-                        disabled={acting === d.id}
-                        className="gap-1"
-                      >
-                        <Check className="h-4 w-4" />
-                        {t('approve')}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
+                      <button
+                        type="button"
                         onClick={() => {
-                          setNoteFor({ id: d.id, action: 'reject' });
+                          setNoteFor(null);
                           setNoteDraft('');
                         }}
                         disabled={acting === d.id}
-                        className="gap-1"
+                        className="inline-flex h-9 items-center border border-input bg-background px-3 text-sm font-medium hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
                       >
-                        <X className="h-4 w-4" />
+                        {t('cancel')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => reject(d.id, noteDraft.trim())}
+                        disabled={acting === d.id || noteDraft.trim().length === 0}
+                        className="inline-flex h-9 items-center bg-destructive px-3 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 disabled:pointer-events-none disabled:opacity-50"
+                      >
                         {t('reject')}
-                      </Button>
+                      </button>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </li>
-          );
-        })}
-      </ul>
+                  </div>
+                )}
+
+                {!isRejecting && status === 'PENDING' && (
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => approve(d.id)}
+                      disabled={acting === d.id}
+                      className="inline-flex h-9 items-center bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      {t('approve')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNoteFor({ id: d.id });
+                        setNoteDraft('');
+                      }}
+                      disabled={acting === d.id}
+                      className="inline-flex h-9 items-center border border-input bg-background px-3 text-sm font-medium hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      {t('reject')}
+                    </button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+function Pair({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div>
+      <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dd className={cn('text-sm', mono && 'font-mono tabular-nums')}>{value}</dd>
     </div>
   );
 }

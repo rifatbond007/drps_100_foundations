@@ -37,30 +37,12 @@
     }
   },
   "landing": {
-    "heroBadge": "Trusted by 12,000+ donors across Bangladesh",
-    "heroTitle": "Your donation, real change",
-    "heroSubtitle": "Secure and transparent donations to verified charitable causes. Process easily via bKash.",
-    "heroHighlight": "100% of every taka reaches the cause.",
-    "donateCta": "Donate now",
-    "aboutCta": "Learn more",
-    "scrollHint": "Scroll to learn more",
-    "stats": {
-      "raised": "Total raised",
-      "donors": "Active donors",
-      "causes": "Verified causes",
-      "transparency": "Fund transparency"
-    },
-    "statsValues": {
-      "raised": "৳2.4Cr+",
-      "donors": "12,400+",
-      "causes": "38",
-      "transparency": "100%"
-    },
-    "trustBadges": {
-      "secure": "Secure payments",
-      "verified": "Verified causes",
-      "transparent": "Transparent ledger"
-    }
+    "heroTitle": "Your donation,",
+    "heroAccent": "real change.",
+    "heroSubtitle": "Verified charitable giving for DRPS Batch-19 Foundation causes. Send via bKash in seconds.",
+    "donateCta": "Donate",
+    "recentHeader": "Recent donations",
+    "recentFootnote": "Each transaction is verified by an admin."
   },
   "about": {
     "title": "About us",
@@ -137,6 +119,7 @@
   },
   "donation": {
     "title": "Donate",
+    "amountLabel": "Amount",
     "customAmount": "Enter a custom amount",
     "purpose": "Purpose",
     "submit": "Continue donation",
@@ -260,12 +243,14 @@
   "admin": {
     "title": "Admin panel",
     "dashboard": {
+      "title": "Admin dashboard",
       "manageUsers": "Manage users",
       "manageUsersDesc": "Ban, unban, and search all registered users",
       "viewReports": "View reports",
       "viewReportsDesc": "Donation trends and CSV export",
       "reviewDonations": "Review donations",
-      "reviewDonationsDesc": "Verify donor-submitted bKash TrxIDs"
+      "reviewDonationsDesc": "Verify donor-submitted bKash TrxIDs",
+      "quickLinks": "Quick links"
     },
     "users": {
       "title": "User management",
@@ -346,10 +331,9 @@
     "donations": {
       "title": "Donation review",
       "subtitle": "Verify donor-submitted bKash TrxIDs and approve or reject.",
-      "filterAll": "All",
       "filterPending": "Awaiting review",
-      "filterApproved": "Approved",
-      "filterRejected": "Rejected",
+      "filterSuccess": "Approved",
+      "filterFailed": "Rejected",
       "donor": "Donor",
       "anonymous": "Anonymous donor",
       "trxId": "TrxID",

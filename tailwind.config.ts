@@ -11,9 +11,9 @@ const config: Config = {
   theme: {
     container: {
       center: true,
-      padding: '1rem',
+      padding: '1.25rem',
       screens: {
-        '2xl': '1280px',
+        '2xl': '1200px',
       },
     },
     extend: {
@@ -23,13 +23,25 @@ const config: Config = {
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        // Foundation green — used sparingly for primary actions and active
+        // states. HSL keeps a single hue family so all surfaces share one
+        // colour story without us hand-tuning each shade.
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
         },
+        // Surface-tinted secondary — the "muted" feel of the page chrome
+        // (footer, sidebar surface, account cards). Off-paper so it reads
+        // as a quieter plane.
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
+        },
+        // Reserved for payment surfaces only — never for chrome.
+        // Distinct hue so the donor's eye finds the money path at a glance.
+        bkash: {
+          DEFAULT: 'hsl(var(--bkash))',
+          foreground: 'hsl(var(--bkash-foreground))',
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
@@ -47,17 +59,33 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        // Admin chrome — mustard. Gives /admin/* a distinct, trustworthy
+        // tone separate from donor-facing pages, without resorting to a
+        // different primary.
+        admin: {
+          DEFAULT: 'hsl(var(--admin))',
+          foreground: 'hsl(var(--admin-foreground))',
+        },
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        // Tight corners. The pages are register-style — no rounded cards
+        // stacked on rounded cards. Inputs/buttons get a hint (6px) but
+        // everything else sits on the grid.
+        lg: '6px',
+        md: '4px',
+        sm: '2px',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        bn: ['var(--font-bengali)', 'sans-serif'],
+        // Single family — Hind Siliguri ships both Latin and Bengali in
+        // one font file so headlines, body, and numerals all share the
+        // same metrics.
+        sans: ['var(--font-hind)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-hind)', 'system-ui', 'serif'],
       },
+      // One orchestrated entrance — the body fades in once. No scattered
+      // fade-and-slide on every section.
       keyframes: {
+        'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
         'accordion-down': {
           from: { height: '0' },
           to: { height: 'var(--radix-accordion-content-height)' },
@@ -66,17 +94,11 @@ const config: Config = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
-        'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
-        'slide-up': {
-          from: { transform: 'translateY(10px)', opacity: '0' },
-          to: { transform: 'translateY(0)', opacity: '1' },
-        },
       },
       animation: {
+        'fade-in': 'fade-in 0.4s ease-out',
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'fade-in': 'fade-in 0.5s ease-in-out',
-        'slide-up': 'slide-up 0.3s ease-out',
       },
     },
   },

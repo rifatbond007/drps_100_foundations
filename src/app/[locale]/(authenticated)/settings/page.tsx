@@ -1,12 +1,13 @@
 /**
  * Authenticated settings page.
  *
- * Uses react-hook-form + zod resolver with two parallel schemas:
- *   - profile  → PATCH /api/users/profile  (name, phone, languagePref)
- *   - settings → PUT  /api/users/settings  (notifications, theme)
+ * Two stacked sections (Profile, Preferences) separated by hairline
+ * rules. No card chrome — sections are just titled blocks with form
+ * fields flowing vertically inside.
  *
- * Both submits run in parallel when the user clicks Save. Email is
- * read-only (NextAuth providers don't allow changing email here).
+ * Profile fields and preferences share one Save button at the bottom.
+ * Saving runs both PATCH /users/profile and PUT /users/settings in
+ * parallel.
  */
 'use client';
 
@@ -15,8 +16,6 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -26,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Avatar } from '@/components/ui/avatar';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useProfile, type UserProfile } from '@/lib/hooks/use-profile';
 import { apiClient } from '@/lib/api/client';
@@ -54,14 +52,12 @@ export default function SettingsPage() {
   const { user } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
 
-  // Profile form (PATCH /api/users/profile)
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: { name: '', phone: '', languagePref: 'BN' },
     mode: 'onBlur',
   });
 
-  // Settings form (PUT /api/users/settings)
   const settingsForm = useForm<SettingsForm>({
     resolver: zodResolver(updateSettingsSchema),
     defaultValues: {
@@ -77,7 +73,6 @@ export default function SettingsPage() {
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Hydrate profile form when profile loads
   useEffect(() => {
     if (profile) {
       profileForm.reset({
@@ -86,11 +81,9 @@ export default function SettingsPage() {
         languagePref: profile.languagePref,
       });
     }
-    // profileForm.reset is stable across renders; only re-hydrate when profile id changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id]);
 
-  // Hydrate settings form when /api/users/settings responds
   useEffect(() => {
     let cancelled = false;
     setSettingsLoading(true);
@@ -113,7 +106,6 @@ export default function SettingsPage() {
     return () => {
       cancelled = true;
     };
-    // settingsForm.reset is stable across renders; we only want to fetch once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -136,7 +128,6 @@ export default function SettingsPage() {
 
     try {
       const tasks: Promise<unknown>[] = [];
-      // Only PATCH profile if anything actually changed.
       if (
         profileData.name !== (profile?.name ?? '') ||
         (profileData.phone || '') !== (profile?.phone ?? '') ||
@@ -154,12 +145,10 @@ export default function SettingsPage() {
           })
         );
       }
-      // Settings always sent — they have defaults and the schema is partial.
       tasks.push(apiClient.put<UserSettings>('/users/settings', settingsData));
 
       await Promise.all(tasks);
       setSaveState('saved');
-      // Auto-hide the "saved" badge after a few seconds.
       setTimeout(() => {
         setSaveState((prev) => (prev === 'saved' ? 'idle' : prev));
       }, 3000);
@@ -180,163 +169,146 @@ export default function SettingsPage() {
   const profileEmail = profile?.email ?? user.email ?? null;
 
   return (
-    <div className="space-y-3">
-      <div>
+    <div className="space-y-8">
+      <header>
         <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
-      </div>
+        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+        {profileName && (
+          <p className="mt-3 text-sm text-foreground">
+            {profileName}
+            {profileEmail && (
+              <span className="ml-2 text-xs text-muted-foreground">· {profileEmail}</span>
+            )}
+          </p>
+        )}
+      </header>
 
-      {/* Identity card (read-only) */}
-      <Card>
-        <CardContent className="flex items-center gap-4 py-3">
-          <Avatar
-            src={profile?.avatarUrl ?? user.image ?? null}
-            name={profileName}
-            email={profileEmail}
-            size="md"
-          />
-          <div>
-            <div className="text-base font-semibold">{profileName ?? '—'}</div>
-            <div className="text-xs text-muted-foreground">{profileEmail ?? '—'}</div>
+      {/* Profile */}
+      <section className="space-y-4 border-t border-border pt-6">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          {t('profile')}
+        </h2>
+        {profileLoading ? (
+          <p className="text-sm text-muted-foreground">{tCommon('loading')}</p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="settings-name">{t('name')}</Label>
+              <Input
+                id="settings-name"
+                placeholder={t('namePlaceholder')}
+                {...profileForm.register('name')}
+              />
+              {profileForm.formState.errors.name && (
+                <p className="text-xs text-destructive">
+                  {profileForm.formState.errors.name.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="settings-email">{t('email')}</Label>
+              <Input id="settings-email" type="email" disabled value={profileEmail ?? ''} />
+              <p className="text-xs text-muted-foreground">{t('emailReadOnly')}</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="settings-phone">{t('phone')}</Label>
+              <Input
+                id="settings-phone"
+                placeholder={t('phonePlaceholder')}
+                {...profileForm.register('phone')}
+              />
+              {profileForm.formState.errors.phone && (
+                <p className="text-xs text-destructive">
+                  {profileForm.formState.errors.phone.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="settings-language">{t('language')}</Label>
+              <Select
+                value={profileForm.watch('languagePref') ?? 'BN'}
+                onValueChange={(v) =>
+                  profileForm.setValue('languagePref', v as 'BN' | 'EN', {
+                    shouldDirty: true,
+                  })
+                }
+              >
+                <SelectTrigger id="settings-language">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BN">{t('languageOptions.BN')}</SelectItem>
+                  <SelectItem value="EN">{t('languageOptions.EN')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </section>
 
-      {/* Profile form */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">{t('profile')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {profileLoading ? (
-            <div className="text-sm text-muted-foreground">{tCommon('loading')}</div>
-          ) : (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="settings-name">{t('name')}</Label>
-                <Input
-                  id="settings-name"
-                  placeholder={t('namePlaceholder')}
-                  {...profileForm.register('name')}
+      {/* Preferences */}
+      <section className="space-y-4 border-t border-border pt-6">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          {t('notifications')}
+        </h2>
+        {settingsLoading ? (
+          <p className="text-sm text-muted-foreground">{tCommon('loading')}</p>
+        ) : settingsLoadError ? (
+          <p className="text-sm text-destructive">{settingsLoadError}</p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="settings-theme">{t('theme')}</Label>
+              <Select
+                value={settingsForm.watch('theme') ?? 'system'}
+                onValueChange={(v) =>
+                  settingsForm.setValue('theme', v as 'light' | 'dark' | 'system', {
+                    shouldDirty: true,
+                  })
+                }
+              >
+                <SelectTrigger id="settings-theme">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">{t('themeOptions.light')}</SelectItem>
+                  <SelectItem value="dark">{t('themeOptions.dark')}</SelectItem>
+                  <SelectItem value="system">{t('themeOptions.system')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3 sm:col-span-2">
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-primary"
+                  {...settingsForm.register('emailNotifications')}
                 />
-                {profileForm.formState.errors.name && (
-                  <p className="text-xs text-destructive">
-                    {profileForm.formState.errors.name.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="settings-email">{t('email')}</Label>
-                <Input id="settings-email" type="email" disabled value={profileEmail ?? ''} />
-                <p className="text-xs text-muted-foreground">{t('emailReadOnly')}</p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="settings-phone">{t('phone')}</Label>
-                <Input
-                  id="settings-phone"
-                  placeholder={t('phonePlaceholder')}
-                  {...profileForm.register('phone')}
+                <span className="text-sm">{t('emailNotifications')}</span>
+              </label>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-primary"
+                  {...settingsForm.register('donationReceipts')}
                 />
-                {profileForm.formState.errors.phone && (
-                  <p className="text-xs text-destructive">
-                    {profileForm.formState.errors.phone.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="settings-language">{t('language')}</Label>
-                <Select
-                  value={profileForm.watch('languagePref') ?? 'BN'}
-                  onValueChange={(v) =>
-                    profileForm.setValue('languagePref', v as 'BN' | 'EN', {
-                      shouldDirty: true,
-                    })
-                  }
-                >
-                  <SelectTrigger id="settings-language">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BN">{t('languageOptions.BN')}</SelectItem>
-                    <SelectItem value="EN">{t('languageOptions.EN')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Appearance + Notifications form */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">{t('appearance')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {settingsLoading ? (
-            <div className="text-sm text-muted-foreground">{tCommon('loading')}</div>
-          ) : settingsLoadError ? (
-            <div className="text-sm text-destructive">{settingsLoadError}</div>
-          ) : (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="settings-theme">{t('theme')}</Label>
-                <Select
-                  value={settingsForm.watch('theme') ?? 'system'}
-                  onValueChange={(v) =>
-                    settingsForm.setValue('theme', v as 'light' | 'dark' | 'system', {
-                      shouldDirty: true,
-                    })
-                  }
-                >
-                  <SelectTrigger id="settings-theme">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">{t('themeOptions.light')}</SelectItem>
-                    <SelectItem value="dark">{t('themeOptions.dark')}</SelectItem>
-                    <SelectItem value="system">{t('themeOptions.system')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">{t('notifications')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <label className="flex items-center justify-between gap-4 rounded-md border p-2">
-            <span className="text-sm">{t('emailNotifications')}</span>
-            <input
-              type="checkbox"
-              className="h-4 w-4"
-              {...settingsForm.register('emailNotifications')}
-            />
-          </label>
-          <label className="flex items-center justify-between gap-4 rounded-md border p-2">
-            <span className="text-sm">{t('donationReceipts')}</span>
-            <input
-              type="checkbox"
-              className="h-4 w-4"
-              {...settingsForm.register('donationReceipts')}
-            />
-          </label>
-        </CardContent>
-      </Card>
+                <span className="text-sm">{t('donationReceipts')}</span>
+              </label>
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* Save + status */}
-      <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
         <div
           className={cn(
             'flex items-center gap-2 text-sm',
-            saveState === 'saved' && 'text-green-600',
+            saveState === 'saved' && 'text-primary',
             saveState === 'error' && 'text-destructive'
           )}
           role="status"
@@ -358,9 +330,14 @@ export default function SettingsPage() {
             <span>{t('saveFailed', { message: saveError })}</span>
           )}
         </div>
-        <Button onClick={onSave} disabled={isSaving || profileLoading || settingsLoading}>
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={isSaving || profileLoading || settingsLoading}
+          className="inline-flex h-10 items-center justify-center bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
+        >
           {isSaving ? t('saving') : t('saveChanges')}
-        </Button>
+        </button>
       </div>
     </div>
   );

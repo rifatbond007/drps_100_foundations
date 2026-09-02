@@ -3,6 +3,11 @@
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
+/**
+ * Global error boundary. Restrained: a short sentence, a reference code
+ * (the digest), and a "Try again" button. No dramatic illustration or
+ * apologetic copy.
+ */
 export default function GlobalError({
   error,
   reset,
@@ -16,13 +21,15 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-4 text-center">
-      <h1 className="text-4xl font-bold tracking-tight">Something went wrong</h1>
-      <p className="max-w-md text-muted-foreground">
-        An unexpected error occurred. Our team has been notified.
+    <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
+      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        Something went wrong
+      </p>
+      <p className="text-base text-foreground">
+        We couldn't finish loading this page. Our team has been notified.
       </p>
       {error.digest && (
-        <p className="font-mono text-xs text-muted-foreground">Reference: {error.digest}</p>
+        <p className="font-mono text-xs text-muted-foreground">ref: {error.digest}</p>
       )}
       <Button onClick={reset}>Try again</Button>
     </div>

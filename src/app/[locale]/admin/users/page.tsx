@@ -1,18 +1,22 @@
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { UsersTable } from '@/components/admin/UsersTable';
 
 /**
  * /admin/users — admin user list.
- *
- * No h1 / subtitle here on purpose: the layout already renders the
- * dashboard-style stat cards above the page content, and the page is
- * identifiable from the sidebar's Users link. Adding a redundant
- * "User management" + "All registered users" header duplicates info
- * the admin already sees in chrome.
+ * Hosts the table component, which carries its own header inside.
  */
 export default async function AdminUsersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations('admin.users');
 
-  return <UsersTable />;
+  return (
+    <div className="space-y-6">
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+      </header>
+      <UsersTable />
+    </div>
+  );
 }

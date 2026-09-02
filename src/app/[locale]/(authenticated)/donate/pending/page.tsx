@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 /**
  * /donate/pending — donor lands here after submitting the bKash TrxID.
- *
- * Server component: shows the receipt reference + a clear "we'll
- * review this within 24 hours" message. No client JS needed.
+ * Server component. The reference + "we'll review within 24 hours"
+ * message sit on a single mustard-tinted panel (mustard is reserved
+ * for "in progress" states; admin surfaces use it too, but the meaning
+ * is consistent: awaiting review).
  */
 export default async function DonatePendingPage({
   params,
@@ -22,16 +22,18 @@ export default async function DonatePendingPage({
   const t = await getTranslations('donation.pending');
 
   return (
-    <div className="mx-auto flex max-w-md flex-col items-center gap-6 px-4 py-16 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 text-yellow-700">
-        <Clock className="h-8 w-8" />
-      </div>
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="mt-2 text-muted-foreground">{t('subtitle')}</p>
-        {id && <p className="mt-2 font-mono text-xs text-muted-foreground">Reference: {id}</p>}
-      </div>
-      <div className="flex flex-wrap justify-center gap-3">
+    <div className="mx-auto max-w-md py-12">
+      <section className="border-l-4 border-admin bg-admin/5 px-5 py-4">
+        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="mt-2 text-sm text-foreground/80">{t('subtitle')}</p>
+        {id && (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Reference: <span className="font-mono">{id}</span>
+          </p>
+        )}
+      </section>
+
+      <div className="mt-6 flex flex-wrap gap-3">
         <Button asChild variant="outline">
           <Link href={`/${locale}/history`}>{t('viewHistory')}</Link>
         </Button>

@@ -37,30 +37,12 @@
     }
   },
   "landing": {
-    "heroBadge": "সারাদেশের ১২,০০০+ দাতার আস্থা",
-    "heroTitle": "আপনার দান, বাস্তব পরিবর্তন",
-    "heroSubtitle": "যাচাইকৃত দাতব্য প্রতিষ্ঠানে নিরাপদ ও স্বচ্ছ দান। bKash এর মাধ্যমে চালান করা সহজ।",
-    "heroHighlight": "প্রতিটি টাকা সরাসরি কার্যকরী খাতে পৌঁছায়।",
-    "donateCta": "এখনই দান করুন",
-    "aboutCta": "আরও জানুন",
-    "scrollHint": "বিস্তারিত জানতে স্ক্রোল করুন",
-    "stats": {
-      "raised": "মোট সংগ্রহ",
-      "donors": "সক্রিয় দাতা",
-      "causes": "যাচাইকৃত খাত",
-      "transparency": "স্বচ্ছতা"
-    },
-    "statsValues": {
-      "raised": "৳২.৪ কোটি+",
-      "donors": "১২,৪০০+",
-      "causes": "৩৮",
-      "transparency": "১০০%"
-    },
-    "trustBadges": {
-      "secure": "নিরাপদ পেমেন্ট",
-      "verified": "যাচাইকৃত প্রকল্প",
-      "transparent": "স্বচ্ছ হিসাব"
-    }
+    "heroTitle": "আপনার দান,",
+    "heroAccent": "বাস্তব পরিবর্তন।",
+    "heroSubtitle": "DRPS Batch-19 Foundation-এ যাচাইকৃত দাতব্য প্রকল্পে নিরাপদ ও স্বচ্ছ দান। bKash-এর মাধ্যমে পাঠানো সহজ।",
+    "donateCta": "দান করুন",
+    "recentHeader": "সাম্প্রতিক দান",
+    "recentFootnote": "প্রতিটি লেনদেন একজন অ্যাডমিন যাচাই করেন।"
   },
   "about": {
     "title": "আমাদের সম্পর্কে",
@@ -137,6 +119,7 @@
   },
   "donation": {
     "title": "দান করুন",
+    "amountLabel": "পরিমাণ",
     "customAmount": "অন্য পরিমাণ লিখুন",
     "purpose": "উদ্দেশ্য",
     "submit": "দান চালিয়ে যান",
@@ -260,12 +243,14 @@
   "admin": {
     "title": "অ্যাডমিন প্যানেল",
     "dashboard": {
+      "title": "অ্যাডমিন ড্যাশবোর্ড",
       "manageUsers": "ব্যবহারকারী ব্যবস্থাপনা",
       "manageUsersDesc": "নিষিদ্ধ, মুক্ত এবং অনুসন্ধান",
       "viewReports": "রিপোর্ট দেখুন",
       "viewReportsDesc": "দানের প্রবণতা এবং CSV রপ্তানি",
       "reviewDonations": "দান পর্যালোচনা",
-      "reviewDonationsDesc": "বিকাশ ট্রানজ্যাকশন আইডি যাচাই করুন"
+      "reviewDonationsDesc": "বিকাশ ট্রানজ্যাকশন আইডি যাচাই করুন",
+      "quickLinks": "দ্রুত লিঙ্ক"
     },
     "users": {
       "title": "ব্যবহারকারী ব্যবস্থাপনা",
@@ -326,7 +311,7 @@
       "subtitle": "দানের পরিসংখ্যান ও বিশ্লেষণ",
       "totalRaised": "মোট সংগ্রহ",
       "totalDonors": "মোট দাতা",
-      "successRate": "সাফল্যের হার",
+      "successRate": "সফলতার হার",
       "byPurpose": "উদ্দেশ্য অনুসারে",
       "byMonth": "মাস অনুসারে",
       "exportCsv": "CSV রপ্তানি করুন",
@@ -346,10 +331,9 @@
     "donations": {
       "title": "দান পর্যালোচনা",
       "subtitle": "দাতার জমা দেওয়া বিকাশ TrxID যাচাই করে অনুমোদন বা প্রত্যাখ্যান করুন।",
-      "filterAll": "সব",
       "filterPending": "পর্যালোচনা অপেক্ষমাণ",
-      "filterApproved": "অনুমোদিত",
-      "filterRejected": "প্রত্যাখ্যাত",
+      "filterSuccess": "অনুমোদিত",
+      "filterFailed": "প্রত্যাখ্যান",
       "donor": "দাতা",
       "anonymous": "বেনামী দাতা",
       "trxId": "TrxID",
@@ -369,7 +353,7 @@
       "empty": "পর্যালোচনার জন্য কোনো দান নেই",
       "toasts": {
         "approved": "দান অনুমোদিত হয়েছে",
-        "rejected": "দান প্রত্যাখ্যাত হয়েছে",
+        "rejected": "দান প্রত্যাখ্যান হয়েছে",
         "error": "কর্ম ব্যর্থ: {message}"
       }
     }

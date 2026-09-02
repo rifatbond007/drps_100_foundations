@@ -1,19 +1,13 @@
 /**
- * Admin landing stats — 3 cards shown above the main admin content:
- *   1. Total users (excludes soft-deleted)
- *   2. Total money raised (lifetime, SUCCESS status only)
- *   3. Today's total donations (server-local calendar day)
+ * Admin landing stats — three single-line figures shown above all
+ * admin pages: total users, total raised (lifetime, SUCCESS only),
+ * today's donations.
  *
- * Server component — fetches /api/admin/reports in the layout and passes
- * the totals down. This keeps the layout a pure server component and
- * avoids a client-side fetch waterfall.
- *
- * If the totals fetch fails for any reason, the cards render as "—" rather
- * than throwing — admin pages should never be blocked by a transient
- * reports failure.
+ * Layout: a 1fr row (3 equal columns on lg, stacked on mobile). Each
+ * column is just a label + the number — no card chrome, no icon, no
+ * subtitle. The numbers are large and tabular; the labels are tiny
+ * uppercase eyebrows.
  */
-import { Users, Wallet, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBDT } from '@/lib/utils';
 
 export interface AdminTotals {
@@ -27,54 +21,26 @@ export interface AdminTotals {
 
 interface AdminStatsCardProps {
   totals: AdminTotals;
-  /**
-   * BCP-47 locale tag — passed through to formatBDT so Bengali vs English
-   * digit shaping matches the rest of the page.
-   */
   locale: 'bn' | 'en';
 }
 
 export function AdminStatsCard({ totals, locale }: AdminStatsCardProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardDescription>Total users</CardDescription>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <CardTitle className="text-3xl">{totals.totalUsers.toLocaleString(locale)}</CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {totals.totalDonors.toLocaleString(locale)} have donated
-          </p>
-        </CardContent>
-      </Card>
+    <dl className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border sm:grid-cols-3">
+      <Cell label="Total users" value={totals.totalUsers.toLocaleString(locale)} />
+      <Cell label="Total raised" value={formatBDT(totals.totalRaised, locale)} />
+      <Cell label="Today" value={formatBDT(totals.todayTotal, locale)} />
+    </dl>
+  );
+}
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardDescription>Total raised</CardDescription>
-          <Wallet className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <CardTitle className="text-3xl">{formatBDT(totals.totalRaised, locale)}</CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {totals.totalDonations.toLocaleString(locale)} donations
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardDescription>Today&apos;s donations</CardDescription>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <CardTitle className="text-3xl">{formatBDT(totals.todayTotal, locale)}</CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {totals.todayCount.toLocaleString(locale)} today
-          </p>
-        </CardContent>
-      </Card>
+function Cell({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-background px-4 py-3">
+      <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </dt>
+      <dd className="mt-1 text-2xl font-bold tabular-nums text-foreground">{value}</dd>
     </div>
   );
 }
