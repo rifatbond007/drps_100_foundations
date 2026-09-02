@@ -14,6 +14,24 @@ jobs:
   ci:
     name: Format / Lint / Type-check / Unit Tests
     runs-on: ubuntu-latest
+    # Ephemeral Postgres for the migration-drift check. The URL must match
+    # the credentials the migrations expect (none — they use defaults).
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: donation
+          POSTGRES_PASSWORD: donation
+          POSTGRES_DB: donation_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://donation:donation@localhost:5432/donation_ci
     steps:
       - uses: actions/checkout@v4
 
@@ -33,6 +51,19 @@ jobs:
       # `prisma generate` populates node_modules/.prisma/client.
       - name: Generate Prisma client
         run: pnpm prisma generate
+
+      # Apply migrations against the CI Postgres. If a contributor
+      # edited prisma/schema.prisma without generating a matching
+      # migration, the resulting schema in CI Postgres will diverge
+      # from `prisma migrate status`'s view of HEAD — this step fails
+      # loud and early instead of letting drift reach prod. Production
+      # deploys apply migrations via `pnpm db:deploy` before building
+      # (see docs/CI_CD_PIPELINE.md).
+      - name: Apply migrations to ephemeral Postgres
+        run: pnpm db:deploy
+
+      - name: Verify migrations match schema
+        run: pnpm db:status
 
       - name: Format check (Prettier)
         run: pnpm format:check

@@ -1,0 +1,4 @@
+-- placeholder for migration that previously existed but whose SQL file was lost.
+-- The schema is already applied via prisma db push; this empty file only exists
+-- so 'prisma migrate resolve --applied' can mark the orphan _prisma_migrations
+-- row as resolved. See 20260902120000_init/migration.sql for the canonical schema.
