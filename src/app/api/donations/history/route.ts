@@ -77,6 +77,6 @@ export async function GET(request: Request) {
     };
     return ok(body);
   } catch (error) {
-    return fail(error);
+    return fail(error, { route: 'donations/history', method: 'GET' });
   }
 }
