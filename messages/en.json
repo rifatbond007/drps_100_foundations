@@ -38,16 +38,15 @@
   },
   "landing": {
     "heroEyebrow": "DRPS Batch-19 Foundation",
-    "heroTitle": "Your donation,",
-    "heroAccent": "real change.",
-    "heroSubtitle": "Run by our own alumni. Every transaction is reviewed by an admin.",
+    "heroHeadlineL1": "Your donation,",
+    "heroHeadlineL2": "in motion.",
+    "heroSubtitle": "bKash-verified. Run by alumni. Every taka reviewed.",
+    "heroLiveLabel": "Raised today",
     "donateCta": "Donate",
     "howItWorks": "How it works",
     "step1Title": "Pick an amount",
     "step2Title": "Send via bKash",
-    "step3Title": "Admin verifies",
-    "recentStrip": "To date",
-    "ledgerAnonymous": "Anonymous"
+    "step3Title": "Admin verifies"
   },
   "about": {
     "title": "About us",
