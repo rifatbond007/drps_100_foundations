@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" width="320" height="400" role="img" aria-label="Portrait placeholder">
+  <rect width="320" height="400" fill="hsl(40, 25%, 96%)" />
+  <rect x="12" y="12" width="296" height="376" fill="none" stroke="hsl(35, 12%, 18%)" stroke-width="1" opacity="0.18" />
+
+  <!-- Mustard wash backdrop, matching the section accent -->
+  <rect x="40" y="60" width="240" height="280" fill="hsl(42, 60%, 78%)" opacity="0.35" />
+
+  <!-- Shoulders: a third silhouette — narrower, taller -->
+  <path d="M40 340 L40 320 Q40 268 112 248 L208 248 Q280 268 280 320 L280 340 Z"
+        fill="hsl(35, 12%, 18%)" opacity="0.9" />
+
+  <!-- Lapel notch, the editorial mark of a jacket -->
+  <path d="M132 248 L160 290 L188 248 Z" fill="hsl(40, 25%, 96%)" />
+  <path d="M132 248 L160 290 L188 248" fill="none" stroke="hsl(35, 12%, 18%)" stroke-width="1" opacity="0.4" />
+
+  <!-- Tie: a flat mustard strip hanging from the collar notch -->
+  <path d="M150 270 L170 270 L172 340 L148 340 Z" fill="hsl(42, 70%, 48%)" />
+
+  <!-- Neck -->
+  <rect x="140" y="220" width="40" height="44" fill="hsl(35, 12%, 18%)" opacity="0.85" />
+
+  <!-- Head: round, clean -->
+  <circle cx="160" cy="170" r="68" fill="hsl(35, 22%, 78%)" />
+
+  <!-- Hair: short, flat top -->
+  <path d="M96 156 Q96 92 160 92 Q224 92 224 156 L224 134 Q200 110 160 110 Q120 110 96 134 Z"
+        fill="hsl(35, 12%, 18%)" opacity="0.88" />
+
+  <!-- Spectacles: two thin ovals, the section's only repeated editorial
+       gesture (the page does not otherwise draw glasses) -->
+  <circle cx="142" cy="178" r="10" fill="none" stroke="hsl(35, 12%, 18%)" stroke-width="2" opacity="0.85" />
+  <circle cx="178" cy="178" r="10" fill="none" stroke="hsl(35, 12%, 18%)" stroke-width="2" opacity="0.85" />
+  <line x1="152" y1="178" x2="168" y2="178" stroke="hsl(35, 12%, 18%)" stroke-width="2" opacity="0.85" />
+
+  <text x="24" y="378" font-family="serif" font-size="20" font-weight="700"
+        fill="hsl(35, 12%, 18%)" letter-spacing="2">03</text>
+</svg>

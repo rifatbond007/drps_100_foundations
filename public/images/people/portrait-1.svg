@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" width="320" height="400" role="img" aria-label="Portrait placeholder">
+  <!-- Paper background, matches landing surface -->
+  <rect width="320" height="400" fill="hsl(40, 25%, 96%)" />
+
+  <!-- Hairline frame inset from the edge -->
+  <rect x="12" y="12" width="296" height="376" fill="none" stroke="hsl(35, 12%, 18%)" stroke-width="1" opacity="0.18" />
+
+  <!-- Soft tonal backdrop behind the figure (mustard wash) -->
+  <rect x="40" y="60" width="240" height="280" fill="hsl(42, 60%, 78%)" opacity="0.35" />
+
+  <!-- Shoulders: a flat trapezoid, no rounded corners -->
+  <path d="M40 340 L40 320 Q40 270 110 250 L210 250 Q280 270 280 320 L280 340 Z"
+        fill="hsl(35, 12%, 18%)" opacity="0.9" />
+
+  <!-- Neck: thin rect -->
+  <rect x="138" y="218" width="44" height="46" fill="hsl(35, 12%, 18%)" opacity="0.85" />
+
+  <!-- Head: oval -->
+  <ellipse cx="160" cy="170" rx="68" ry="78" fill="hsl(35, 22%, 78%)" />
+
+  <!-- Hair: cropped cap, no shading -->
+  <path d="M95 162 Q95 90 160 90 Q225 90 225 162 L225 140 Q210 110 160 110 Q110 110 95 140 Z"
+        fill="hsl(35, 12%, 18%)" opacity="0.88" />
+
+  <!-- Mustard accent: a small square pin on the lapel — the section's
+       single chromatic mark on this frame -->
+  <rect x="152" y="296" width="16" height="16" fill="hsl(42, 70%, 48%)" />
+
+  <!-- Initial monogram, bottom-left of the frame, set in display weight -->
+  <text x="24" y="378" font-family="serif" font-size="20" font-weight="700"
+        fill="hsl(35, 12%, 18%)" letter-spacing="2">01</text>
+</svg>
