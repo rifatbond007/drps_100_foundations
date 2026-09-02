@@ -24,7 +24,7 @@ export async function HowItWorksSection({ locale }: Props) {
   ];
 
   return (
-    <section className="border-t border-border bg-background">
+    <section id="how" className="border-t border-border bg-background">
       <div className="container py-14 sm:py-20">
         <h2 className="mb-8 max-w-2xl text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           {t('howSectionTitle')}

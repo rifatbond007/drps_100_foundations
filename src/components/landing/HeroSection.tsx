@@ -1,23 +1,21 @@
 /**
- * Landing hero — pass two.
+ * Landing hero — pass three.
  *
- * Two bold moves, both typographic:
+ * One bold move, typographic:
  *
- *   1. The headline is a split display. The noun ("Your donation,")
- *      fills the column at 7xl-9xl in display weight. The verb
- *      ("in motion.") sits directly below it at 3xl-4xl in light
- *      weight with loosened tracking. The contrast is size + weight,
- *      not colour — this is the move the previous hero was missing.
+ *   The headline is a split display. The noun fills the column at
+ *   7xl-9xl in display weight; the verb sits directly below it at
+ *   3xl-4xl in light weight with loosened tracking. The contrast is
+ *   size + weight, not colour.
  *
- *   2. The top-right corner carries a single live total in tabular
- *      numerals, set larger than any other body text on the page. It
- *      is the visual anchor on the right edge. No chip, no card, no
- *      eyebrow — just a small label and a number, hairline-divided
- *      from the foundation wordmark on the left.
+ *   The previous version carried a top strip with a "Raised today"
+ *   figure on the right edge. That figure was redundant with the
+ *   Activity section directly below — two numbers for the same idea
+ *   on the same screen. Removed. Activity is now the only place the
+ *   raised-so-far figure lives, and the hero is just the headline.
  *
  * Restraint:
- *   - No motion. No orchestrated reveal. The number renders at its
- *     final value on first paint.
+ *   - No motion. No orchestrated reveal.
  *   - The bKash pink appears in exactly two places: the "send to"
  *     destination inside step 02, and a single 4px bar at the very
  *     bottom of the hero. That bar is the page's only saturated
@@ -34,26 +32,10 @@ export async function HeroSection({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'landing' });
 
   return (
-    <section className="relative flex min-h-[calc(100dvh-3.5rem)] flex-col border-b border-border bg-background">
-      {/* ── Top strip: foundation ID (left) · live total (right) ──
-       *  Hairline rules separate this row from the hero body above
-       *  and below. The total is the strongest piece of typography
-       *  on the page besides the headline — it carries the right
-       *  edge of the layout. */}
-      <div className="border-b border-border">
-        <div className="container flex items-baseline justify-between gap-6 py-3">
-          <p className="text-sm font-medium tracking-tight text-foreground">{t('heroEyebrow')}</p>
-          <div className="flex items-baseline gap-3 text-right">
-            <span className="hidden text-xs text-muted-foreground sm:inline">
-              {t('heroLiveLabel')}
-            </span>
-            <span className="text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
-              ৳5,000
-            </span>
-          </div>
-        </div>
-      </div>
-
+    <section
+      id="hero"
+      className="relative flex min-h-[calc(100dvh-3.5rem)] flex-col border-b border-border bg-background"
+    >
       {/* ── Hero body: split headline + subtitle + CTA ─────────── */}
       <div className="container flex flex-1 flex-col justify-center py-14 sm:py-20 lg:py-24">
         {/* Split display. The first line is the noun, full-width at
