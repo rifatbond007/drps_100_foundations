@@ -15,7 +15,7 @@
  * deployment (Vercel env + .env.local).
  */
 
-export const BKASH_RECEIVER_NUMBER = process.env.BKASH_RECEIVER_NUMBER ?? '01616413419';
+export const BKASH_RECEIVER_NUMBER = process.env.BKASH_RECEIVER_NUMBER ?? '01720058533';
 
 /** Display label for the bKash payment instructions shown on /donate. */
 export const PAYMENT_INSTRUCTIONS = {
