@@ -37,10 +37,17 @@
     }
   },
   "landing": {
+    "heroEyebrow": "DRPS Batch-19 Foundation",
     "heroTitle": "Your donation,",
     "heroAccent": "real change.",
-    "heroSubtitle": "Verified charitable giving for DRPS Batch-19 Foundation causes. Send via bKash in seconds.",
-    "donateCta": "Donate"
+    "heroSubtitle": "Run by our own alumni. Every transaction is reviewed by an admin.",
+    "donateCta": "Donate",
+    "howItWorks": "How it works",
+    "step1Title": "Pick an amount",
+    "step2Title": "Send via bKash",
+    "step3Title": "Admin verifies",
+    "recentStrip": "To date",
+    "ledgerAnonymous": "Anonymous"
   },
   "about": {
     "title": "About us",

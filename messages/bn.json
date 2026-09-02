@@ -37,10 +37,17 @@
     }
   },
   "landing": {
+    "heroEyebrow": "DRPS Batch-19 Foundation",
     "heroTitle": "আপনার দান,",
     "heroAccent": "বাস্তব পরিবর্তন।",
-    "heroSubtitle": "DRPS Batch-19 Foundation-এ যাচাইকৃত দাতব্য প্রকল্পে নিরাপদ ও স্বচ্ছ দান। bKash-এর মাধ্যমে পাঠানো সহজ।",
-    "donateCta": "দান করুন"
+    "heroSubtitle": "আমাদের প্রাক্তনীদের দ্বারা পরিচালিত, প্রতিটি লেনদেন অ্যাডমিন যাচাই করেন।",
+    "donateCta": "দান করুন",
+    "howItWorks": "কীভাবে কাজ করে",
+    "step1Title": "পরিমাণ বাছুন",
+    "step2Title": "bKash-এ পাঠান",
+    "step3Title": "অ্যাডমিন যাচাই করেন",
+    "recentStrip": "আজ পর্যন্ত",
+    "ledgerAnonymous": "বেনামী"
   },
   "about": {
     "title": "আমাদের সম্পর্কে",
