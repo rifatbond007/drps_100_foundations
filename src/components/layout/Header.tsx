@@ -80,6 +80,7 @@ export async function Header({ locale }: { locale: string }) {
               blog: t('blog'),
               alumni: t('alumni'),
               dashboard: t('dashboard'),
+              donate: t('donate'),
               settings: t('settings'),
               history: t('history'),
               users: t('users'),
@@ -90,6 +91,7 @@ export async function Header({ locale }: { locale: string }) {
               sectionsAdmin: t('sections.admin'),
               login: t('login'),
               logout: t('logout'),
+              language: 'Language',
             }}
             session={
               isLoggedIn

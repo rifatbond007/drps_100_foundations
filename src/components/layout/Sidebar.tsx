@@ -1,14 +1,18 @@
 /**
  * Sidebar navigation for authenticated pages.
  *
- * Vertical register of links — no section labels, no icon squares.
- * The active item is marked by a 2px emerald bar on its left edge and
- * bolded text. Hover state is a faint background tint, no rounded
- * chip.
+ * Editorial register layout:
+ *   - One eyebrow header per area (Main / Admin) above its list of
+ *     items. The header is a small uppercase label that names what
+ *     the section is for — not a navigation step itself.
+ *   - Each list is a single register: items separated by hairline
+ *     rules, no card chrome. The active item carries an inset
+ *     emerald left bar (border-l-2 border-l-primary) and bold type.
+ *   - Hover state is a faint background tint.
+ *   - Sign-out lives at the bottom of the sidebar as a quiet hairline-
+ *     separated row.
  *
- * Each item points to a distinct route; the active highlighter uses
- * prefix-match so /admin/users highlights while editing a user, but
- * the dashboard sibling route does not light up by accident.
+ * Hidden below md — the mobile drawer (MobileMenu) covers nav there.
  */
 'use client';
 
@@ -24,8 +28,9 @@ interface NavItem {
   labelKey: 'dashboard' | 'donate' | 'history' | 'profile' | 'users' | 'reports' | 'donations';
 }
 
-// Regular user — three items, no Donate shortcut for admins (the
-// /donate page guards that server-side; this just removes the dead link).
+// Regular user — Main section only. The /donate page guards that route
+// server-side for admins; this just keeps the link out of the admin
+// sidebar.
 const userItems: NavItem[] = [
   { href: '/dashboard', labelKey: 'dashboard' },
   { href: '/donate', labelKey: 'donate' },
@@ -33,7 +38,7 @@ const userItems: NavItem[] = [
   { href: '/settings', labelKey: 'profile' },
 ];
 
-// Admin — four items, each on a distinct route.
+// Admin — Admin section only (admins don't see donor-facing nav here).
 const adminItems: NavItem[] = [
   { href: '/admin/dashboard', labelKey: 'dashboard' },
   { href: '/admin/users', labelKey: 'users' },
@@ -52,42 +57,70 @@ export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   };
 
   return (
-    <aside className="hidden w-52 shrink-0 border-r border-border md:block">
-      <nav className="sticky top-14 flex flex-col gap-6 px-4 py-6">
-        <ul className="flex flex-col">
-          {items.map((item) => {
-            const fullHref = `/${locale}${item.href}`;
-            const isActive = pathname === fullHref || pathname.startsWith(`${fullHref}/`);
-            return (
-              <li key={item.href}>
-                <Link
+    <aside className="hidden w-60 shrink-0 border-r border-border md:block">
+      <nav className="sticky top-14 flex max-h-[calc(100dvh-3.5rem)] flex-col">
+        <div className="flex-1 overflow-y-auto px-4 py-6">
+          <Section title={isAdmin ? tNav('sections.admin') : tNav('sections.account')}>
+            {items.map((item) => {
+              const fullHref = `/${locale}${item.href}`;
+              const isActive = pathname === fullHref || pathname.startsWith(`${fullHref}/`);
+              return (
+                <Item
+                  key={item.href}
                   href={fullHref}
-                  aria-current={isActive ? 'page' : undefined}
-                  className={cn(
-                    'relative block py-2 pl-4 pr-2 text-sm transition-colors',
-                    'border-l-2 border-transparent',
-                    'hover:bg-secondary',
-                    isActive
-                      ? 'border-l-primary font-semibold text-foreground'
-                      : 'text-muted-foreground'
-                  )}
-                >
-                  {tNav(item.labelKey)}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                  active={isActive}
+                  label={tNav(item.labelKey)}
+                />
+              );
+            })}
+          </Section>
+        </div>
 
         <button
           type="button"
           onClick={handleSignOut}
-          className="self-start pl-4 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="flex shrink-0 items-center gap-2 border-t border-border px-4 py-3 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
-          <LogOut className="mr-2 inline h-4 w-4 align-text-bottom" aria-hidden="true" />
+          <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
           {tNav('logout')}
         </button>
       </nav>
     </aside>
+  );
+}
+
+/** Section heading inside the sidebar. Eyebrow label + the register of
+ *  items below it, separated by hairline rules. */
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </p>
+      <ul className="border-y border-border">{children}</ul>
+    </div>
+  );
+}
+
+/** Single sidebar row. Hairline divider between siblings is provided by
+ *  `border-b border-border last:border-b-0`. Active item carries an
+ *  inset emerald left bar. */
+function Item({ href, active, label }: { href: string; active: boolean; label: string }) {
+  return (
+    <li className="border-b border-border last:border-b-0">
+      <Link
+        href={href}
+        aria-current={active ? 'page' : undefined}
+        className={cn(
+          'relative flex h-10 items-center pl-4 pr-3 text-sm transition-colors',
+          'border-l-2',
+          active
+            ? 'border-l-primary bg-primary/5 font-semibold text-foreground'
+            : 'border-l-transparent text-muted-foreground hover:bg-accent hover:text-foreground'
+        )}
+      >
+        {label}
+      </Link>
+    </li>
   );
 }
