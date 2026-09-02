@@ -25,7 +25,7 @@ export default async function AdminLayout({
   if (session.user.role !== 'ADMIN') redirect(`/${locale}/dashboard`);
 
   return (
-    <div className="container flex w-full gap-8 py-8">
+    <div className="container flex w-full flex-col gap-6 py-6 md:flex-row md:gap-8 md:py-8">
       <Sidebar isAdmin />
       <div className="min-w-0 flex-1">{children}</div>
     </div>

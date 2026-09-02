@@ -50,7 +50,7 @@ export async function Header({ locale }: { locale: string }) {
             className="h-8 w-8 shrink-0"
           />
           <span className="hidden text-base font-semibold tracking-tight text-foreground sm:inline">
-            দান প্ল্যাটফর্ম
+            DRPS19
           </span>
         </Link>
 

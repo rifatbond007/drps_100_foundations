@@ -40,9 +40,7 @@
     "heroTitle": "আপনার দান,",
     "heroAccent": "বাস্তব পরিবর্তন।",
     "heroSubtitle": "DRPS Batch-19 Foundation-এ যাচাইকৃত দাতব্য প্রকল্পে নিরাপদ ও স্বচ্ছ দান। bKash-এর মাধ্যমে পাঠানো সহজ।",
-    "donateCta": "দান করুন",
-    "recentHeader": "সাম্প্রতিক দান",
-    "recentFootnote": "প্রতিটি লেনদেন একজন অ্যাডমিন যাচাই করেন।"
+    "donateCta": "দান করুন"
   },
   "about": {
     "title": "আমাদের সম্পর্কে",
@@ -108,6 +106,7 @@
     "donationCount": "দানের সংখ্যা",
     "allTime": "সর্বকাল",
     "lastDonation": "শেষ দান",
+    "pendingDonations": "বিচারাধীন দান",
     "never": "এখনও কোনো দান নেই",
     "donateCta": "এখনই দান করুন",
     "donateCtaSecondary": "এখনই দান করুন",

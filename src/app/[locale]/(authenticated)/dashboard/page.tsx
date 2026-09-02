@@ -1,11 +1,15 @@
 /**
  * Authenticated dashboard.
  *
- * Composition: a single "আপনার অনুদান" panel that lists the user's
- * recent donations as a register. No three stat cards above it — the
- * amount-total goes at the top of the list as a single line of type,
- * not a card. The page reads as one continuous log rather than as
- * three widget cards + one list card stacked on each other.
+ * Four hairline-border cards summarise the donor's account at a glance:
+ * total donated (BDT, lifetime successful), donation count, last donation
+ * amount + date, and pending donations awaiting bKash confirmation.
+ *
+ * Each card has the same structure: an uppercase eyebrow label on top,
+ * a tabular big number or short value below. Cards are 1-up on mobile
+ * and 2-up on small screens, 4-up on lg+. The recent-donations register
+ * sits below the cards so the page still tells the story of "what you
+ * did" rather than only "what you have."
  */
 'use client';
 
@@ -15,12 +19,24 @@ import { Button } from '@/components/ui/button';
 import { useProfile } from '@/lib/hooks/use-profile';
 import { useDonationHistory } from '@/lib/hooks/use-donations';
 import { useAuth } from '@/lib/hooks/use-auth';
-import { formatBDT } from '@/lib/utils';
-import { cn } from '@/lib/utils';
+import { formatBDT, cn } from '@/lib/utils';
 
 function StatusLabel({ status }: { status: string }) {
   const tHistory = useTranslations('history');
   return <span>{tHistory(`status.${status}`)}</span>;
+}
+
+function StatCard({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="border border-border bg-background p-4">
+      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+      <div className="mt-2 text-xl font-bold tabular-nums text-foreground sm:text-2xl">
+        {children}
+      </div>
+    </div>
+  );
 }
 
 export default function DashboardPage() {
@@ -47,10 +63,10 @@ export default function DashboardPage() {
   const localePref = (profile?.languagePref.toLowerCase() as 'bn' | 'en') ?? 'bn';
 
   const donations = history?.donations ?? [];
-  const total = donations.reduce(
-    (sum, d) => sum + (d.status === 'SUCCESS' ? Number(d.amount) : 0),
-    0
-  );
+  const successDonations = donations.filter((d) => d.status === 'SUCCESS');
+  const pendingDonations = donations.filter((d) => d.status === 'PENDING');
+  const total = successDonations.reduce((sum, d) => sum + Number(d.amount), 0);
+  const lastDonation = successDonations[0];
 
   return (
     <div className="space-y-8">
@@ -62,19 +78,61 @@ export default function DashboardPage() {
         <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
       </header>
 
-      {/* Total + count as a single line of type, not a card. */}
-      <div className="flex items-baseline justify-between border-y border-border py-3">
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {t('totalDonated')}
-        </p>
-        {profileLoading ? (
-          <span className="text-2xl font-bold tabular-nums text-muted-foreground">—</span>
-        ) : (
-          <span className="text-3xl font-bold tabular-nums text-foreground">
-            {formatBDT(String(total), localePref)}
-          </span>
-        )}
-      </div>
+      {/* Stat cards */}
+      <section
+        aria-label={t('profileStatsTitle')}
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        <StatCard label={t('totalDonated')}>
+          {profileLoading || historyLoading ? (
+            <span className="text-muted-foreground">—</span>
+          ) : (
+            formatBDT(String(total), localePref)
+          )}
+        </StatCard>
+
+        <StatCard label={t('donationCount')}>
+          {historyLoading ? (
+            <span className="text-muted-foreground">—</span>
+          ) : (
+            successDonations.length.toLocaleString(locale === 'en' ? 'en-US' : 'bn-BD')
+          )}
+        </StatCard>
+
+        <StatCard label={t('lastDonation')}>
+          {historyLoading ? (
+            <span className="text-muted-foreground">—</span>
+          ) : lastDonation ? (
+            <div className="flex flex-col">
+              <span>{formatBDT(lastDonation.amount, localePref)}</span>
+              <span className="mt-1 text-xs font-normal text-muted-foreground">
+                {new Date(lastDonation.createdAt).toLocaleDateString(
+                  locale === 'en' ? 'en-US' : 'bn-BD'
+                )}
+              </span>
+            </div>
+          ) : (
+            <span className="text-sm font-normal text-muted-foreground">{t('never')}</span>
+          )}
+        </StatCard>
+
+        <StatCard label={t('pendingDonations')}>
+          {historyLoading ? (
+            <span className="text-muted-foreground">—</span>
+          ) : (
+            <span className="flex items-baseline gap-2">
+              <span>
+                {pendingDonations.length.toLocaleString(locale === 'en' ? 'en-US' : 'bn-BD')}
+              </span>
+              {pendingDonations.length > 0 && (
+                <span className="text-[10px] font-medium uppercase tracking-wider text-admin">
+                  {tHistory('status.PENDING')}
+                </span>
+              )}
+            </span>
+          )}
+        </StatCard>
+      </section>
 
       {/* Recent donations */}
       <section>
