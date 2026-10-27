@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { CAUSES } from '@/lib/config/causes';
 import { formatBDT, type AppLocale } from '@/lib/format';
 import type { PublicStats } from '@/lib/stats';
+import { HeroStats } from './hero-stats';
 import { SectionHeading } from './section-heading';
 
 interface CausesProps {
@@ -62,6 +63,12 @@ export function Causes(props: CausesProps) {
   return (
     <section id="causes" className="container scroll-mt-20 py-16 sm:py-24">
       <SectionHeading title={t('causesTitle')} lead={t('causesLead')} />
+      {/* Live totals (hidden when unavailable), then the per-fund breakdown. */}
+      {props.stats && (
+        <div className="mb-10">
+          <HeroStats stats={props.stats} locale={props.locale} />
+        </div>
+      )}
       <CauseCards {...props} />
     </section>
   );

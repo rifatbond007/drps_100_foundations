@@ -36,7 +36,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
   return (
     <>
-      <Hero stats={stats} locale={locale} />
+      <Hero />
       <Causes stats={stats} locale={locale} />
       <HowItWorks />
       <People />
