@@ -119,8 +119,18 @@
   },
   "about": {
     "title": "About us",
-    "subtitle": "Our mission and those we serve",
-    "body": "This platform is built for transparent, efficient, and secure charitable giving. Every transaction is processed through a secure payment gateway."
+    "subtitle": "An alumni-run foundation that helps our community when it matters most.",
+    "storyTitle": "Who we are",
+    "body1": "The DRPS Batch-19 Foundation was set up by former students to support classmates, teachers and neighbours through education costs, medical bills and emergencies.",
+    "body2": "Donations arrive through bKash. Each one is matched against its transaction ID by an admin before it is counted, so every taka on this site is real money that reached us.",
+    "pillar1Title": "Education",
+    "pillar1Body": "Books, tuition and scholarships so students stay in school.",
+    "pillar2Title": "Health",
+    "pillar2Body": "Help with surgery, medicine and urgent care.",
+    "pillar3Title": "Relief",
+    "pillar3Body": "Fast response when floods, fires or crises hit.",
+    "ctaTitle": "Want to help?",
+    "ctaBody": "Sign in with Google and donate in about three minutes."
   },
   "blog": {
     "title": "Stories from the field",
@@ -138,26 +148,9 @@
     "loginTitle": "Welcome",
     "loginSubtitle": "Sign in with your Google account to continue",
     "loginWithGoogle": "Sign in with Google",
-    "loggingIn": "Redirecting to Google…",
     "signupHint": "First time here? The same button creates your account.",
-    "loginTerms": "By signing in you agree to our terms of service",
     "logout": "Sign out",
     "errorTitle": "Sign-in error",
-    "profileCompletion": {
-      "title": "Complete your profile",
-      "subtitle": "Provide a few details to start donating",
-      "phoneLabel": "Phone number",
-      "phonePlaceholder": "+8801XXXXXXXXX",
-      "languageLabel": "Preferred language",
-      "submit": "Save profile",
-      "errors": {
-        "invalidPhone": "Please enter a valid Bangladeshi phone number",
-        "submitFailed": "Failed to save profile",
-        "unauthorized": "Please sign in to save your profile",
-        "networkError": "Network error. Please check your connection and try again.",
-        "saving": "Saving…"
-      }
-    },
     "errors": {
       "configuration": "Server is misconfigured. Please contact support.",
       "accessDenied": "Access denied. If you believe this is a mistake, please contact support.",
@@ -437,7 +430,14 @@
     "forbidden": "Access denied",
     "rateLimit": "Rate limit exceeded",
     "serverError": "Server error",
-    "validationFailed": "Validation failed"
+    "validationFailed": "Validation failed",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The page you were looking for doesn’t exist or has moved.",
+    "errorTitle": "Something went wrong",
+    "errorBody": "We couldn’t load this page. Please try again.",
+    "goHome": "Go home",
+    "tryAgain": "Try again",
+    "reference": "Reference: {id}"
   },
   "footer": {
     "copyright": "© {year} {appName}. All rights reserved.",

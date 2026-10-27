@@ -15,7 +15,7 @@
 export function safeCallbackUrl(input: string | undefined | null, fallback = '/'): string {
   if (!input) return fallback;
   if (!input.startsWith('/')) return fallback;
-  if (input.startsWith('//')) return fallback;
+  if (input.startsWith('//') || input.startsWith('/\\')) return fallback;
   if (/[\r\n\t]/.test(input)) return fallback;
   return input;
 }

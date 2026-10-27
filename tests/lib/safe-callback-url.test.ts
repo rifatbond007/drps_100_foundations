@@ -49,3 +49,9 @@ describe('safeCallbackUrl', () => {
     expect(safeCallbackUrl('/dashboard\tfoo', '/bn')).toBe('/bn');
   });
 });
+
+describe('safeCallbackUrl backslash', () => {
+  it('rejects a backslash after the leading slash (browsers treat it as //)', () => {
+    expect(safeCallbackUrl('/\\evil.com', '/bn')).toBe('/bn');
+  });
+});
