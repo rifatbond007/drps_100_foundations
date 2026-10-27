@@ -5,120 +5,62 @@
 
 ---
 
-## 1. Complete Project Structure
+## 1. Project Structure
+
+Current layout (updated 2026-10-28). Sections 2+ are the original setup notes.
 
 ```
-donation-platform/
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml                      # Main CI pipeline
-│   │   ├── docker.yml                  # Docker Hub build
-│   │   ├── deploy.yml                  # VPS deployment
-│   │   └── code-quality.yml            # Code quality checks
-│   ├── ISSUE_TEMPLATE/
-│   │   ├── bug_report.md
-│   │   └── feature_request.md
-│   └── PULL_REQUEST_TEMPLATE.md
-├── prisma/
-│   ├── schema.prisma                   # Database schema
-│   ├── migrations/                     # Migration files
-│   └── seed.ts                         # Database seeding
-├── public/
-│   ├── images/
-│   ├── icons/
-│   └── locales/                        # Static translations
-├── src/
-│   ├── app/
-│   │   ├── [locale]/
-│   │   │   ├── (public)/
-│   │   │   │   ├── page.tsx
-│   │   │   │   ├── about/
-│   │   │   │   ├── login/
-│   │   │   │   └── layout.tsx
-│   │   │   ├── (authenticated)/
-│   │   │   │   ├── dashboard/
-│   │   │   │   ├── donate/
-│   │   │   │   ├── history/
-│   │   │   │   ├── settings/
-│   │   │   │   └── layout.tsx
-│   │   │   └── admin/
-│   │   │       ├── users/
-│   │   │       ├── reports/
-│   │   │       └── layout.tsx
-│   │   ├── api/
-│   │   │   ├── auth/
-│   │   │   ├── donations/
-│   │   │   ├── users/
-│   │   │   ├── admin/
-│   │   │   ├── webhooks/
-│   │   │   └── health/
-│   │   ├── globals.css
-│   │   └── layout.tsx
-│   ├── components/
-│   │   ├── ui/                         # shadcn/ui components
-│   │   ├── forms/
-│   │   ├── layout/
-│   │   ├── auth/
-│   │   ├── donation/
-│   │   └── admin/
-│   ├── lib/
-│   │   ├── api/
-│   │   ├── auth/
-│   │   ├── payment/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   ├── hooks/
-│   │   ├── errors.ts
-│   │   ├── logger.ts
-│   │   └── redis.ts
-│   ├── types/
-│   ├── styles/
-│   └── middleware.ts
-├── scripts/
-│   ├── backup-db.sh                    # Database backup
-│   ├── restore-db.sh                   # Database restore
-│   ├── setup-vps.sh                    # VPS setup
-│   └── monitor.sh                      # Health monitoring
-├── nginx/
-│   ├── nginx.conf
-│   └── conf.d/
-│       └── app.conf
-├── certbot/
-│   ├── conf/
-│   └── www/
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── e2e/
-│       ├── donation-flow.spec.ts
-│       ├── auth.spec.ts
-│       └── admin.spec.ts
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── FRONTEND_PLANNING.md
-│   ├── BACKEND_PLANNING.md
-│   ├── CI_CD_PIPELINE.md
-│   ├── API.md
-│   ├── DEPLOYMENT.md
-│   └── TROUBLESHOOTING.md
-├── .env.example
-├── .env.local                          # Local development
-├── .eslintrc.json
-├── .prettierrc
-├── .gitignore
-├── docker-compose.yml
-├── docker-compose.dev.yml
-├── Dockerfile
-├── next.config.js
-├── package.json
-├── tsconfig.json
-├── tailwind.config.ts
-├── playwright.config.ts
-├── vitest.config.ts
-└── README.md
+src/
+├── app/                         # Routes only — pages and layouts stay thin
+│   ├── layout.tsx               # Passthrough; the <html> lives in [locale]/layout.tsx
+│   ├── not-found.tsx            # 404 for URLs outside a locale
+│   ├── global-error.tsx         # Last-resort error boundary (own <html>)
+│   ├── [locale]/
+│   │   ├── layout.tsx           # <html lang>, font, metadata, providers
+│   │   ├── error.tsx · not-found.tsx · [...rest]/   # Localized error + 404
+│   │   ├── (marketing)/         # Site header + footer: landing, about, blog, alumni, login
+│   │   ├── (app)/               # App shell (signed in): dashboard, donate/*, history, settings
+│   │   └── admin/               # App shell (ADMIN): dashboard, donations, users, reports
+│   └── api/                     # Route handlers (not locale-prefixed)
+│       ├── public/stats         # Cached public totals for the landing page
+│       ├── donations/…          # create, history, [id], [id]/submit-trx
+│       ├── users/…              # profile, settings
+│       └── admin/…              # donations review, users, reports, errors
+├── components/
+│   ├── ui/                      # Design-system primitives (button, card, dialog, badge, stat-card, …)
+│   └── layout/                  # site-header, site-footer, mobile-nav, app-shell, app-sidebar,
+│                                # user-menu, language-switcher, theme-toggle, providers
+├── features/                    # Feature components, grouped by area
+│   ├── landing/                 # Hero, causes, how-it-works, people, events, stories, FAQ, trust
+│   ├── auth/                    # Sign-in/out buttons, login card
+│   ├── donation/                # Donate form, stepper, bKash card, TrxID form, donation list
+│   ├── profile/                 # Profile + preferences forms
+│   ├── admin/                   # Overview, review queue, users table, reports, charts
+│   └── content/                 # Coming-soon and status (404/error) pages
+├── hooks/                       # TanStack Query hooks (profile, donations, admin)
+├── lib/
+│   ├── api/                     # Response helpers (ok/fail/parseJsonBody), browser client
+│   ├── auth/                    # NextAuth config, session guards, route-guard (middleware rules)
+│   ├── config/                  # causes (goals), events, nav, site — editable content config
+│   ├── i18n/                    # Locales, next-intl request config, API error → message key
+│   ├── payment/                 # bKash receiver number (server only)
+│   ├── validation/              # zod schemas
+│   ├── utils/                   # cn(), safe callback URL, cookie names
+│   ├── format.ts · time.ts      # Locale formatting; Asia/Dhaka date helpers
+│   └── stats.ts · prisma.ts · redis.ts · rate-limit.ts · audit.ts · errors.ts · logger.ts
+├── types/
+└── middleware.ts                # i18n routing + page access (see lib/auth/route-guard.ts)
+
+messages/{bn,en}.json            # All user-facing copy; key sets must match (tested)
+prisma/                          # Schema + migrations
+scripts/check-duplicate-trx.ts   # Run before deploying the TrxID unique-index migration
+tests/                           # Vitest (api, lib, components, features)
+e2e/                             # Playwright
 ```
 
----
+Conventions: component files are kebab-case with PascalCase exports; every
+user-facing string goes through `messages/*.json`; editable content (fund
+goals, events) lives in `src/lib/config/`.
 
 ## 2. Initial Setup Commands
 

@@ -3,11 +3,14 @@
 A production-grade donation web platform for a school-run organization. Members log in with Google, manage a personal dashboard, donate via bKash, update their profile info, and use the site in Bangla (default) or English.
 
 **Target scale:** ~1,000 users/month
-**Stack:** Next.js 15 · PostgreSQL · Redis · NextAuth.js · bKash PGW · next-intl
-**Status:** �️ Planning & infrastructure phase — source code not yet written
+**Stack:** Next.js 15 · PostgreSQL · Redis · NextAuth.js · bKash (manual Send Money + TrxID review) · next-intl
+**Status:** In development — app, admin area and redesigned UI implemented
 **Maintainer:** [riftbond007](https://github.com/riftbond007) (`abdullah.al.rifat2239@gmail.com`)
 
 ---
+
+> **Deploying the 2026-10-28 changes:** run `pnpm db:check-duplicate-trx` before
+> `prisma migrate deploy` (see CHANGELOG).
 
 ## 📚 Documentation Index
 

@@ -6,6 +6,35 @@
 
 ---
 
+## 0. Design System (current, 2026-10-28)
+
+The UI was redesigned from the original "paper and ink" register style to a
+warmer, card-based look. This section is the source of truth; the planning
+notes below describe the original intent and are kept for history.
+
+- **Tokens:** HSL CSS variables in `src/app/globals.css` (light + `.dark`),
+  exposed as Tailwind colours in `tailwind.config.ts`. Roles: `primary`
+  (emerald, actions/active states), `primary-soft` (tinted surfaces and icon
+  chips), `success` / `warning` / `destructive` / `info` (+ `-soft`) for
+  status, neutral `muted` / `border` / `card`.
+- **bKash pink** (`bkash`) is used only on the bKash instruction card and the
+  TrxID submit button.
+- **Shape:** radius 8/12/16/20px, pill buttons, `shadow-card` / `shadow-lift`.
+- **Type:** Hind Siliguri for Bangla and Latin; body line-height 1.65, Bangla
+  headings 1.35.
+- **Theme:** `next-themes` (light/dark/system). Signed-in users' choice is
+  saved via `PUT /api/users/settings` and applied on load (`ThemeSync`).
+- **Motion:** count-up on the hero total, progress-bar fill, card hover lift;
+  all disabled under `prefers-reduced-motion`.
+- **Primitives:** `src/components/ui/*` (button, card, input, field, badge,
+  progress, dialog/sheet, dropdown-menu, tabs, accordion, table, stat-card,
+  empty-state, page-header, load-error).
+- **Chrome:** marketing pages use `SiteHeader`/`SiteFooter`; signed-in pages
+  use `AppShell` (collapsible sidebar on desktop, sheet nav on mobile).
+- **Data states:** every fetch has a skeleton, an error state with retry
+  (`LoadError`), and an empty state — never silent zeros. Public totals are
+  hidden, not zeroed, when stats are unavailable.
+
 ## 1. Frontend Architecture
 
 ### 1.1 Tech Stack
