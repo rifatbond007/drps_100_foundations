@@ -5,7 +5,7 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { Providers } from '@/components/layout/Providers';
+import { Providers } from '@/components/layout/providers';
 import { locales, isLocale } from '@/lib/i18n/config';
 
 // Hind Siliguri covers Latin and Bengali in one family, so headings don't
