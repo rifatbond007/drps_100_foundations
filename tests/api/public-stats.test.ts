@@ -1,15 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/stats', () => ({
-  getPublicStats: vi
-    .fn()
-    .mockResolvedValue({
-      totalRaised: '10',
-      donorCount: 1,
-      donationCount: 1,
-      byPurpose: {},
-      updatedAt: 'x',
-    }),
+  getPublicStats: vi.fn().mockResolvedValue({
+    totalRaised: '10',
+    donorCount: 1,
+    donationCount: 1,
+    byPurpose: {},
+    updatedAt: 'x',
+  }),
 }));
 
 import { GET } from '@/app/api/public/stats/route';

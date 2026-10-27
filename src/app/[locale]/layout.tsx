@@ -3,8 +3,6 @@ import { Hind_Siliguri } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { Providers } from '@/components/layout/providers';
 import { locales, isLocale } from '@/lib/i18n/config';
 
@@ -64,11 +62,8 @@ export default async function LocaleLayout({
     <html lang={locale} className={hind.variable} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col bg-background font-sans antialiased">
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <Providers>
-            <Header locale={locale} />
-            <main className="flex-1">{children}</main>
-            <Footer locale={locale} />
-          </Providers>
+          {/* Each route group renders its own chrome (site header vs app shell). */}
+          <Providers>{children}</Providers>
         </NextIntlClientProvider>
       </body>
     </html>

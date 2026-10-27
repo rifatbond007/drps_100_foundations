@@ -1,6 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
 import { HeroSection } from '@/components/landing/HeroSection';
-import { LandingNav } from '@/components/landing/LandingNav';
 import { ActivitySection } from '@/components/landing/ActivitySection';
 import { CausesSection } from '@/components/landing/CausesSection';
 import { HowItWorksSection } from '@/components/landing/HowItWorksSection';
@@ -45,7 +44,6 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   return (
     <>
       <HeroSection locale={locale} />
-      <LandingNav />
       <ActivitySection locale={safeLocale} />
       <CausesSection locale={safeLocale} />
       <HowItWorksSection locale={safeLocale} />

@@ -191,7 +191,26 @@
     "amountLabel": "Amount",
     "customAmount": "Enter a custom amount",
     "purpose": "Purpose",
-    "submit": "Continue donation",
+    "submit": {
+      "title": "Send money via bKash",
+      "subtitle": "Follow the steps below, then submit your transaction ID.",
+      "amount": "Amount",
+      "purpose": "Purpose",
+      "instructionsHeader": "Steps to complete your donation",
+      "step1": "Open your bKash app and choose {method} → Send Money.",
+      "step2": "Send the exact amount to <b>{number}</b>",
+      "copy": "Copy number",
+      "step3": "Use the reference: {hint}",
+      "step4": "After sending, come back here and submit the TrxID + your bKash number below.",
+      "trxLabel": "bKash TrxID",
+      "trxPlaceholder": "e.g. TRX123ABC456",
+      "trxHelp": "Find this in your bKash app under Transaction History.",
+      "phoneLabel": "Your bKash phone number",
+      "phonePlaceholder": "01XXXXXXXXX",
+      "phoneHelp": "The number registered to your bKash account (where you sent from).",
+      "submit": "Submit for review",
+      "reviewNote": "We never store or share your bKash phone. Admin only uses it to verify the transaction in the bKash app."
+    },
     "processing": "Processing…",
     "recentDonations": "Recent donations",
     "purposes": {
@@ -223,26 +242,6 @@
       "subtitle": "We received your bKash transaction details. An admin will verify and approve your donation within 24 hours.",
       "viewHistory": "View history",
       "backToDashboard": "Back to dashboard"
-    },
-    "submit": {
-      "title": "Send money via bKash",
-      "subtitle": "Follow the steps below, then submit your transaction ID.",
-      "amount": "Amount",
-      "purpose": "Purpose",
-      "instructionsHeader": "Steps to complete your donation",
-      "step1": "Open your bKash app and choose {method} → Send Money.",
-      "step2": "Send the exact amount to <b>{number}</b>",
-      "copy": "Copy number",
-      "step3": "Use the reference: {hint}",
-      "step4": "After sending, come back here and submit the TrxID + your bKash number below.",
-      "trxLabel": "bKash TrxID",
-      "trxPlaceholder": "e.g. TRX123ABC456",
-      "trxHelp": "Find this in your bKash app under Transaction History.",
-      "phoneLabel": "Your bKash phone number",
-      "phonePlaceholder": "01XXXXXXXXX",
-      "phoneHelp": "The number registered to your bKash account (where you sent from).",
-      "submit": "Submit for review",
-      "reviewNote": "We never store or share your bKash phone. Admin only uses it to verify the transaction in the bKash app."
     },
     "errors": {
       "minAmount": "Minimum donation is 10 BDT",
@@ -440,6 +439,26 @@
     "about": "About",
     "privacy": "Privacy policy",
     "terms": "Terms of service",
-    "contact": "Contact"
+    "contact": "Contact",
+    "tagline": "DRPS Batch-19 Foundation. Every taka is recorded, verified by our team, and reported back to members.",
+    "paymentNote": "Donations are sent with bKash and verified manually by an admin before they count.",
+    "explore": "Explore",
+    "account": "Account"
+  },
+  "a11y": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "language": "Language",
+    "theme": "Theme",
+    "userMenu": "Account menu",
+    "mainNav": "Main navigation",
+    "switchToBn": "Switch to Bangla",
+    "switchToEn": "Switch to English",
+    "close": "Close"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }

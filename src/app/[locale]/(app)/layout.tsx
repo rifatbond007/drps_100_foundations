@@ -1,4 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
+import { SiteHeader } from '@/components/layout/site-header';
 import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { requireAuth } from '@/lib/auth/session';
@@ -33,9 +34,13 @@ export default async function AuthenticatedLayout({
   }
 
   return (
-    <div className="container flex w-full flex-col gap-6 py-6 md:flex-row md:gap-8 md:py-8">
-      <Sidebar isAdmin={session.user.role === 'ADMIN'} />
-      <div className="min-w-0 flex-1">{children}</div>
-    </div>
+    // Interim chrome until the app shell lands (plan Task 15).
+    <>
+      <SiteHeader />
+      <div className="container flex w-full flex-col gap-6 py-6 md:flex-row md:gap-8 md:py-8">
+        <Sidebar isAdmin={session.user.role === 'ADMIN'} />
+        <div className="min-w-0 flex-1">{children}</div>
+      </div>
+    </>
   );
 }
