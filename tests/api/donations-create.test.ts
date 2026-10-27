@@ -191,3 +191,18 @@ describe('Error shape parity', () => {
     expect(new ForbiddenError('x')).toBeInstanceOf(Error);
   });
 });
+
+describe('malformed input', () => {
+  it('returns 400 on malformed JSON', async () => {
+    mocks.requireActiveUser.mockResolvedValueOnce({
+      user: { id: 'u1', role: 'USER', email: 'u@x.y', languagePref: 'BN' },
+    });
+    const bad = new Request('http://localhost/api/donations/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{bad',
+    }) as unknown as NextRequest;
+    const res = await POST(bad);
+    expect(res.status).toBe(400);
+  });
+});

@@ -8,10 +8,9 @@
  * Idempotent on terminal states.
  */
 import { type NextRequest } from 'next/server';
-import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth/session';
-import { ok, fail } from '@/lib/api/helpers';
+import { ok, fail, parseJsonBody } from '@/lib/api/helpers';
 import { rateLimit, requireRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { logSecurityEvent } from '@/lib/audit';
 import { NotFoundError, ValidationError, ConflictError } from '@/lib/errors';
@@ -33,14 +32,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       throw new ValidationError('Invalid donation id');
     }
 
-    let body: z.infer<typeof adminReviewSchema>;
-    try {
-      const text = await request.text();
-      body = text ? adminReviewSchema.parse(JSON.parse(text)) : {};
-    } catch (error) {
-      if (error instanceof z.ZodError) return fail(error);
-      throw error;
-    }
+    const body = await parseJsonBody(request, adminReviewSchema, { optional: true });
 
     // Reject requires a reason — without it the donor can't tell what
     // went wrong and would resubmit the same TrxID.

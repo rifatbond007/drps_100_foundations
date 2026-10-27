@@ -4,7 +4,7 @@
  * H5 (audit fix): In production, AppError.message is NEVER echoed to clients.
  * Instead we generate an `errorId` (cryptographically random) and:
  *  - Log the full message + stack + errorId server-side
- *  - Persist the full error to AuditLog.correlationId so it can be looked
+ *  - Persist 5xx errors to AuditLog.correlationId so they can be looked
  *    up by the errorId in the client (e.g. via /api/admin/errors). This
  *    is the lifeline when Vercel log retention has rolled past the
  *    request — the DB persists indefinitely, and an admin can run
@@ -19,13 +19,14 @@
  * `.catch()` re-routes a write failure to the logger so we still see it.
  */
 import { NextResponse } from 'next/server';
-import { AppError } from '@/lib/errors';
-import { ZodError } from 'zod';
+import { AppError, ValidationError } from '@/lib/errors';
+import { ZodError, type z } from 'zod';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import type { ApiError, ApiSuccess } from '@/types/api';
 
-const IS_PROD = process.env.NODE_ENV === 'production';
+// Read per call so tests (and any late env injection) see the current value.
+const isProd = (): boolean => process.env.NODE_ENV === 'production';
 
 /**
  * Persist a redacted fingerprint of an unhandled error to AuditLog so
@@ -84,6 +85,36 @@ function persistError(
     });
 }
 
+/**
+ * Parse a JSON request body through a zod schema. Malformed JSON is a
+ * client error (400), never a 500. With `optional`, an empty body
+ * parses as `{}`.
+ */
+export async function parseJsonBody<S extends z.ZodTypeAny>(
+  request: Request,
+  schema: S,
+  opts: { optional?: boolean } = {}
+): Promise<z.infer<S>> {
+  const text = await request.text();
+  if (!text.trim()) {
+    if (opts.optional) return schema.parse({});
+    throw new ValidationError('Request body is required');
+  }
+  let json: unknown;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    throw new ValidationError('Invalid JSON body');
+  }
+  return schema.parse(json);
+}
+
+/** Parse URL search params through a zod schema (ZodError → 400 via fail()). */
+export function parseQuery<S extends z.ZodTypeAny>(url: URL | string, schema: S): z.infer<S> {
+  const { searchParams } = typeof url === 'string' ? new URL(url) : url;
+  return schema.parse(Object.fromEntries(searchParams));
+}
+
 export function ok<T>(data: T, init?: ResponseInit): NextResponse<ApiSuccess<T>> {
   return NextResponse.json({ success: true, data }, init);
 }
@@ -111,9 +142,10 @@ export function fail(
   }
 
   if (error instanceof AppError) {
-    if (IS_PROD) {
+    if (isProd()) {
       const errorId = newErrorId();
-      logger.error(
+      const serverSide = error.statusCode >= 500;
+      logger[serverSide ? 'error' : 'warn'](
         {
           errorId,
           code: error.code,
@@ -123,7 +155,9 @@ export function fail(
         },
         'AppError in API route'
       );
-      persistError(errorId, error, ctx);
+      // Only server-side failures go to the AuditLog; 4xx (auth, not
+      // found, validation, rate limit) would otherwise flood it.
+      if (serverSide) persistError(errorId, error, ctx);
       return NextResponse.json(
         {
           success: false,
@@ -142,7 +176,7 @@ export function fail(
   }
 
   // Unknown error: always opaque in prod
-  if (IS_PROD) {
+  if (isProd()) {
     const errorId = newErrorId();
     logger.error({ errorId, error }, 'Unhandled API error');
     persistError(errorId, error, ctx);

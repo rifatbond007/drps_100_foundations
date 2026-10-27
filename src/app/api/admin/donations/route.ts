@@ -16,8 +16,14 @@ import { NextRequest } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth/session';
-import { ok, fail } from '@/lib/api/helpers';
+import { z } from 'zod';
+import { ok, fail, parseQuery } from '@/lib/api/helpers';
+import { paginationSchema } from '@/lib/validation/common';
 import { rateLimit, requireRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+
+const listQuerySchema = paginationSchema.extend({
+  status: z.enum(['PENDING', 'SUCCESS', 'FAILED', 'CANCELLED']).default('PENDING'),
+});
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,18 +36,9 @@ export async function GET(request: NextRequest) {
     );
     requireRateLimit(rl);
 
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status') ?? 'PENDING';
-    const page = Math.max(1, Number(searchParams.get('page') ?? '1'));
-    const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit') ?? '20')));
+    const { status, page, limit } = parseQuery(request.url, listQuerySchema);
 
-    if (!['PENDING', 'SUCCESS', 'FAILED', 'CANCELLED'].includes(status)) {
-      return fail(new Error('Invalid status'));
-    }
-
-    const where: Prisma.DonationWhereInput = {
-      status: status as 'PENDING' | 'SUCCESS' | 'FAILED' | 'CANCELLED',
-    };
+    const where: Prisma.DonationWhereInput = { status };
 
     // For PENDING show only the ones the donor has already submitted a
     // TrxID for (so the admin has something to verify). Pure-PENDING

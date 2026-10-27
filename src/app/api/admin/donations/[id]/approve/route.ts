@@ -16,10 +16,9 @@
  * state without DB writes.
  */
 import { type NextRequest } from 'next/server';
-import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth/session';
-import { ok, fail } from '@/lib/api/helpers';
+import { ok, fail, parseJsonBody } from '@/lib/api/helpers';
 import { rateLimit, requireRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { logSecurityEvent } from '@/lib/audit';
 import { NotFoundError, ValidationError, ConflictError } from '@/lib/errors';
@@ -41,15 +40,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       throw new ValidationError('Invalid donation id');
     }
 
-    let body: z.infer<typeof adminReviewSchema>;
-    try {
-      // Body is optional — admin may approve with no note.
-      const text = await request.text();
-      body = text ? adminReviewSchema.parse(JSON.parse(text)) : {};
-    } catch (error) {
-      if (error instanceof z.ZodError) return fail(error);
-      throw error;
-    }
+    // Body is optional — admin may approve with no note.
+    const body = await parseJsonBody(request, adminReviewSchema, { optional: true });
 
     const donation = await prisma.donation.findUnique({
       where: { id },

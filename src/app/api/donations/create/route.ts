@@ -22,11 +22,10 @@
  * donate without finishing onboarding and edit their profile from
  * /settings at any time.
  */
-import { z } from 'zod';
 import { NextResponse, type NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireActiveUser } from '@/lib/auth/session';
-import { ok, fail } from '@/lib/api/helpers';
+import { ok, fail, parseJsonBody } from '@/lib/api/helpers';
 import { rateLimit, requireRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { redis } from '@/lib/redis';
 import { logSecurityEvent } from '@/lib/audit';
@@ -63,13 +62,7 @@ export async function POST(request: NextRequest) {
     requireRateLimit(rl);
 
     // 4. Zod-validate body
-    let body: z.infer<typeof createDonationSchema>;
-    try {
-      body = createDonationSchema.parse(await request.json());
-    } catch (error) {
-      if (error instanceof z.ZodError) return fail(error);
-      throw error;
-    }
+    const body = await parseJsonBody(request, createDonationSchema);
 
     // 5. Idempotency (response cache). If Redis is unreachable we
     // proceed without the cache — a retried POST would create a second

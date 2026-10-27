@@ -16,7 +16,8 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, requireAdmin } from '@/lib/auth/session';
 import { ok, fail } from '@/lib/api/helpers';
-import { ForbiddenError, ValidationError } from '@/lib/errors';
+import { Prisma } from '@prisma/client';
+import { ForbiddenError, NotFoundError, ValidationError } from '@/lib/errors';
 import { logSecurityEvent } from '@/lib/audit';
 import { cuidSchema } from '@/lib/validation/common';
 
@@ -46,11 +47,18 @@ export async function POST(request: Request) {
       }
     }
 
-    const updated = await prisma.user.update({
-      where: { id: targetUserId },
-      data: { tokenVersion: { increment: 1 } },
-      select: { id: true, tokenVersion: true },
-    });
+    const updated = await prisma.user
+      .update({
+        where: { id: targetUserId },
+        data: { tokenVersion: { increment: 1 } },
+        select: { id: true, tokenVersion: true },
+      })
+      .catch((error: unknown) => {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+          throw new NotFoundError('User not found');
+        }
+        throw error;
+      });
 
     await logSecurityEvent({
       action: 'ADMIN_ACTION',

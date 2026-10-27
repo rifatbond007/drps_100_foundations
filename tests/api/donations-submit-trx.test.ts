@@ -175,3 +175,18 @@ describe('POST /api/donations/[id]/submit-trx', () => {
     );
   });
 });
+
+describe('malformed input', () => {
+  it('returns 400 on malformed JSON', async () => {
+    mocks.requireActiveUser.mockResolvedValueOnce({
+      user: { id: 'u1', role: 'USER', email: 'u@x.y', languagePref: 'BN' },
+    });
+    const bad = new Request('http://localhost/api/donations/d1/submit-trx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{bad',
+    }) as unknown as NextRequest;
+    const res = await POST(bad, { params: Promise.resolve({ id: 'd1' }) });
+    expect(res.status).toBe(400);
+  });
+});

@@ -19,11 +19,10 @@
  * /donate/pending?id=... which shows the receipt number + the
  * estimated review window.
  */
-import { z } from 'zod';
 import { type NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireActiveUser } from '@/lib/auth/session';
-import { ok, fail } from '@/lib/api/helpers';
+import { ok, fail, parseJsonBody } from '@/lib/api/helpers';
 import { logSecurityEvent } from '@/lib/audit';
 import { NotFoundError, ForbiddenError, ValidationError } from '@/lib/errors';
 import { submitTrxSchema } from '@/lib/validation/donation';
@@ -37,13 +36,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       throw new ValidationError('Invalid donation id');
     }
 
-    let body: z.infer<typeof submitTrxSchema>;
-    try {
-      body = submitTrxSchema.parse(await request.json());
-    } catch (error) {
-      if (error instanceof z.ZodError) return fail(error);
-      throw error;
-    }
+    const body = await parseJsonBody(request, submitTrxSchema);
 
     const donation = await prisma.donation.findUnique({
       where: { id },

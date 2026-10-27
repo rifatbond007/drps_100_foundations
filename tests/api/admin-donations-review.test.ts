@@ -198,3 +198,23 @@ describe('POST /api/admin/donations/[id]/reject', () => {
     );
   });
 });
+
+describe('malformed input', () => {
+  const bad = () =>
+    new Request('http://localhost/api/admin/donations/d1/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{bad',
+    }) as unknown as NextRequest;
+  const params = { params: Promise.resolve({ id: 'd1' }) };
+
+  it('approve returns 400 on malformed JSON', async () => {
+    const res = await approve(bad(), params);
+    expect(res.status).toBe(400);
+  });
+
+  it('reject returns 400 on malformed JSON', async () => {
+    const res = await reject(bad(), params);
+    expect(res.status).toBe(400);
+  });
+});
