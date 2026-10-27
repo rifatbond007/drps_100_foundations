@@ -185,32 +185,23 @@
     "emptyBody": "Your donations will show up here once you make one."
   },
   "donation": {
-    "title": "Donate",
-    "amountLabel": "Amount",
-    "customAmount": "Enter a custom amount",
-    "purpose": "Purpose",
-    "submit": {
-      "title": "Send money via bKash",
-      "subtitle": "Follow the steps below, then submit your transaction ID.",
-      "amount": "Amount",
-      "purpose": "Purpose",
-      "instructionsHeader": "Steps to complete your donation",
-      "step1": "Open your bKash app and choose {method} → Send Money.",
-      "step2": "Send the exact amount to <b>{number}</b>",
-      "copy": "Copy number",
-      "step3": "Use the reference: {hint}",
-      "step4": "After sending, come back here and submit the TrxID + your bKash number below.",
-      "trxLabel": "bKash TrxID",
-      "trxPlaceholder": "e.g. TRX123ABC456",
-      "trxHelp": "Find this in your bKash app under Transaction History.",
-      "phoneLabel": "Your bKash phone number",
-      "phonePlaceholder": "01XXXXXXXXX",
-      "phoneHelp": "The number registered to your bKash account (where you sent from).",
-      "submit": "Submit for review",
-      "reviewNote": "We never store or share your bKash phone. Admin only uses it to verify the transaction in the bKash app."
+    "title": "Make a donation",
+    "subtitle": "Choose an amount and a fund. You’ll pay with bKash on the next step.",
+    "steps": {
+      "amount": "Amount & fund",
+      "pay": "Pay with bKash",
+      "submit": "Submit TrxID",
+      "done": "Done"
     },
-    "processing": "Processing…",
-    "recentDonations": "Recent donations",
+    "amountLabel": "How much would you like to give?",
+    "customAmount": "Other amount",
+    "amountHint": "Between ৳10 and ৳100,000",
+    "purpose": "Choose a fund",
+    "summaryTitle": "Summary",
+    "summaryAmount": "Amount",
+    "summaryFund": "Fund",
+    "continue": "Continue to bKash",
+    "secureNote": "An admin verifies every donation before it counts.",
     "purposes": {
       "GENERAL_FUND": "General fund",
       "EDUCATION": "Education",
@@ -223,29 +214,41 @@
       "FAILED": "Failed",
       "CANCELLED": "Cancelled"
     },
-    "success": {
-      "title": "Thank you!",
-      "subtitle": "Your donation was accepted successfully.",
-      "viewReceipt": "View receipt",
-      "backToDashboard": "Back to dashboard"
+    "errors": {
+      "minAmount": "The minimum donation is ৳10",
+      "maxAmount": "The maximum donation is ৳100,000",
+      "createFailed": "We couldn’t start your donation. Please try again."
     },
-    "failed": {
-      "title": "Donation failed",
-      "subtitle": "Sorry, your donation could not be processed.",
-      "tryAgain": "Try again",
-      "backToDashboard": "Back to dashboard"
+    "submit": {
+      "title": "Send money with bKash",
+      "subtitle": "Send the amount below with bKash, then tell us the transaction ID.",
+      "step1": "Open bKash and choose Send Money.",
+      "step2": "Send exactly {amount} to our number.",
+      "step3": "Write the reference in the bKash reference field.",
+      "step4": "Enter the TrxID from bKash and the number you sent from.",
+      "receiverLabel": "bKash number",
+      "referenceLabel": "Reference",
+      "amountLabel": "Amount",
+      "copy": "Copy",
+      "copied": "Copied",
+      "trxLabel": "bKash TrxID",
+      "trxPlaceholder": "e.g. BK8XQ2M1ZP",
+      "trxHelp": "Find it in your bKash app under Transaction history.",
+      "phoneLabel": "Your bKash number",
+      "phonePlaceholder": "01XXXXXXXXX",
+      "phoneHelp": "The number you sent the money from.",
+      "submit": "Submit for review",
+      "reviewNote": "We only use your bKash number to match the transaction.",
+      "loadFailed": "We couldn’t find this donation.",
+      "invalidTrx": "Enter the TrxID exactly as bKash shows it (letters and numbers).",
+      "invalidPhone": "Enter an 11-digit number starting with 01."
     },
     "pending": {
-      "title": "Donation submitted for review",
-      "subtitle": "We received your bKash transaction details. An admin will verify and approve your donation within 24 hours.",
-      "viewHistory": "View history",
-      "backToDashboard": "Back to dashboard"
-    },
-    "errors": {
-      "minAmount": "Minimum donation is 10 BDT",
-      "maxAmount": "Maximum donation is 100,000 BDT",
-      "createFailed": "Failed to create donation",
-      "invalidPurpose": "Invalid purpose"
+      "title": "Thank you! Your donation is in review",
+      "subtitle": "We received your bKash details. An admin will check the transaction, usually within a few hours.",
+      "reference": "Reference",
+      "viewHistory": "View my donations",
+      "backHome": "Back to home"
     }
   },
   "history": {
@@ -444,7 +447,18 @@
     "errorBody": "We couldn’t load this page. Please try again.",
     "goHome": "Go home",
     "tryAgain": "Try again",
-    "reference": "Reference: {id}"
+    "reference": "Reference: {id}",
+    "codes": {
+      "VALIDATION_ERROR": "Please check the details and try again.",
+      "UNAUTHORIZED": "Please sign in again.",
+      "FORBIDDEN": "You don’t have permission to do that.",
+      "NOT_FOUND": "We couldn’t find that.",
+      "CONFLICT": "That was already changed. Refresh and try again.",
+      "RATE_LIMIT_EXCEEDED": "Too many attempts. Please wait a minute and try again.",
+      "TRX_ALREADY_USED": "This TrxID is already used by another donation. Check the ID in your bKash app.",
+      "ALREADY_REVIEWED": "Another admin already reviewed this donation.",
+      "INTERNAL_ERROR": "Something went wrong on our side. Please try again."
+    }
   },
   "footer": {
     "copyright": "© {year} {appName}. All rights reserved.",

@@ -1,14 +1,12 @@
 import Link from 'next/link';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { CircleCheck, History, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { DonateStepper } from '@/features/donation/donate-stepper';
+import { donationReference } from '@/features/donation/reference';
 
-/**
- * /donate/pending — donor lands here after submitting the bKash TrxID.
- * Server component. The reference + "we'll review within 24 hours"
- * message sit on a single mustard-tinted panel (mustard is reserved
- * for "in progress" states; admin surfaces use it too, but the meaning
- * is consistent: awaiting review).
- */
+/** Final step: the TrxID is submitted and waiting for an admin. */
 export default async function DonatePendingPage({
   params,
   searchParams,
@@ -19,28 +17,37 @@ export default async function DonatePendingPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const { id } = await searchParams;
-  const t = await getTranslations('donation.pending');
+  const t = await getTranslations({ locale, namespace: 'donation.pending' });
 
   return (
-    <div className="mx-auto max-w-md py-12">
-      <section className="border-l-4 border-admin bg-admin/5 px-5 py-4">
-        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="mt-2 text-sm text-foreground/80">{t('subtitle')}</p>
+    <div className="mx-auto max-w-2xl">
+      <DonateStepper step={4} />
+      <Card className="flex flex-col items-center p-8 text-center sm:p-12">
+        <span className="flex size-20 items-center justify-center rounded-full bg-primary-soft text-primary">
+          <CircleCheck className="size-10" aria-hidden />
+        </span>
+        <h1 className="mt-6 text-balance text-2xl font-bold sm:text-3xl">{t('title')}</h1>
+        <p className="mt-3 max-w-md text-muted-foreground">{t('subtitle')}</p>
         {id && (
-          <p className="mt-3 text-xs text-muted-foreground">
-            Reference: <span className="font-mono">{id}</span>
+          <p className="mt-6 rounded-full bg-muted px-4 py-1.5 text-sm">
+            {t('reference')}: <span className="tabular font-semibold">{donationReference(id)}</span>
           </p>
         )}
-      </section>
-
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Button asChild variant="outline">
-          <Link href={`/${locale}/history`}>{t('viewHistory')}</Link>
-        </Button>
-        <Button asChild>
-          <Link href={`/${locale}/dashboard`}>{t('backToDashboard')}</Link>
-        </Button>
-      </div>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Button asChild>
+            <Link href={`/${locale}/history`}>
+              <History aria-hidden />
+              {t('viewHistory')}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/${locale}`}>
+              <Home aria-hidden />
+              {t('backHome')}
+            </Link>
+          </Button>
+        </div>
+      </Card>
     </div>
   );
 }

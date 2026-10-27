@@ -55,7 +55,6 @@ vi.mock('@/lib/logger', () => ({
 // the dependency.
 vi.mock('@/lib/payment', () => ({
   PAYMENT_METHOD: 'manual_bkash',
-  PAYMENT_INSTRUCTIONS: { method: 'bKash (Personal)', number: '01616413419', referenceHint: '' },
 }));
 
 import { POST } from '@/app/api/donations/create/route';
