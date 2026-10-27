@@ -3,13 +3,10 @@
  * Used for: sessions, rate limiting, idempotency, caching.
  *
  * Production guarantees:
- *  - REDIS_URL MUST be set; we throw at module-load instead of silently
- *    connecting to a non-existent local Redis. This catches the common
- *    Vercel misconfig (default `redis://localhost:6379` = guaranteed
- *    EHOSTUNREACH + 30s hangs on every serverless cold start) at
- *    startup instead of producing opaque "Something went wrong" 500s
- *    on the first request that hits `redis.zcard(...)` /
- *    `redis.get(...)`.
+ *  - REDIS_URL MUST be set. If it is missing we log an error at import
+ *    (never throw — that would break `next build` and unrelated routes)
+ *    and disable the offline queue so commands fail fast instead of
+ *    hanging on a localhost connection that will never succeed.
  *  - Auto-enable TLS for `rediss://` URLs (Upstash, Redis Cloud, etc.)
  *    by parsing the URL explicitly — passing a `rediss://` URL through
  *    ioredis's `url:` constructor option DOES auto-set `tls: {}` since
@@ -27,11 +24,15 @@ const globalForRedis = globalThis as unknown as { redis?: Redis };
 const isProd = process.env.NODE_ENV === 'production';
 const rawUrl = process.env.REDIS_URL;
 
-if (isProd && (!rawUrl || rawUrl.length === 0)) {
-  throw new Error(
-    'REDIS_URL must be set in production. On Vercel, add it under Project → Settings → Environment Variables ' +
-      'for the Production environment. Using a default `redis://localhost:6379` on Vercel causes silent ' +
-      'connection failures and opaque 500s on every request that hits Redis (rate limit, idempotency cache).'
+const missingInProd = isProd && (!rawUrl || rawUrl.length === 0);
+if (missingInProd) {
+  // Log loudly instead of throwing: a module-level throw breaks `next build`
+  // and every route that merely imports this file (health, landing stats).
+  // Commands fail fast instead (see enableOfflineQueue below) and callers
+  // already degrade when Redis is unavailable.
+  logger.error(
+    {},
+    'REDIS_URL must be set in production. Redis-backed features (rate limit, idempotency, caching) are disabled.'
   );
 }
 
@@ -54,6 +55,9 @@ export const redis =
     // ONLY place a Redis failure surfaces (caught in helpers.ts / rate
     // limiter below), so the failure mode is loud, not silent.
     lazyConnect: true,
+    // Misconfigured prod: reject commands immediately instead of queueing
+    // them behind a connection that will never come up.
+    ...(missingInProd ? { enableOfflineQueue: false } : {}),
     reconnectOnError: (err) =>
       err.message.includes('READONLY') || err.message.includes('ETIMEDOUT'),
     ...(isTls ? { tls: { rejectUnauthorized: true } } : {}),
