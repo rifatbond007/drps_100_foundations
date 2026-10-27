@@ -1,0 +1,46 @@
+import type { DonationPurpose } from '@prisma/client';
+import { BookOpen, HandHeart, HeartPulse, Siren, type LucideIcon } from 'lucide-react';
+
+export interface Cause {
+  purpose: DonationPurpose;
+  icon: LucideIcon;
+  /** Fundraising goal in BDT. Placeholder values — edit to the foundation's real targets. */
+  goal: number;
+  /** `landing.*` message keys. */
+  nameKey: string;
+  descKey: string;
+}
+
+export const CAUSES: readonly Cause[] = [
+  {
+    purpose: 'GENERAL_FUND',
+    icon: HandHeart,
+    goal: 100_000,
+    nameKey: 'causeGeneralName',
+    descKey: 'causeGeneralDesc',
+  },
+  {
+    purpose: 'EDUCATION',
+    icon: BookOpen,
+    goal: 75_000,
+    nameKey: 'causeEducationName',
+    descKey: 'causeEducationDesc',
+  },
+  {
+    purpose: 'MEDICAL',
+    icon: HeartPulse,
+    goal: 50_000,
+    nameKey: 'causeMedicalName',
+    descKey: 'causeMedicalDesc',
+  },
+  {
+    purpose: 'EMERGENCY',
+    icon: Siren,
+    goal: 25_000,
+    nameKey: 'causeEmergencyName',
+    descKey: 'causeEmergencyDesc',
+  },
+];
+
+export const causeFor = (purpose: DonationPurpose): Cause =>
+  CAUSES.find((c) => c.purpose === purpose) ?? CAUSES[0]!;

@@ -19,6 +19,7 @@ export function formatBDT(amount: number | string, locale: AppLocale = 'bn'): st
     return new Intl.NumberFormat(intlLocale(locale), {
       style: 'currency',
       currency: 'BDT',
+      currencyDisplay: 'narrowSymbol',
       maximumFractionDigits: 0,
     }).format(n);
   } catch {

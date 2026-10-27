@@ -1,58 +1,50 @@
 import { setRequestLocale } from 'next-intl/server';
-import { HeroSection } from '@/components/landing/HeroSection';
-import { ActivitySection } from '@/components/landing/ActivitySection';
-import { CausesSection } from '@/components/landing/CausesSection';
-import { HowItWorksSection } from '@/components/landing/HowItWorksSection';
-import { PeopleSection } from '@/components/landing/PeopleSection';
-import { EventsSection } from '@/components/landing/EventsSection';
-import { StoriesSection } from '@/components/landing/StoriesSection';
-import { FaqSection } from '@/components/landing/FaqSection';
-import { TrustSection } from '@/components/landing/TrustSection';
-import { CtaStripSection } from '@/components/landing/CtaStripSection';
+import { getPublicStats, type PublicStats } from '@/lib/stats';
+import { logger } from '@/lib/logger';
+import { toAppLocale } from '@/lib/format';
+import { Hero } from '@/features/landing/hero';
+import { Causes } from '@/features/landing/causes';
+import { HowItWorks } from '@/features/landing/how-it-works';
+import { People } from '@/features/landing/people';
+import { Events } from '@/features/landing/events';
+import { Stories } from '@/features/landing/stories';
+import { Faq } from '@/features/landing/faq';
+import { Trust } from '@/features/landing/trust';
+import { CtaBanner } from '@/features/landing/cta-banner';
 
-/**
- * /[locale] — the public landing page.
- *
- * Ten sections in deliberate order:
- *   1. Hero (split display + 01/02/03 register + bKash bar)
- *   2. ─── sticky in-page nav (table of contents) ───
- *   3. Activity (3 figures as one register — heartbeat)
- *   4. Causes (4 rows: number · name · description · raised)
- *   5. How it works (3 steps as a register with explanations)
- *   6. People (3 hairline-framed portraits — the faces)
- *   7. Events (date · title · location · status register)
- *   8. Stories (one display number + editorial paragraph + facts)
- *   9. FAQ (click-to-expand questions in a register)
- *  10. Trust (editorial paragraph + 3 verification figures)
- *  ───  CTA strip (the page's only emerald surface) ───
- *
- * Every section opens with a hairline rule at the page level. Within
- * sections, hairline rules separate rows. No cards, no shadows, no
- * gradients. Three reserved colours: emerald (CTA + active nav
- * underline), bKash pink (hero bar + step 02), admin mustard (people
- * accents + TBA status). The rest is paper and ink.
- *
- * The LandingNav sits between the masthead header and the Activity
- * section. It is sticky and updates its active state as the reader
- * scrolls. Each link uses native smooth scroll to its section id.
- */
+// Public figures refresh at most once a minute.
+export const revalidate = 60;
+
+async function loadStats(): Promise<PublicStats | null> {
+  try {
+    return await getPublicStats();
+  } catch (error) {
+    // Hide the figures rather than show zeros or a broken page.
+    logger.warn(
+      { err: error instanceof Error ? error.message : String(error) },
+      'landing: stats unavailable'
+    );
+    return null;
+  }
+}
+
 export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  const safeLocale: 'bn' | 'en' = locale === 'en' ? 'en' : 'bn';
+  const { locale: raw } = await params;
+  setRequestLocale(raw);
+  const locale = toAppLocale(raw);
+  const stats = await loadStats();
 
   return (
     <>
-      <HeroSection locale={locale} />
-      <ActivitySection locale={safeLocale} />
-      <CausesSection locale={safeLocale} />
-      <HowItWorksSection locale={safeLocale} />
-      <PeopleSection locale={safeLocale} />
-      <EventsSection locale={safeLocale} />
-      <StoriesSection locale={safeLocale} />
-      <FaqSection />
-      <TrustSection locale={safeLocale} />
-      <CtaStripSection locale={locale} />
+      <Hero stats={stats} locale={locale} />
+      <Causes stats={stats} locale={locale} />
+      <HowItWorks />
+      <People />
+      <Events locale={locale} />
+      <Stories />
+      <Faq />
+      <Trust />
+      <CtaBanner locale={locale} />
     </>
   );
 }
