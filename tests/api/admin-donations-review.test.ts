@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
     donation: {
       findUnique: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
     },
   },
   rateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 10, resetAt: new Date() }),
@@ -78,12 +79,7 @@ describe('POST /api/admin/donations/[id]/approve', () => {
       amount: { toString: () => '500.00' },
       bkashTransactionId: null,
     });
-    mocks.prisma.donation.update.mockResolvedValueOnce({
-      id: 'd1',
-      status: 'SUCCESS',
-      completedAt: new Date('2026-01-01T00:00:00Z'),
-      reviewedAt: new Date('2026-01-01T00:00:00Z'),
-    });
+    mocks.prisma.donation.updateMany.mockResolvedValueOnce({ count: 1 });
 
     const res = await approve(buildReq({ adminNote: 'verified' }), {
       params: Promise.resolve({ id: 'd1' }),
@@ -93,9 +89,9 @@ describe('POST /api/admin/donations/[id]/approve', () => {
     expect(body.data.status).toBe('SUCCESS');
     expect(body.data.donationId).toBe('d1');
 
-    expect(mocks.prisma.donation.update).toHaveBeenCalledWith(
+    expect(mocks.prisma.donation.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'd1' },
+        where: { id: 'd1', status: 'PENDING' },
         data: expect.objectContaining({
           status: 'SUCCESS',
           bkashTransactionId: 'TRX-12345',
@@ -168,12 +164,7 @@ describe('POST /api/admin/donations/[id]/reject', () => {
       userId: 'u1',
       amount: { toString: () => '500.00' },
     });
-    mocks.prisma.donation.update.mockResolvedValueOnce({
-      id: 'd1',
-      status: 'FAILED',
-      completedAt: new Date('2026-01-01T00:00:00Z'),
-      reviewedAt: new Date('2026-01-01T00:00:00Z'),
-    });
+    mocks.prisma.donation.updateMany.mockResolvedValueOnce({ count: 1 });
 
     const res = await reject(buildReq({ adminNote: 'TrxID does not match amount' }), {
       params: Promise.resolve({ id: 'd1' }),
@@ -182,9 +173,9 @@ describe('POST /api/admin/donations/[id]/reject', () => {
     const body = await res.json();
     expect(body.data.status).toBe('FAILED');
 
-    expect(mocks.prisma.donation.update).toHaveBeenCalledWith(
+    expect(mocks.prisma.donation.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'd1' },
+        where: { id: 'd1', status: 'PENDING' },
         data: expect.objectContaining({
           status: 'FAILED',
           adminNote: 'TrxID does not match amount',
@@ -216,5 +207,45 @@ describe('malformed input', () => {
   it('reject returns 400 on malformed JSON', async () => {
     const res = await reject(bad(), params);
     expect(res.status).toBe(400);
+  });
+});
+
+describe('review races', () => {
+  const params = { params: Promise.resolve({ id: 'd1' }) };
+  const pending = {
+    id: 'd1',
+    status: 'PENDING',
+    trxId: 'TRX-12345',
+    userId: 'u1',
+    amount: { toString: () => '500.00' },
+    bkashTransactionId: null,
+  };
+
+  it('approve returns 409 ALREADY_REVIEWED when another admin rejected first', async () => {
+    mocks.prisma.donation.findUnique
+      .mockResolvedValueOnce(pending)
+      .mockResolvedValueOnce({ ...pending, status: 'FAILED' });
+    mocks.prisma.donation.updateMany.mockResolvedValueOnce({ count: 0 });
+    const res = await approve(buildReq({}), params);
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe('ALREADY_REVIEWED');
+  });
+
+  it('approve is idempotent when another admin approved first', async () => {
+    mocks.prisma.donation.findUnique
+      .mockResolvedValueOnce(pending)
+      .mockResolvedValueOnce({ ...pending, status: 'SUCCESS' });
+    mocks.prisma.donation.updateMany.mockResolvedValueOnce({ count: 0 });
+    const res = await approve(buildReq({}), params);
+    expect(res.status).toBe(200);
+    expect((await res.json()).data.message).toBe('Already approved');
+  });
+
+  it('reject returns 409 ALREADY_REVIEWED when the donation was reviewed concurrently', async () => {
+    mocks.prisma.donation.findUnique.mockResolvedValueOnce(pending);
+    mocks.prisma.donation.updateMany.mockResolvedValueOnce({ count: 0 });
+    const res = await reject(buildReq({ adminNote: 'not found in bKash' }), params);
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe('ALREADY_REVIEWED');
   });
 });

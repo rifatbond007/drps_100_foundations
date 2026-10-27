@@ -94,11 +94,11 @@ export default function SubmitTrxPage() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const res = await apiClient.post<{ redirectUrl: string }>(
-        `/donations/${donationId}/submit-trx`,
-        { trxId: trxId.trim(), senderPhone: senderPhone.trim() }
-      );
-      router.push(res.redirectUrl);
+      await apiClient.post(`/donations/${donationId}/submit-trx`, {
+        trxId: trxId.trim(),
+        senderPhone: senderPhone.trim(),
+      });
+      router.push(`/${locale}/donate/pending?id=${donationId}`);
     } catch (e) {
       setSubmitError(e instanceof ApiClientError ? e.message : 'Submission failed');
       setSubmitting(false);

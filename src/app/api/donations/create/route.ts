@@ -69,9 +69,11 @@ export async function POST(request: NextRequest) {
     // PENDING row (visible to admin + donor in history), but refusing
     // every donation when Redis is down is worse for donors. The
     // warning is loud enough for ops to notice.
+    // Scoped by user so one donor's key can never replay another's response.
+    const idemKey = `idem:donation:${session.user.id}:${body.idempotencyKey}`;
     let cached: string | null = null;
     try {
-      cached = await redis.get(`idem:donation:${body.idempotencyKey}`);
+      cached = await redis.get(idemKey);
     } catch (error) {
       logger.warn(
         {
@@ -89,29 +91,25 @@ export async function POST(request: NextRequest) {
 
     // 6. Insert Donation(PENDING). No gateway call — manual flow means
     //    the donor sends money out-of-band and submits the TrxID next.
-    const donation = await prisma.donation.create({
-      data: {
-        userId: session.user.id,
-        amount: body.amount.toString(),
-        currency: 'BDT',
-        purpose: body.purpose,
-        isAnonymous: body.isAnonymous,
-        status: 'PENDING',
-        // Use the donation id itself as the "payment id" so the field is
-        // non-null from the start. The bkashTransactionId field will be
-        // populated later (by /submit-trx for the donor's submitted
-        // TrxID, then promoted to the real TrxID on admin approval).
-        bkashPaymentId: undefined, // will be set below
-        paymentMethod: PAYMENT_METHOD,
-      },
-    });
-
-    // Persist paymentId = donationId for stable lookup. Use update so the
-    // @unique constraint on bkashPaymentId applies and we surface any
-    // collision (extremely unlikely with cuid() but defensive).
-    await prisma.donation.update({
-      where: { id: donation.id },
-      data: { bkashPaymentId: donation.id },
+    // bkashPaymentId mirrors the donation id so the column is non-null.
+    // Create + update run in one transaction so a failure can't leave a
+    // row without its payment id.
+    const donation = await prisma.$transaction(async (tx) => {
+      const created = await tx.donation.create({
+        data: {
+          userId: session.user.id,
+          amount: body.amount.toString(),
+          currency: 'BDT',
+          purpose: body.purpose,
+          isAnonymous: body.isAnonymous,
+          status: 'PENDING',
+          paymentMethod: PAYMENT_METHOD,
+        },
+      });
+      return tx.donation.update({
+        where: { id: created.id },
+        data: { bkashPaymentId: created.id },
+      });
     });
 
     // 7. Audit + idempotency cache
@@ -139,12 +137,7 @@ export async function POST(request: NextRequest) {
     };
 
     await redis
-      .set(
-        `idem:donation:${body.idempotencyKey}`,
-        JSON.stringify(responseBody),
-        'EX',
-        IDEMPOTENCY_TTL_SECONDS
-      )
+      .set(idemKey, JSON.stringify(responseBody), 'EX', IDEMPOTENCY_TTL_SECONDS)
       .catch((error) => {
         // Cache-write failure is non-fatal — the donation is already
         // persisted. We just lose dedupe for any retries of this exact

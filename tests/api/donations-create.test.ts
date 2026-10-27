@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => ({
     user: {
       findUnique: vi.fn(),
     },
+    $transaction: vi.fn(),
   },
   redis: {
     get: vi.fn().mockResolvedValue(null),
@@ -78,6 +79,7 @@ function buildReq(body: unknown): NextRequest {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.redis.get.mockResolvedValue(null);
+  mocks.prisma.$transaction.mockImplementation((fn: (tx: unknown) => unknown) => fn(mocks.prisma));
 });
 
 afterEach(() => {
@@ -104,6 +106,11 @@ describe('POST /api/donations/create', () => {
       user: { id: 'u1', role: 'USER', profileCompleted: false, languagePref: 'BN' },
     });
     mocks.prisma.donation.create.mockResolvedValueOnce({ id: 'd1', amount: '500' });
+    mocks.prisma.donation.update.mockResolvedValueOnce({
+      id: 'd1',
+      amount: '500',
+      purpose: 'GENERAL_FUND',
+    });
 
     const res = await POST(buildReq(VALID_BODY));
     expect(res.status).toBe(200);
@@ -137,6 +144,11 @@ describe('POST /api/donations/create', () => {
       user: { id: 'u1', role: 'USER', profileCompleted: true, languagePref: 'BN' },
     });
     mocks.prisma.donation.create.mockResolvedValueOnce({ id: 'd1', amount: '500' });
+    mocks.prisma.donation.update.mockResolvedValueOnce({
+      id: 'd1',
+      amount: '500',
+      purpose: 'GENERAL_FUND',
+    });
 
     const res = await POST(buildReq(VALID_BODY));
     expect(res.status).toBe(200);
@@ -164,6 +176,10 @@ describe('POST /api/donations/create', () => {
         data: { bkashPaymentId: 'd1' },
       })
     );
+    // Create + payment-id update happen in one transaction.
+    expect(mocks.prisma.$transaction).toHaveBeenCalledTimes(1);
+    // Idempotency cache is scoped to the user.
+    expect(mocks.redis.get).toHaveBeenCalledWith(`idem:donation:u1:${VALID_BODY.idempotencyKey}`);
     // Audit log fired.
     expect(mocks.logSecurityEvent).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'DONATION_INITIATED', userId: 'u1' })

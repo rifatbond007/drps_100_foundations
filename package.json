@@ -33,6 +33,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:status": "prisma migrate status",
     "db:reset-donations": "tsx scripts/reset-donations.ts",
+    "db:check-duplicate-trx": "tsx scripts/check-duplicate-trx.ts",
     "db:backup": "bash scripts/backup-db.sh",
     "db:restore": "bash scripts/restore-db.sh",
     "docker:dev": "docker compose -f docker-compose.dev.yml up",
