@@ -4,7 +4,7 @@
  *
  * Endpoint: GET /api/users/profile
  * Returns: id, email, name, avatarUrl, phone, role, languagePref,
- *          profileCompleted, createdAt, lastLoginAt, donationCount, totalDonated.
+ *          profileCompleted, createdAt, lastLoginAt, donationCount, totalDonated, pendingCount.
  */
 'use client';
 
@@ -24,6 +24,7 @@ export interface UserProfile {
   lastLoginAt: string | null;
   donationCount: number;
   totalDonated: string; // decimal-as-string from server (Prisma Decimal)
+  pendingCount: number;
 }
 
 export function useProfile() {

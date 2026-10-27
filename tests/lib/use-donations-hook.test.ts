@@ -1,53 +1,69 @@
 /**
- * Light test that the useDonationHistory hook wires the right cache key
- * and surfaces errors. Mocks both tanstack/react-query and the apiClient.
+ * The donation history hooks: cache keys, query params, and paging.
+ * Mocks tanstack/react-query and the apiClient.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   apiClient: { get: vi.fn() },
   useQuery: vi.fn(),
+  useInfiniteQuery: vi.fn(),
 }));
 
-vi.mock('@tanstack/react-query', () => ({ useQuery: mocks.useQuery }));
+vi.mock('@tanstack/react-query', () => ({
+  useQuery: mocks.useQuery,
+  useInfiniteQuery: mocks.useInfiniteQuery,
+}));
 vi.mock('@/lib/api/client', () => ({ apiClient: mocks.apiClient }));
 
-import { useDonationHistory } from '@/hooks/use-donations';
+import { useDonationHistory, useDonationHistoryInfinite } from '@/hooks/use-donations';
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
+type Opts = {
+  queryKey: unknown[];
+  queryFn: (ctx: { pageParam: number }) => unknown;
+  getNextPageParam: (last: { page: number; limit: number; total: number }) => number | undefined;
+};
+
+beforeEach(() => vi.clearAllMocks());
 
 describe('useDonationHistory', () => {
-  it('keys the query by donations/history + userId, calls apiClient.get', () => {
-    let captured: unknown;
-    mocks.useQuery.mockImplementationOnce((opts: unknown) => {
+  it('requests a limited first page', () => {
+    let captured: { queryKey: unknown[]; queryFn: () => unknown } | undefined;
+    mocks.useQuery.mockImplementationOnce((opts) => {
       captured = opts;
-      return { data: undefined, isLoading: true, error: null };
+      return {};
     });
-
-    useDonationHistory('user-42');
-
-    expect(captured).toMatchObject({
-      queryKey: ['donations', 'history', 'user-42'],
-      enabled: true,
+    useDonationHistory({ limit: 5 });
+    expect(captured?.queryKey).toEqual(['donations', 'history', { limit: 5 }]);
+    void captured?.queryFn();
+    expect(mocks.apiClient.get).toHaveBeenCalledWith('/donations/history', {
+      params: { page: 1, limit: 5 },
     });
-    // queryFn is a closure; invoke and confirm it calls apiClient.get
-    const fn = (captured as { queryFn: () => unknown }).queryFn;
-    mocks.apiClient.get.mockResolvedValueOnce({ donations: [], total: 0, page: 1, limit: 20 });
-    void fn();
-    expect(mocks.apiClient.get).toHaveBeenCalledWith('/donations/history');
+  });
+});
+
+describe('useDonationHistoryInfinite', () => {
+  function capture(params: Parameters<typeof useDonationHistoryInfinite>[0]): Opts {
+    let captured: Opts | undefined;
+    mocks.useInfiniteQuery.mockImplementationOnce((opts: Opts) => {
+      captured = opts;
+      return {};
+    });
+    useDonationHistoryInfinite(params);
+    return captured!;
+  }
+
+  it('requests the given page with the status filter', () => {
+    const opts = capture({ status: 'PENDING' });
+    void opts.queryFn({ pageParam: 2 });
+    expect(mocks.apiClient.get).toHaveBeenCalledWith('/donations/history', {
+      params: { page: 2, limit: 20, status: 'PENDING' },
+    });
   });
 
-  it('disables the query when no userId is provided', () => {
-    let captured: unknown;
-    mocks.useQuery.mockImplementationOnce((opts: unknown) => {
-      captured = opts;
-      return { data: undefined, isLoading: false, error: null };
-    });
-
-    useDonationHistory(undefined);
-
-    expect(captured).toMatchObject({ enabled: false });
+  it('stops paging after the last page', () => {
+    const opts = capture({});
+    expect(opts.getNextPageParam({ page: 1, limit: 20, total: 45 })).toBe(2);
+    expect(opts.getNextPageParam({ page: 3, limit: 20, total: 45 })).toBeUndefined();
   });
 });

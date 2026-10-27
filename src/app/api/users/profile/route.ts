@@ -62,11 +62,14 @@ export async function GET() {
 
     // H-fix: \`donationCount\`/\`totalDonated\` aren't columns on User.
     // Compute them via aggregation so the route stays type-safe.
-    const donationAgg = await prisma.donation.aggregate({
-      where: { userId: session.user.id, status: 'SUCCESS' },
-      _count: { _all: true },
-      _sum: { amount: true },
-    });
+    const [donationAgg, pendingCount] = await Promise.all([
+      prisma.donation.aggregate({
+        where: { userId: session.user.id, status: 'SUCCESS' },
+        _count: { _all: true },
+        _sum: { amount: true },
+      }),
+      prisma.donation.count({ where: { userId: session.user.id, status: 'PENDING' } }),
+    ]);
 
     return ok({
       id: user.id,
@@ -81,6 +84,7 @@ export async function GET() {
       lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
       donationCount: donationAgg._count._all,
       totalDonated: donationAgg._sum.amount?.toString() ?? '0',
+      pendingCount,
     });
   } catch (error) {
     return fail(error);

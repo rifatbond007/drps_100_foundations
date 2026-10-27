@@ -1,118 +1,69 @@
 'use client';
 
-import Link from 'next/link';
+import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/use-auth';
-import { useDonationHistory } from '@/hooks/use-donations';
-import { cn } from '@/lib/utils';
-import { formatBDT, intlLocale, toAppLocale } from '@/lib/format';
+import { EmptyState } from '@/components/ui/empty-state';
+import { LoadError } from '@/components/ui/load-error';
+import { PageHeader } from '@/components/ui/page-header';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DonationList } from '@/features/donation/donation-list';
+import { useDonationHistoryInfinite } from '@/hooks/use-donations';
+import { toAppLocale } from '@/lib/format';
+import type { DonationStatus } from '@/types/donation';
 
-/**
- * /history — every donation the user has made, in a register layout.
- *
- * No cards per row — each donation is a single line in a numbered list.
- * Status uses the same colour key as the dashboard (primary/destructive/
- * admin/muted) so the user doesn't have to relearn it.
- *
- * PENDING-but-no-trxId is a special state: the donor created the row
- * but never finished the bKash step. We show a one-line note + a
- * continue button right under the row.
- */
+const TABS = ['all', 'PENDING', 'SUCCESS', 'FAILED'] as const;
+type Tab = (typeof TABS)[number];
+
 export default function HistoryPage() {
+  const locale = toAppLocale(useLocale());
   const t = useTranslations('history');
-  const { user } = useAuth();
-  const locale = useLocale();
-  const { data, isLoading, error } = useDonationHistory(user?.id);
-
-  if (!user) return null;
-
-  const donations = data?.donations ?? [];
+  const [tab, setTab] = useState<Tab>('all');
+  const status: DonationStatus | undefined = tab === 'all' ? undefined : tab;
+  const query = useDonationHistoryInfinite({ status });
+  const items = query.data?.pages.flatMap((p) => p.donations) ?? [];
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
-      </header>
+    <>
+      <PageHeader title={t('title')} description={t('subtitle')} />
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="mb-5">
+        <TabsList>
+          {TABS.map((key) => (
+            <TabsTrigger key={key} value={key}>
+              {t(`tabs.${key}`)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-      {isLoading && (
-        <p className="py-8 text-center text-sm text-muted-foreground">{t('loading')}</p>
-      )}
-
-      {error && (
-        <p
-          role="alert"
-          className="border-l-2 border-destructive bg-destructive/5 px-3 py-2 text-sm text-destructive"
-        >
-          {t('loadingFailed', { message: error.message })}
-        </p>
-      )}
-
-      {!isLoading && !error && donations.length === 0 && (
-        <div className="border-t border-border py-12 text-center">
-          <p className="text-sm text-muted-foreground">{t('noDonations')}</p>
+      {query.isLoading ? (
+        <div className="flex flex-col gap-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-lg" />
+          ))}
         </div>
+      ) : query.isError ? (
+        <LoadError message={t('loadFailed')} onRetry={() => void query.refetch()} />
+      ) : items.length === 0 ? (
+        <EmptyState icon={History} title={t('noDonations')} description={t('emptyBody')} />
+      ) : (
+        <>
+          <DonationList items={items} locale={locale} />
+          {query.hasNextPage && (
+            <div className="mt-6 flex justify-center">
+              <Button
+                variant="outline"
+                loading={query.isFetchingNextPage}
+                onClick={() => void query.fetchNextPage()}
+              >
+                {t('loadMore')}
+              </Button>
+            </div>
+          )}
+        </>
       )}
-
-      {!isLoading && !error && donations.length > 0 && (
-        <ol className="border-t border-border">
-          {donations.map((d) => {
-            const isPendingNoTrx = d.status === 'PENDING' && !d.trxId;
-            const isPendingAwaiting = d.status === 'PENDING' && !!d.trxId;
-            const isRejected = d.status === 'FAILED' && !!d.adminNote;
-            return (
-              <li key={d.id} className="border-b border-border py-4">
-                <div className="flex items-baseline justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="truncate text-base font-semibold tabular-nums text-foreground">
-                      {formatBDT(d.amount)}
-                    </div>
-                    <div className="mt-0.5 text-xs text-muted-foreground">
-                      {t(`purposes.${d.purpose}`)}
-                    </div>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <div
-                      className={cn(
-                        'text-sm font-medium',
-                        d.status === 'SUCCESS' && 'text-primary',
-                        d.status === 'FAILED' && 'text-destructive',
-                        d.status === 'PENDING' && 'text-admin',
-                        d.status === 'CANCELLED' && 'text-muted-foreground'
-                      )}
-                    >
-                      {t(`status.${d.status}`)}
-                    </div>
-                    <time className="text-xs tabular-nums text-muted-foreground">
-                      {new Date(d.createdAt).toLocaleDateString(intlLocale(toAppLocale(locale)))}
-                    </time>
-                  </div>
-                </div>
-
-                {isPendingAwaiting && (
-                  <p className="mt-2 text-xs text-admin">{t('awaitingReview')}</p>
-                )}
-
-                {isPendingNoTrx && (
-                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-xs text-muted-foreground">{t('trxNotSubmitted')}</span>
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={`/${locale}/donate/submit?id=${d.id}`}>{t('submitTrx')}</Link>
-                    </Button>
-                  </div>
-                )}
-
-                {isRejected && (
-                  <p className="mt-2 text-xs text-destructive">
-                    <span className="font-medium">{t('adminNoteLabel')}:</span> {d.adminNote}
-                  </p>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-      )}
-    </div>
+    </>
   );
 }

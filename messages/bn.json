@@ -167,24 +167,22 @@
   },
   "dashboard": {
     "title": "ড্যাশবোর্ড",
-    "subtitle": "আপনার দানের সারসংক্ষেপ",
+    "subtitle": "এক নজরে আপনার দান।",
     "greeting": "হ্যালো, {name}",
-    "loadingProfile": "আপনার ড্যাশবোর্ড লোড হচ্ছে…",
-    "profileStatsTitle": "আপনার দান এক নজরে",
     "totalDonated": "মোট দান",
-    "last30Days": "গত ৩০ দিন",
     "donationCount": "দানের সংখ্যা",
-    "allTime": "সর্বকাল",
-    "lastDonation": "শেষ দান",
     "pendingDonations": "বিচারাধীন দান",
     "never": "এখনও কোনো দান নেই",
     "donateCta": "এখনই দান করুন",
-    "donateCtaSecondary": "এখনই দান করুন",
     "recentDonations": "সাম্প্রতিক দান",
     "viewAllDonations": "সব দেখুন",
-    "editProfile": "প্রোফাইল সম্পাদনা",
-    "loadFailed": "আপনার প্রোফাইল লোড করা যায়নি",
-    "signedInAs": "{email} হিসেবে সাইন ইন করা আছে"
+    "loadFailed": "আপনার ড্যাশবোর্ড লোড করা যায়নি।",
+    "approvedHint": "অনুমোদিত দান",
+    "pendingHint": "অ্যাডমিন যাচাইয়ের অপেক্ষায়",
+    "donateAgainTitle": "আবার দান করতে চান?",
+    "donateAgainBody": "একটি তহবিল বেছে নিয়ে বিকাশে পাঠান — সময় লাগে প্রায় তিন মিনিট।",
+    "emptyTitle": "এখনো কোনো দান নেই",
+    "emptyBody": "দান করলে সেটি এখানে দেখা যাবে।"
   },
   "donation": {
     "title": "দান করুন",
@@ -252,9 +250,7 @@
   },
   "history": {
     "title": "দানের ইতিহাস",
-    "subtitle": "আপনার সকল দানের একটি তালিকা",
-    "loading": "লোড হচ্ছে…",
-    "loadingFailed": "লোড ব্যর্থ: {message}",
+    "subtitle": "আপনার প্রতিটি দান এবং তার বর্তমান অবস্থা।",
     "noDonations": "এখনও কোনো দান নেই",
     "viewAll": "সব দেখুন",
     "status": {
@@ -272,7 +268,16 @@
     "awaitingReview": "পর্যালোচনাধীন",
     "trxNotSubmitted": "এখনও TrxID জমা দেওয়া হয়নি",
     "submitTrx": "TrxID জমা দিন",
-    "adminNoteLabel": "অ্যাডমিনের কারণ"
+    "adminNoteLabel": "অ্যাডমিনের কারণ",
+    "tabs": {
+      "all": "সব",
+      "PENDING": "অপেক্ষমাণ",
+      "SUCCESS": "অনুমোদিত",
+      "FAILED": "বাতিল"
+    },
+    "loadMore": "আরও দেখুন",
+    "loadFailed": "আপনার দানগুলো লোড করা যায়নি।",
+    "emptyBody": "এখানে এখনো কিছু নেই।"
   },
   "settings": {
     "title": "সেটিংস",

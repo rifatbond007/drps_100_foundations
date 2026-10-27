@@ -167,24 +167,22 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Summary of your donations",
+    "subtitle": "Your giving at a glance.",
     "greeting": "Hi, {name}",
-    "loadingProfile": "Loading your dashboard…",
-    "profileStatsTitle": "Your donations at a glance",
     "totalDonated": "Total donated",
-    "last30Days": "Last 30 days",
     "donationCount": "Donations",
-    "allTime": "All time",
-    "lastDonation": "Last donation",
     "pendingDonations": "Pending donations",
     "never": "No donations yet",
     "donateCta": "Donate now",
-    "donateCtaSecondary": "Donate now",
     "recentDonations": "Recent donations",
     "viewAllDonations": "View all",
-    "editProfile": "Edit profile",
-    "loadFailed": "Could not load your profile",
-    "signedInAs": "Signed in as {email}"
+    "loadFailed": "We couldn’t load your dashboard.",
+    "approvedHint": "Approved donations",
+    "pendingHint": "Waiting for admin review",
+    "donateAgainTitle": "Ready to give again?",
+    "donateAgainBody": "Pick a fund and send with bKash — it takes about three minutes.",
+    "emptyTitle": "No donations yet",
+    "emptyBody": "Your donations will show up here once you make one."
   },
   "donation": {
     "title": "Donate",
@@ -252,9 +250,7 @@
   },
   "history": {
     "title": "Donation history",
-    "subtitle": "A list of all your donations",
-    "loading": "Loading…",
-    "loadingFailed": "Failed to load: {message}",
+    "subtitle": "Every donation you have made and where it stands.",
     "noDonations": "No donations yet",
     "viewAll": "View all",
     "status": {
@@ -272,7 +268,16 @@
     "awaitingReview": "Awaiting review",
     "trxNotSubmitted": "TrxID not submitted yet",
     "submitTrx": "Submit TrxID",
-    "adminNoteLabel": "Reason from admin"
+    "adminNoteLabel": "Reason from admin",
+    "tabs": {
+      "all": "All",
+      "PENDING": "Pending",
+      "SUCCESS": "Approved",
+      "FAILED": "Rejected"
+    },
+    "loadMore": "Load more",
+    "loadFailed": "We couldn’t load your donations.",
+    "emptyBody": "Nothing here yet."
   },
   "settings": {
     "title": "Settings",
