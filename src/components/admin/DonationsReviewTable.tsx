@@ -15,7 +15,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
-import { cn, formatBDT } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatBDT, intlLocale, toAppLocale } from '@/lib/format';
 
 type StatusFilter = 'PENDING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
 
@@ -198,9 +199,7 @@ export function DonationsReviewTable() {
                   </div>
                   <time className="shrink-0 text-xs tabular-nums text-muted-foreground">
                     {d.trxSubmittedAt
-                      ? new Date(d.trxSubmittedAt).toLocaleString(
-                          locale === 'en' ? 'en-US' : 'bn-BD'
-                        )
+                      ? new Date(d.trxSubmittedAt).toLocaleString(intlLocale(toAppLocale(locale)))
                       : '—'}
                   </time>
                 </div>

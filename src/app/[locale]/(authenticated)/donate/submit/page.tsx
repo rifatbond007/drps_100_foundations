@@ -20,8 +20,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
-import { formatBDT } from '@/lib/utils';
 import { PAYMENT_INSTRUCTIONS } from '@/lib/payment';
+import { formatBDT } from '@/lib/format';
 
 interface DonationSummary {
   id: string;

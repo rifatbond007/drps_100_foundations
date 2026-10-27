@@ -2,10 +2,12 @@
  * Zod validation schemas — users.
  */
 import { z } from 'zod';
+import { BD_PHONE_REGEX } from './common';
 
 export const bangladeshPhoneSchema = z
   .string()
-  .regex(/^\+8801[3-9]\d{8}$/, 'Must be +8801XXXXXXXXX');
+  .trim()
+  .regex(BD_PHONE_REGEX, 'Invalid Bangladesh phone number');
 
 export const completeProfileSchema = z.object({
   name: z.string().trim().min(1, 'Name required').max(100, 'Name too long'),

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { cn, formatBDT } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatBDT } from '@/lib/format';
 
 describe('cn', () => {
   it('merges class names', () => {

@@ -10,7 +10,7 @@
  * donor is most interested in, so it earns the right of way.
  */
 import { getTranslations } from 'next-intl/server';
-import { formatBDT } from '@/lib/utils';
+import { formatBDT } from '@/lib/format';
 
 interface Props {
   locale: 'bn' | 'en';

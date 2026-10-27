@@ -24,7 +24,7 @@ import {
 } from 'recharts';
 import { ApiClientError } from '@/lib/api/errors';
 import { useAdminReports } from '@/lib/hooks/use-admin-reports';
-import { formatBDT } from '@/lib/utils';
+import { formatBDT } from '@/lib/format';
 
 const PURPOSE_COLORS = [
   'hsl(var(--primary))',

@@ -8,7 +8,7 @@
  * subtitle. The numbers are large and tabular; the labels are tiny
  * uppercase eyebrows.
  */
-import { formatBDT } from '@/lib/utils';
+import { formatBDT } from '@/lib/format';
 
 export interface AdminTotals {
   totalRaised: string;

@@ -23,6 +23,7 @@ import { AppError } from '@/lib/errors';
 import { ZodError } from 'zod';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
+import type { ApiError, ApiSuccess } from '@/types/api';
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 
@@ -81,19 +82,6 @@ function persistError(
         'persistError: failed to write AuditLog row'
       );
     });
-}
-
-export interface ApiSuccess<T> {
-  success: true;
-  data: T;
-}
-
-export interface ApiError {
-  success: false;
-  error: string;
-  message: string;
-  errorId?: string;
-  details?: unknown;
 }
 
 export function ok<T>(data: T, init?: ResponseInit): NextResponse<ApiSuccess<T>> {

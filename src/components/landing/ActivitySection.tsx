@@ -10,7 +10,7 @@
  * follows the hero's split display. Three numbers as one rhythm.
  */
 import { getTranslations } from 'next-intl/server';
-import { formatBDT } from '@/lib/utils';
+import { formatBDT, intlLocale, toAppLocale } from '@/lib/format';
 
 interface Props {
   locale: 'bn' | 'en';
@@ -38,7 +38,7 @@ export async function ActivitySection({ locale }: Props) {
           <Cell label={t('activityLifetime')} value={formatBDT(lifetime, locale)} />
           <Cell
             label={t('activityReviewing')}
-            value={pending.toLocaleString(locale === 'en' ? 'en-US' : 'bn-BD')}
+            value={pending.toLocaleString(intlLocale(toAppLocale(locale)))}
             accent="admin"
           />
         </div>

@@ -5,8 +5,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useDonationHistory } from '@/lib/hooks/use-donations';
-import { formatBDT } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import { formatBDT, intlLocale, toAppLocale } from '@/lib/format';
 
 /**
  * /history — every donation the user has made, in a register layout.
@@ -85,9 +85,7 @@ export default function HistoryPage() {
                       {t(`status.${d.status}`)}
                     </div>
                     <time className="text-xs tabular-nums text-muted-foreground">
-                      {new Date(d.createdAt).toLocaleDateString(
-                        locale === 'en' ? 'en-US' : 'bn-BD'
-                      )}
+                      {new Date(d.createdAt).toLocaleDateString(intlLocale(toAppLocale(locale)))}
                     </time>
                   </div>
                 </div>

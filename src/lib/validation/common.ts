@@ -12,3 +12,9 @@ export const paginationSchema = z.object({
 });
 
 export type Pagination = z.infer<typeof paginationSchema>;
+
+/** Bangladesh mobile number for a user profile: 01XXXXXXXXX, 8801…, or +8801…. */
+export const BD_PHONE_REGEX = /^(\+?880|0)1[3-9]\d{8}$/;
+
+/** bKash sender number as typed in the bKash app: 01XXXXXXXXX. */
+export const BKASH_PHONE_REGEX = /^01[3-9]\d{8}$/;

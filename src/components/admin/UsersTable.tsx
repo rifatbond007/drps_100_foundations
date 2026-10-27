@@ -28,7 +28,8 @@ import {
 } from '@/components/ui/select';
 import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
-import { cn, formatBDT } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatBDT } from '@/lib/format';
 
 type Role = 'USER' | 'ADMIN';
 

@@ -16,6 +16,7 @@
  * carries the section.
  */
 import { getTranslations } from 'next-intl/server';
+import { intlLocale, toAppLocale } from '@/lib/format';
 
 interface Props {
   locale: 'bn' | 'en';
@@ -43,7 +44,7 @@ export async function StoriesSection({ locale }: Props) {
            *  numeral system automatically via Intl.NumberFormat. */}
           <div>
             <p className="text-6xl font-bold tabular-nums leading-none tracking-tight text-foreground sm:text-7xl lg:text-8xl">
-              {new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'bn-BD').format(127)}
+              {new Intl.NumberFormat(intlLocale(toAppLocale(locale))).format(127)}
             </p>
             <p className="mt-3 max-w-xs text-base font-medium text-muted-foreground sm:text-lg">
               {t('storiesFigureCaption')}

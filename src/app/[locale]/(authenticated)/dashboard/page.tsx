@@ -19,7 +19,8 @@ import { Button } from '@/components/ui/button';
 import { useProfile } from '@/lib/hooks/use-profile';
 import { useDonationHistory } from '@/lib/hooks/use-donations';
 import { useAuth } from '@/lib/hooks/use-auth';
-import { formatBDT, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatBDT, intlLocale, toAppLocale } from '@/lib/format';
 
 function StatusLabel({ status }: { status: string }) {
   const tHistory = useTranslations('history');
@@ -95,7 +96,7 @@ export default function DashboardPage() {
           {historyLoading ? (
             <span className="text-muted-foreground">—</span>
           ) : (
-            successDonations.length.toLocaleString(locale === 'en' ? 'en-US' : 'bn-BD')
+            successDonations.length.toLocaleString(intlLocale(toAppLocale(locale)))
           )}
         </StatCard>
 
@@ -107,7 +108,7 @@ export default function DashboardPage() {
               <span>{formatBDT(lastDonation.amount, localePref)}</span>
               <span className="mt-1 text-xs font-normal text-muted-foreground">
                 {new Date(lastDonation.createdAt).toLocaleDateString(
-                  locale === 'en' ? 'en-US' : 'bn-BD'
+                  intlLocale(toAppLocale(locale))
                 )}
               </span>
             </div>
@@ -121,9 +122,7 @@ export default function DashboardPage() {
             <span className="text-muted-foreground">—</span>
           ) : (
             <span className="flex items-baseline gap-2">
-              <span>
-                {pendingDonations.length.toLocaleString(locale === 'en' ? 'en-US' : 'bn-BD')}
-              </span>
+              <span>{pendingDonations.length.toLocaleString(intlLocale(toAppLocale(locale)))}</span>
               {pendingDonations.length > 0 && (
                 <span className="text-[10px] font-medium uppercase tracking-wider text-admin">
                   {tHistory('status.PENDING')}
@@ -181,7 +180,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <time className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                  {new Date(d.createdAt).toLocaleDateString(locale === 'en' ? 'en-US' : 'bn-BD')}
+                  {new Date(d.createdAt).toLocaleDateString(intlLocale(toAppLocale(locale)))}
                 </time>
               </li>
             ))}

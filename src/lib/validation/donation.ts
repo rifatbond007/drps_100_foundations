@@ -3,11 +3,7 @@
  * Per security-agent.md and payment-agent.md.
  */
 import { z } from 'zod';
-
-// BD phone number — matches 01XXXXXXXXX (11 digits, starts with 01).
-// Used both for User.phone and Donation.senderPhone so a donor's saved
-// phone is a hint when they submit TrxID.
-const BD_PHONE_REGEX = /^01[3-9]\d{8}$/;
+import { BKASH_PHONE_REGEX } from './common';
 
 export const DONATION_PURPOSES = ['GENERAL_FUND', 'EDUCATION', 'MEDICAL', 'EMERGENCY'] as const;
 
@@ -40,7 +36,10 @@ export const submitTrxSchema = z.object({
     // bKash TrxIDs are alphanumeric. Be permissive about case so we
     // don't reject legitimate IDs that include lower-case.
     .regex(/^[A-Za-z0-9]+$/, 'TrxID must be alphanumeric'),
-  senderPhone: z.string().trim().regex(BD_PHONE_REGEX, 'Phone must be 11 digits starting with 01'),
+  senderPhone: z
+    .string()
+    .trim()
+    .regex(BKASH_PHONE_REGEX, 'Phone must be 11 digits starting with 01'),
 });
 
 export type SubmitTrxInput = z.infer<typeof submitTrxSchema>;
