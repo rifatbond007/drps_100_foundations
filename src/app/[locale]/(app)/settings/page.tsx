@@ -25,8 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAuth } from '@/lib/hooks/use-auth';
-import { useProfile, type UserProfile } from '@/lib/hooks/use-profile';
+import { useAuth } from '@/hooks/use-auth';
+import { useProfile, type UserProfile } from '@/hooks/use-profile';
 import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';

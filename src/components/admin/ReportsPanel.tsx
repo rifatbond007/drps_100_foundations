@@ -23,7 +23,7 @@ import {
   YAxis,
 } from 'recharts';
 import { ApiClientError } from '@/lib/api/errors';
-import { useAdminReports } from '@/lib/hooks/use-admin-reports';
+import { useAdminReports } from '@/hooks/use-admin-reports';
 import { formatBDT } from '@/lib/format';
 
 const PURPOSE_COLORS = [

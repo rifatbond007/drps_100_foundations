@@ -1,19 +1,17 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 
 /**
- * 404 page. A small number + a sentence + one button. No illustration,
- * no decorative ornament — the page reads as a single sentence that
- * got lost.
+ * Fallback 404 for URLs outside any locale. Localized 404s live in
+ * `app/[locale]/not-found.tsx`; this one only points back into the app.
  */
-export default function NotFound() {
+export default function RootNotFound() {
   return (
-    <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
-      <p className="font-mono text-5xl font-bold tabular-nums text-foreground">404</p>
-      <p className="text-base text-foreground">The page you were looking for is not here.</p>
-      <Button asChild>
-        <Link href="/bn">Return home</Link>
-      </Button>
-    </div>
+    <html lang="bn">
+      <body className="flex min-h-screen items-center justify-center bg-background font-sans text-foreground">
+        <Link href="/bn" className="underline underline-offset-4">
+          দান প্ল্যাটফর্ম · Donation Platform
+        </Link>
+      </body>
+    </html>
   );
 }

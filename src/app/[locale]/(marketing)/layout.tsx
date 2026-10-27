@@ -1,7 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 
 /**
- * Layout for public (unauthenticated) routes — login, about.
+ * Layout for public marketing routes — landing, about, blog, alumni, login.
  * Wraps with locale context; no auth guard required.
  */
 export default async function PublicLayout({

@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@tanstack/react-query', () => ({ useQuery: mocks.useQuery }));
 vi.mock('@/lib/api/client', () => ({ apiClient: mocks.apiClient }));
 
-import { useDonationHistory } from '@/lib/hooks/use-donations';
+import { useDonationHistory } from '@/hooks/use-donations';
 
 beforeEach(() => {
   vi.clearAllMocks();

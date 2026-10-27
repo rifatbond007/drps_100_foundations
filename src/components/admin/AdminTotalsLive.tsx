@@ -15,7 +15,7 @@
 'use client';
 
 import { AdminStatsCard } from './AdminStatsCard';
-import { useAdminTotals } from '@/lib/hooks/use-admin-reports';
+import { useAdminTotals } from '@/hooks/use-admin-reports';
 
 const EMPTY_TOTALS = {
   totalRaised: '0',

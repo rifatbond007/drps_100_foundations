@@ -1,6 +1,6 @@
 /**
  * TanStack Query hook for the current user's profile.
- * Mirrors `useDonationHistory` (src/lib/hooks/use-donations.ts).
+ * Mirrors `useDonationHistory` (src/hooks/use-donations.ts).
  *
  * Endpoint: GET /api/users/profile
  * Returns: id, email, name, avatarUrl, phone, role, languagePref,

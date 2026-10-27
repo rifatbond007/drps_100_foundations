@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/lib/hooks/use-auth';
-import { useDonationHistory } from '@/lib/hooks/use-donations';
+import { useAuth } from '@/hooks/use-auth';
+import { useDonationHistory } from '@/hooks/use-donations';
 import { cn } from '@/lib/utils';
 import { formatBDT, intlLocale, toAppLocale } from '@/lib/format';
 

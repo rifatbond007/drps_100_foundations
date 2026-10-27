@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { AdminTotalsLive } from '@/components/admin/AdminTotalsLive';
-import { AdminStatsCard } from '@/components/admin/AdminStatsCard';
 
 /**
  * /admin/dashboard — landing page for admins.
@@ -56,7 +55,3 @@ export default async function AdminDashboardPage({
     </div>
   );
 }
-
-// `AdminStatsCard` is still re-exported for backwards-compat with tests
-// that imported it from this module path.
-export { AdminStatsCard };

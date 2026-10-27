@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { AmountSelector } from '@/components/donation/AmountSelector';
-import { useAuth } from '@/lib/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth';
 import { apiClient } from '@/lib/api/client';
 import { ApiClientError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
