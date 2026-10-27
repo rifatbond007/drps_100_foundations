@@ -1,17 +1,8 @@
 {
   "common": {
     "appName": "Donation Platform",
-    "loading": "Loading…",
-    "save": "Save",
-    "cancel": "Cancel",
-    "submit": "Submit",
-    "back": "Back",
-    "next": "Next",
-    "search": "Search",
-    "yes": "Yes",
-    "no": "No",
-    "error": "An error occurred",
-    "retry": "Try again"
+    "retry": "Try again",
+    "metaDescription": "DRPS Batch-19 Foundation — secure, transparent donations verified by our team."
   },
   "nav": {
     "home": "Home",
@@ -22,7 +13,6 @@
     "dashboard": "Dashboard",
     "donate": "Donate",
     "history": "History",
-    "profile": "Profile",
     "settings": "Settings",
     "admin": "Admin",
     "users": "Users",
@@ -151,7 +141,6 @@
     "loginSubtitle": "Sign in with your Google account to continue",
     "loginWithGoogle": "Sign in with Google",
     "signupHint": "First time here? The same button creates your account.",
-    "logout": "Sign out",
     "errorTitle": "Sign-in error",
     "errors": {
       "configuration": "Server is misconfigured. Please contact support.",
@@ -172,7 +161,6 @@
     "totalDonated": "Total donated",
     "donationCount": "Donations",
     "pendingDonations": "Pending donations",
-    "never": "No donations yet",
     "donateCta": "Donate now",
     "recentDonations": "Recent donations",
     "viewAllDonations": "View all",
@@ -202,22 +190,9 @@
     "summaryFund": "Fund",
     "continue": "Continue to bKash",
     "secureNote": "An admin verifies every donation before it counts.",
-    "purposes": {
-      "GENERAL_FUND": "General fund",
-      "EDUCATION": "Education",
-      "MEDICAL": "Medical",
-      "EMERGENCY": "Emergency"
-    },
-    "status": {
-      "PENDING": "Pending",
-      "SUCCESS": "Successful",
-      "FAILED": "Failed",
-      "CANCELLED": "Cancelled"
-    },
     "errors": {
       "minAmount": "The minimum donation is ৳10",
-      "maxAmount": "The maximum donation is ৳100,000",
-      "createFailed": "We couldn’t start your donation. Please try again."
+      "maxAmount": "The maximum donation is ৳100,000"
     },
     "submit": {
       "title": "Send money with bKash",
@@ -255,7 +230,6 @@
     "title": "Donation history",
     "subtitle": "Every donation you have made and where it stands.",
     "noDonations": "No donations yet",
-    "viewAll": "View all",
     "status": {
       "PENDING": "Pending",
       "SUCCESS": "Successful",
@@ -269,7 +243,6 @@
       "EMERGENCY": "Emergency"
     },
     "awaitingReview": "Awaiting review",
-    "trxNotSubmitted": "TrxID not submitted yet",
     "submitTrx": "Submit TrxID",
     "adminNoteLabel": "Reason from admin",
     "tabs": {
@@ -442,12 +415,6 @@
     }
   },
   "errors": {
-    "notFound": "Page not found",
-    "unauthorized": "You must sign in",
-    "forbidden": "Access denied",
-    "rateLimit": "Rate limit exceeded",
-    "serverError": "Server error",
-    "validationFailed": "Validation failed",
     "notFoundTitle": "Page not found",
     "notFoundBody": "The page you were looking for doesn’t exist or has moved.",
     "errorTitle": "Something went wrong",
@@ -469,10 +436,6 @@
   },
   "footer": {
     "copyright": "© {year} {appName}. All rights reserved.",
-    "about": "About",
-    "privacy": "Privacy policy",
-    "terms": "Terms of service",
-    "contact": "Contact",
     "tagline": "DRPS Batch-19 Foundation. Every taka is recorded, verified by our team, and reported back to members.",
     "paymentNote": "Donations are sent with bKash and verified manually by an admin before they count.",
     "explore": "Explore",
@@ -487,7 +450,6 @@
     "mainNav": "Main navigation",
     "switchToBn": "Switch to Bangla",
     "switchToEn": "Switch to English",
-    "close": "Close",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar"
   },

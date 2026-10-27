@@ -29,7 +29,7 @@ export async function generateMetadata({
   const appName = t('appName');
   return {
     title: { default: appName, template: `%s | ${appName}` },
-    description: 'DRPS Batch-19 Foundation — secure, transparent donations.',
+    description: t('metaDescription'),
     metadataBase: new URL(process.env.NEXTAUTH_URL ?? 'http://localhost:3000'),
     openGraph: { type: 'website', siteName: appName },
   };
