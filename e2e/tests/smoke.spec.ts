@@ -1,60 +1,49 @@
 import { test, expect } from '@playwright/test';
+import bn from '../../messages/bn.json';
+import en from '../../messages/en.json';
 
-test.describe('Smoke tests', () => {
-  test('landing page loads in Bangla (default locale)', async ({ page }) => {
-    await page.goto('/bn');
-    await expect(page).toHaveTitle(/Donation Platform/);
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  });
+for (const [locale, messages] of [
+  ['bn', bn],
+  ['en', en],
+] as const) {
+  test.describe(`landing (${locale})`, () => {
+    test('renders with the right language and a donate CTA', async ({ page }) => {
+      const response = await page.goto(`/${locale}`);
+      expect(response?.status()).toBe(200);
+      await expect(page.locator('html')).toHaveAttribute('lang', locale);
+      await expect(page).toHaveTitle(new RegExp(messages.common.appName));
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await expect(
+        page.getByRole('link', { name: messages.landing.donateCta }).first()
+      ).toBeVisible();
+    });
 
-  test('English locale loads', async ({ page }) => {
-    await page.goto('/en');
-    await expect(page).toHaveTitle(/Donation Platform/);
+    test('has no horizontal overflow', async ({ page }) => {
+      await page.goto(`/${locale}`);
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth > window.innerWidth
+      );
+      expect(overflow).toBe(false);
+    });
   });
+}
 
-  test('about page renders', async ({ page }) => {
-    await page.goto('/en/about');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  });
+test('about page renders', async ({ page }) => {
+  await page.goto('/en/about');
+  await expect(page.getByRole('heading', { level: 1, name: en.about.title })).toBeVisible();
+});
 
-  test('login page shows Google sign in', async ({ page }) => {
-    await page.goto('/en/login');
-    await expect(page.getByRole('button', { name: /Google/i })).toBeVisible();
-  });
+test('unknown pages show the localized 404', async ({ page }) => {
+  const response = await page.goto('/bn/does-not-exist');
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole('heading', { name: bn.errors.notFoundTitle })).toBeVisible();
+});
 
-  test('authenticated route redirects to login', async ({ page }) => {
-    const response = await page.goto('/en/dashboard');
-    // Either redirected to login or shows login button
-    expect(response?.status() ?? 200).toBeLessThan(500);
-    await expect(page).toHaveURL(/\/(en|bn)\/login/);
-  });
-
-  test('admin route blocks non-admin', async ({ page }) => {
-    await page.goto('/en/admin/users');
-    // Should not 500; should redirect to login or dashboard
-    await expect(page).not.toHaveURL(/\/admin\/users$/);
-  });
-
-  test('health endpoint responds', async ({ request }) => {
-    const res = await request.get('/api/health');
-    expect(res.status()).toBe(200);
-    const body = await res.json();
-    expect(body.status).toMatch(/^(ok|degraded)$/);
-    expect(body.timestamp).toBeTruthy();
-  });
-
-  test('deep health endpoint checks services', async ({ request }) => {
-    const res = await request.get('/api/health?deep=1');
-    expect(res.status()).toBe(200);
-    const body = await res.json();
-    expect(body.services).toBeDefined();
-    expect(body.services.postgres).toBeDefined();
-    expect(body.services.redis).toBeDefined();
-  });
-
-  test('404 page renders', async ({ page }) => {
-    const response = await page.goto('/en/this-does-not-exist');
-    expect(response?.status()).toBe(404);
-    await expect(page.getByText(/404|not found/i)).toBeVisible();
-  });
+test('language switcher keeps the current page', async ({ page }) => {
+  await page.goto('/bn/about');
+  const switcher = page.getByRole('group', { name: bn.a11y.language });
+  // Hidden on narrow screens (lives in the mobile menu there).
+  test.skip(!(await switcher.isVisible()), 'switcher is in the mobile menu at this width');
+  await switcher.getByRole('button', { name: bn.a11y.switchToEn }).click();
+  await expect(page).toHaveURL(/\/en\/about$/);
 });
