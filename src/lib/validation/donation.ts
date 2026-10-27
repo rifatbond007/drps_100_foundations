@@ -33,9 +33,10 @@ export const submitTrxSchema = z.object({
     .trim()
     .min(6, 'TrxID too short')
     .max(40, 'TrxID too long')
-    // bKash TrxIDs are alphanumeric. Be permissive about case so we
-    // don't reject legitimate IDs that include lower-case.
-    .regex(/^[A-Za-z0-9]+$/, 'TrxID must be alphanumeric'),
+    // bKash TrxIDs are alphanumeric. Accept any case but store uppercase,
+    // so case variants of one TrxID collide in the unique index.
+    .regex(/^[A-Za-z0-9]+$/, 'TrxID must be alphanumeric')
+    .transform((v) => v.toUpperCase()),
   senderPhone: z
     .string()
     .trim()

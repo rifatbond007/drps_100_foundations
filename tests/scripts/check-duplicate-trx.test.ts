@@ -26,3 +26,10 @@ describe('groupDuplicateTrx', () => {
     expect(groups).toEqual({});
   });
 });
+
+describe('groupDuplicateTrx case handling', () => {
+  it('treats TrxIDs that differ only in case as duplicates', () => {
+    const groups = groupDuplicateTrx([row('a', 'abc123'), row('b', 'ABC123')]);
+    expect(Object.keys(groups)).toEqual(['ABC123']);
+  });
+});

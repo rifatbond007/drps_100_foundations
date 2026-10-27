@@ -2,8 +2,10 @@
  * Pre-deploy check for the "Donation_trxId_active_key" partial unique index.
  *
  * Lists every TrxID shared by more than one active donation (status not
- * FAILED/CANCELLED). Exits 1 when any exist so the migration is not
- * deployed until an admin resolves them. Never modifies data.
+ * FAILED/CANCELLED, compared case-insensitively). Exits 1 when any exist so
+ * the migration is not deployed until an admin resolves them. Also reports
+ * whether the index exists, since Prisma can't model it and a future
+ * migration could drop it. Never modifies data.
  *
  * Usage: pnpm db:check-duplicate-trx
  */
@@ -23,7 +25,8 @@ export function groupDuplicateTrx(rows: TrxRow[]): Record<string, TrxRow[]> {
   const byTrx: Record<string, TrxRow[]> = {};
   for (const row of rows) {
     if (INACTIVE.has(row.status)) continue;
-    (byTrx[row.trxId] ??= []).push(row);
+    // The index is on upper("trxId"), so compare case-insensitively.
+    (byTrx[row.trxId.toUpperCase()] ??= []).push(row);
   }
   return Object.fromEntries(Object.entries(byTrx).filter(([, group]) => group.length > 1));
 }
@@ -36,6 +39,13 @@ async function main(): Promise<void> {
       select: { id: true, trxId: true, status: true, userId: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
     });
+    const indexes = await prisma.$queryRaw<{ indexname: string }[]>`
+      SELECT indexname FROM pg_indexes WHERE indexname = 'Donation_trxId_active_key'`;
+    console.log(
+      indexes.length > 0
+        ? 'Index Donation_trxId_active_key: present.'
+        : 'Index Donation_trxId_active_key: MISSING (not yet deployed, or dropped by a migration).'
+    );
     const groups = groupDuplicateTrx(rows as TrxRow[]);
     const entries = Object.entries(groups);
     if (entries.length === 0) {

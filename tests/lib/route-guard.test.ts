@@ -36,8 +36,12 @@ describe('resolveRouteGuard', () => {
     expect(guard('/bn/admin/reports', admin)).toEqual({ action: 'next' });
   });
 
-  it('sends signed-in users away from the login page', () => {
-    expect(guard('/en/login', user)).toEqual({ action: 'redirect', to: '/en/dashboard' });
+  it('never redirects away from the login page', () => {
+    // The cookie may be revoked (banned/deleted/forced logout) even though it
+    // decodes; the login page checks the real session itself. Redirecting here
+    // would loop with the app layout's redirect back to /login.
+    expect(guard('/en/login', user)).toEqual({ action: 'next' });
+    expect(guard('/en/login', null)).toEqual({ action: 'next' });
   });
 
   it('uses exact-prefix matching', () => {

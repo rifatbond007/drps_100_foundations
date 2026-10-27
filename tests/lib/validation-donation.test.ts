@@ -126,3 +126,10 @@ describe('donationHistoryQuerySchema', () => {
     expect(() => donationHistoryQuerySchema.parse({ limit: '500' })).toThrow();
   });
 });
+
+describe('submitTrxSchema TrxID normalisation', () => {
+  it('uppercases the TrxID so case variants collide in the unique index', () => {
+    const parsed = submitTrxSchema.parse({ trxId: ' abc123xyz ', senderPhone: '01712345678' });
+    expect(parsed.trxId).toBe('ABC123XYZ');
+  });
+});

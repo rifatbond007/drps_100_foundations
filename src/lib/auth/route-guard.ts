@@ -23,9 +23,10 @@ export function resolveRouteGuard({ pathname, search, locale, token }: GuardInpu
     return pathname === prefix || pathname.startsWith(`${prefix}/`);
   };
 
-  if (under('login')) {
-    return isSignedIn ? { action: 'redirect', to: `/${locale}/dashboard` } : { action: 'next' };
-  }
+  // The login page checks the real session itself: a decodable cookie may
+  // belong to a revoked session, and redirecting it away from /login would
+  // loop with the app layout's redirect back here.
+  if (under('login')) return { action: 'next' };
 
   if (!PROTECTED.some(under)) return { action: 'next' };
 
