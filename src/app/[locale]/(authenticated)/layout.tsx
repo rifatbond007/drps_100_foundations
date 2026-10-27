@@ -28,7 +28,8 @@ export default async function AuthenticatedLayout({
   try {
     session = await requireAuth();
   } catch {
-    redirect(`/${locale}`);
+    // Middleware normally catches this first (with a callbackUrl).
+    redirect(`/${locale}/login`);
   }
 
   return (
