@@ -41,10 +41,6 @@ const config: Config = {
           foreground: token('destructive-foreground'),
           soft: token('destructive-soft'),
         },
-        // Legacy aliases used by pages not yet rebuilt; removed in Task 19.
-        secondary: { DEFAULT: token('muted'), foreground: token('foreground') },
-        accent: { DEFAULT: token('muted'), foreground: token('foreground') },
-        admin: { DEFAULT: token('warning'), foreground: token('primary-foreground') },
       },
       borderRadius: {
         xl: '20px',

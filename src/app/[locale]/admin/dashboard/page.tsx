@@ -1,57 +1,21 @@
-import Link from 'next/link';
-import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { AdminTotalsLive } from '@/components/admin/AdminTotalsLive';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { PageHeader } from '@/components/ui/page-header';
+import { AdminOverview } from '@/features/admin/admin-overview';
 
-/**
- * /admin/dashboard — landing page for admins.
- *
- * Top: live totals row (Total users / Total raised / Today).
- * Below: a list of quick links as text with arrows. No "shortcut card"
- * with an icon square + title + description — admin tools are utility
- * surfaces, not marketing surfaces.
- */
-export default async function AdminDashboardPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'admin.dashboard' });
+  return { title: t('title') };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const safeLocale: 'bn' | 'en' = locale === 'en' ? 'en' : 'bn';
-  const t = await getTranslations('admin.dashboard');
-
-  const links = [
-    { href: `/${locale}/admin/users`, title: t('manageUsers') },
-    { href: `/${locale}/admin/donations`, title: t('reviewDonations') },
-    { href: `/${locale}/admin/reports`, title: t('viewReports') },
-  ];
-
+  const t = await getTranslations({ locale, namespace: 'admin.dashboard' });
   return (
-    <div className="space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-      </header>
-
-      <AdminTotalsLive locale={safeLocale} />
-
-      <nav>
-        <h2 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {t('quickLinks')}
-        </h2>
-        <ul className="border-t border-border">
-          {links.map((l) => (
-            <li key={l.href} className="border-b border-border">
-              <Link
-                href={l.href}
-                className="flex items-center justify-between py-3 text-sm text-foreground hover:text-primary"
-              >
-                <span>{l.title}</span>
-                <span aria-hidden="true">→</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </div>
+    <>
+      <PageHeader title={t('title')} description={t('subtitle')} />
+      <AdminOverview />
+    </>
   );
 }

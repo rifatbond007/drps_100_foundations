@@ -315,36 +315,48 @@
     "loadFailed": "We couldn’t load your settings."
   },
   "admin": {
-    "title": "Admin panel",
     "dashboard": {
-      "title": "Admin dashboard",
+      "title": "Overview",
+      "subtitle": "How the foundation is doing today.",
+      "totalRaised": "Total raised",
+      "thisMonth": "This month",
+      "pendingReview": "Awaiting review",
+      "users": "Users",
+      "today": "{amount} today",
+      "donors": "{count} donors",
+      "monthlyTrend": "Raised per month",
+      "loadFailed": "We couldn’t load the numbers.",
+      "reviewNow": "Review now",
+      "quickLinks": "Quick links",
       "manageUsers": "Manage users",
-      "manageUsersDesc": "Ban, unban, and search all registered users",
+      "manageUsersDesc": "Search, ban and unban members",
       "viewReports": "View reports",
-      "viewReportsDesc": "Donation trends and CSV export",
+      "viewReportsDesc": "Totals by fund and month, CSV export",
       "reviewDonations": "Review donations",
-      "reviewDonationsDesc": "Verify donor-submitted bKash TrxIDs",
-      "quickLinks": "Quick links"
+      "reviewDonationsDesc": "Match TrxIDs and approve or reject"
     },
     "users": {
-      "title": "User management",
-      "subtitle": "All registered users",
-      "search": "Search by email or name",
-      "searchPlaceholder": "Email or name…",
-      "ban": "Ban",
-      "unban": "Unban",
-      "makeAdmin": "Make admin",
-      "removeAdmin": "Remove admin",
-      "viewProfile": "View profile",
-      "actions": "Actions",
+      "title": "Users",
+      "subtitle": "Everyone who has signed in.",
+      "searchPlaceholder": "Search by name or email",
+      "filters": {
+        "all": "All",
+        "admins": "Admins",
+        "banned": "Banned"
+      },
+      "user": "User",
       "role": "Role",
       "status": "Status",
-      "joinedAt": "Joined on",
-      "lastLoginAt": "Last login",
+      "donations": "Donations",
       "totalDonated": "Total donated",
-      "empty": "No users found",
+      "joinedAt": "Joined",
+      "actions": "Actions",
+      "ban": "Ban",
+      "unban": "Unban",
+      "empty": "No users match.",
+      "loadFailed": "We couldn’t load users.",
       "roles": {
-        "USER": "User",
+        "USER": "Member",
         "ADMIN": "Admin"
       },
       "statuses": {
@@ -352,27 +364,22 @@
         "banned": "Banned"
       },
       "banDialog": {
-        "title": "Ban user",
-        "description": "The user will be blocked from signing in. This can be undone later.",
+        "title": "Ban {name}?",
+        "description": "They won’t be able to sign in until you unban them.",
         "reasonLabel": "Reason",
-        "reasonPlaceholder": "Briefly explain why this user is being banned…",
+        "reasonPlaceholder": "Why is this user being banned?",
+        "reasonHint": "At least 10 characters. Kept in the audit log.",
         "cancel": "Cancel",
         "confirm": "Ban user"
       },
-      "confirm": {
-        "ban": "Ban {name}?",
-        "unban": "Unban {name}?",
-        "makeAdmin": "Grant admin to {name}?",
-        "removeAdmin": "Remove admin from {name}?",
-        "cancel": "Cancel",
-        "confirm": "Confirm"
+      "unbanDialog": {
+        "title": "Unban {name}?",
+        "description": "They will be able to sign in again.",
+        "confirm": "Unban"
       },
       "toasts": {
         "banned": "User banned",
-        "unbanned": "User unbanned",
-        "promoted": "Promoted to admin",
-        "demoted": "Admin role removed",
-        "error": "Action failed: {message}"
+        "unbanned": "User unbanned"
       },
       "pagination": {
         "prev": "Previous",
@@ -382,19 +389,16 @@
     },
     "reports": {
       "title": "Reports",
-      "subtitle": "Donation statistics & analytics",
+      "subtitle": "Approved donations by fund and month.",
       "totalRaised": "Total raised",
-      "totalDonors": "Total donors",
-      "successRate": "Success rate",
-      "byPurpose": "By purpose",
-      "byMonth": "By month",
+      "totalDonors": "Donors",
+      "totalDonations": "All donations",
+      "successRate": "Approval rate",
+      "byPurpose": "By fund",
+      "byMonth": "Last 12 months",
       "exportCsv": "Export CSV",
-      "exportPdf": "Export PDF",
-      "loading": "Loading reports…",
-      "error": "Failed to load reports",
-      "empty": "No donations recorded yet",
-      "refresh": "Refresh",
-      "months": "Last 12 months",
+      "loadFailed": "We couldn’t load the reports.",
+      "empty": "No approved donations yet.",
       "purposes": {
         "GENERAL_FUND": "General fund",
         "EDUCATION": "Education",
@@ -403,32 +407,37 @@
       }
     },
     "donations": {
-      "title": "Donation review",
-      "subtitle": "Verify donor-submitted bKash TrxIDs and approve or reject.",
-      "filterPending": "Awaiting review",
-      "filterSuccess": "Approved",
-      "filterFailed": "Rejected",
+      "title": "Review donations",
+      "subtitle": "Match each TrxID in the bKash app, then approve or reject.",
+      "tabs": {
+        "PENDING": "Awaiting review",
+        "SUCCESS": "Approved",
+        "FAILED": "Rejected"
+      },
       "donor": "Donor",
       "anonymous": "Anonymous donor",
+      "reference": "Reference",
       "trxId": "TrxID",
-      "senderPhone": "Sender bKash",
+      "senderPhone": "Sent from",
       "amount": "Amount",
-      "purpose": "Purpose",
+      "purpose": "Fund",
       "submittedAt": "Submitted",
-      "actions": "Actions",
       "approve": "Approve",
       "reject": "Reject",
-      "approveTitle": "Approve donation",
-      "approveDescription": "Confirm you verified the TrxID matches the amount in your bKash app.",
-      "rejectTitle": "Reject donation",
-      "rejectDescription": "Tell the donor why this was rejected so they can resubmit correctly.",
-      "noteLabel": "Note (visible to donor)",
+      "approveTitle": "Approve this donation?",
+      "approveDescription": "Only approve after you found TrxID {trxId} for {amount} in the bKash app.",
+      "rejectTitle": "Reject this donation?",
+      "rejectDescription": "Tell the donor what went wrong so they can fix it.",
+      "noteLabel": "Reason (the donor sees this)",
+      "notePlaceholder": "e.g. TrxID not found in bKash",
       "cancel": "Cancel",
-      "empty": "No donations waiting for review",
+      "copy": "Copy TrxID",
+      "empty": "Nothing waiting for review.",
+      "emptyOther": "No donations here yet.",
+      "loadFailed": "We couldn’t load donations.",
       "toasts": {
         "approved": "Donation approved",
-        "rejected": "Donation rejected",
-        "error": "Action failed: {message}"
+        "rejected": "Donation rejected"
       }
     }
   },
