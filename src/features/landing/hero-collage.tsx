@@ -11,13 +11,19 @@ const BY_AREA = HERO_GRID.tiles
 const PHOTO_FOR = new Map(BY_AREA.map(({ i }, rank) => [i, HERO_PHOTOS[rank]!]));
 
 /** Collage of community portraits laid out on the reference grid. */
-export function HeroCollage({ className }: { className?: string }) {
+export function HeroCollage({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   const { width, height, tiles } = HERO_GRID;
   return (
     <div
       aria-hidden
       className={cn('relative w-full', className)}
-      style={{ aspectRatio: `${width} / ${height}` }}
+      style={{ aspectRatio: `${width} / ${height}`, ...style }}
     >
       {tiles.map((tile, i) => (
         <div
