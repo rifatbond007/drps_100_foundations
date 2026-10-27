@@ -17,6 +17,7 @@
 import { NextRequest } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { dhakaMonthKey, dhakaMonthKeys, startOfDhakaDay, startOfDhakaMonth } from '@/lib/time';
 import { requireAdmin } from '@/lib/auth/session';
 import { ok, fail } from '@/lib/api/helpers';
 import { rateLimit, requireRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
@@ -37,10 +38,9 @@ export async function GET(request: NextRequest) {
 
     // Run all aggregations in parallel
     const now = new Date();
-    const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
-    // Calendar-day window for "today's total donations" stat card.
-    // Use server-local midnight so the count matches the admin's wall clock.
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    // Buckets follow Asia/Dhaka wall-clock time, not the server's UTC.
+    const twelveMonthsAgo = startOfDhakaMonth(now, 11);
+    const startOfToday = startOfDhakaDay(now);
 
     const [statusAgg, purposeGroup, monthRaw, donorCount, todayAgg, totalUsers] = await Promise.all(
       [
@@ -105,10 +105,7 @@ export async function GET(request: NextRequest) {
     // would be cleaner but keeps things DB-agnostic and avoids raw SQL).
     const monthMap = new Map<string, { amount: Prisma.Decimal; count: number }>();
     for (const d of monthRaw) {
-      const key = `${d.createdAt.getFullYear()}-${String(d.createdAt.getMonth() + 1).padStart(
-        2,
-        '0'
-      )}`;
+      const key = dhakaMonthKey(d.createdAt);
       const cur = monthMap.get(key) ?? {
         amount: new Prisma.Decimal(0),
         count: 0,
@@ -120,9 +117,7 @@ export async function GET(request: NextRequest) {
 
     // Ensure we emit all 12 months (zero-filled) so the chart doesn't have gaps.
     const byMonth: { month: string; amount: string; count: number }[] = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    for (const key of dhakaMonthKeys(12, now)) {
       const bucket = monthMap.get(key);
       byMonth.push({
         month: key,
