@@ -30,7 +30,7 @@ export function Hero() {
             }
           />
         </div>
-        <Wordmark className="mx-auto h-[clamp(56px,13svh,150px)] w-full" />
+        <Wordmark className="mx-auto h-[clamp(56px,13svh,150px)] w-auto max-w-full" />
       </div>
     </section>
   );
