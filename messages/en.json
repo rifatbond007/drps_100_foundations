@@ -34,7 +34,9 @@
       "main": "Main",
       "account": "Account",
       "admin": "Admin"
-    }
+    },
+    "overview": "Overview",
+    "backToSite": "Back to website"
   },
   "landing": {
     "heroEyebrow": "DRPS Batch-19 Foundation",
@@ -459,7 +461,9 @@
     "mainNav": "Main navigation",
     "switchToBn": "Switch to Bangla",
     "switchToEn": "Switch to English",
-    "close": "Close"
+    "close": "Close",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar"
   },
   "theme": {
     "light": "Light",

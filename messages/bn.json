@@ -34,7 +34,9 @@
       "main": "মূল",
       "account": "অ্যাকাউন্ট",
       "admin": "অ্যাডমিন"
-    }
+    },
+    "overview": "সারসংক্ষেপ",
+    "backToSite": "ওয়েবসাইটে ফিরুন"
   },
   "landing": {
     "heroEyebrow": "ডিআরপিএস ব্যাচ-১৯ ফাউন্ডেশন",
@@ -459,7 +461,9 @@
     "mainNav": "প্রধান নেভিগেশন",
     "switchToBn": "বাংলায় দেখুন",
     "switchToEn": "ইংরেজিতে দেখুন",
-    "close": "বন্ধ করুন"
+    "close": "বন্ধ করুন",
+    "collapseSidebar": "সাইডবার ছোট করুন",
+    "expandSidebar": "সাইডবার বড় করুন"
   },
   "theme": {
     "light": "লাইট",
