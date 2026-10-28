@@ -6,6 +6,8 @@ export interface Cause {
   icon: LucideIcon;
   /** Fundraising goal in BDT. Placeholder values — edit to the foundation's real targets. */
   goal: number;
+  /** Card photo. Placeholder (see public/images/landing/README.md) — swap for a photo of this fund's work. */
+  image: string;
   /** `landing.*` message keys. */
   nameKey: string;
   descKey: string;
@@ -16,6 +18,7 @@ export const CAUSES: readonly Cause[] = [
     purpose: 'GENERAL_FUND',
     icon: HandHeart,
     goal: 100_000,
+    image: '/images/landing/03.jpg',
     nameKey: 'causeGeneralName',
     descKey: 'causeGeneralDesc',
   },
@@ -23,6 +26,7 @@ export const CAUSES: readonly Cause[] = [
     purpose: 'EDUCATION',
     icon: BookOpen,
     goal: 75_000,
+    image: '/images/landing/08.jpg',
     nameKey: 'causeEducationName',
     descKey: 'causeEducationDesc',
   },
@@ -30,6 +34,7 @@ export const CAUSES: readonly Cause[] = [
     purpose: 'MEDICAL',
     icon: HeartPulse,
     goal: 50_000,
+    image: '/images/landing/14.jpg',
     nameKey: 'causeMedicalName',
     descKey: 'causeMedicalDesc',
   },
@@ -37,6 +42,7 @@ export const CAUSES: readonly Cause[] = [
     purpose: 'EMERGENCY',
     icon: Siren,
     goal: 25_000,
+    image: '/images/landing/27.jpg',
     nameKey: 'causeEmergencyName',
     descKey: 'causeEmergencyDesc',
   },

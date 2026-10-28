@@ -52,42 +52,52 @@ export function SiteHeader() {
   );
 
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md transition-colors',
-        scrolled ? 'border-border' : 'border-transparent'
-      )}
-    >
-      <div className="container flex h-16 items-center gap-4">
-        <Logo href={`/${locale}`} name={tCommon('appName')} className="min-w-0" />
+    // Floating bar: blends into the page at the top, becomes a frosted pill once scrolled.
+    <header className="sticky top-0 z-40 py-2">
+      <div className="container">
+        <div
+          className={cn(
+            'flex h-12 items-center gap-3 rounded-full border pl-2 pr-1.5 transition-all duration-300 md:grid md:grid-cols-[1fr_auto_1fr]',
+            scrolled
+              ? 'border-border/70 bg-background/75 shadow-lift backdrop-blur-xl'
+              : 'border-transparent bg-transparent'
+          )}
+        >
+          <Logo href={`/${locale}`} name={tCommon('appName')} className="min-w-0" />
 
-        <nav aria-label={tA11y('mainNav')} className="ml-6 hidden items-center gap-1 md:flex">
-          {MARKETING_NAV.map(({ key, path }) => {
-            const href = `/${locale}${path}`;
-            const active = pathname === href;
-            return (
-              <Link
-                key={key}
-                href={href}
-                aria-current={active ? 'page' : undefined}
-                className={cn(
-                  'rounded-full px-3.5 py-2 text-sm font-medium transition-colors',
-                  active
-                    ? 'bg-primary-soft text-primary-soft-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {t(key)}
-              </Link>
-            );
-          })}
-        </nav>
+          <nav
+            aria-label={tA11y('mainNav')}
+            className="hidden h-9 items-center rounded-full bg-muted p-0.5 md:flex"
+          >
+            {MARKETING_NAV.map(({ key, path }) => {
+              const href = `/${locale}${path}`;
+              const active = pathname === href;
+              return (
+                <Link
+                  key={key}
+                  href={href}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'flex h-8 items-center rounded-full px-4 text-sm font-medium transition-colors',
+                    active
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {t(key)}
+                </Link>
+              );
+            })}
+          </nav>
 
-        <div className="ml-auto flex items-center gap-1.5">
-          <LanguageSwitcher className="hidden sm:inline-flex" />
-          <ThemeToggle />
-          <div className="hidden items-center gap-1.5 md:flex">{actions}</div>
-          <MobileNav footer={<div className="flex flex-col gap-2 [&>*]:w-full">{actions}</div>} />
+          <div className="ml-auto flex items-center gap-1.5 md:justify-self-end">
+            <LanguageSwitcher className="hidden sm:inline-flex" />
+            <ThemeToggle />
+            <div className="hidden items-center gap-1.5 md:flex [&_a]:rounded-full [&_button]:rounded-full">
+              {actions}
+            </div>
+            <MobileNav footer={<div className="flex flex-col gap-2 [&>*]:w-full">{actions}</div>} />
+          </div>
         </div>
       </div>
     </header>

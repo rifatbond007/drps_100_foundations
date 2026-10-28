@@ -10,15 +10,15 @@ interface HeroStatsProps {
   locale: AppLocale;
 }
 
-/** Live totals strip under the hero. Renders nothing when stats are unavailable. */
+/** Live totals strip beside the causes heading. Renders nothing when stats are unavailable. */
 export function HeroStats({ stats, locale }: HeroStatsProps) {
   const t = useTranslations('landing');
   if (!stats) return null;
 
   return (
-    <div className="mx-auto w-full max-w-3xl rounded-xl border bg-card/90 shadow-lift backdrop-blur">
-      <dl className="grid divide-y sm:grid-cols-[1.4fr_1fr_1fr] sm:divide-x sm:divide-y-0">
-        <div className="px-6 py-5 text-center sm:text-left">
+    <div className="shrink-0">
+      <dl className="flex flex-wrap gap-x-10 gap-y-4">
+        <div>
           <dt className="text-sm text-muted-foreground">{t('heroStatsTitle')}</dt>
           <dd
             data-testid="hero-total"
@@ -27,22 +27,20 @@ export function HeroStats({ stats, locale }: HeroStatsProps) {
             <CountUp value={Number(stats.totalRaised)} format={(n) => formatBDT(n, locale)} />
           </dd>
         </div>
-        <div className="px-6 py-5 text-center sm:text-left">
+        <div>
           <dt className="text-sm text-muted-foreground">{t('statDonors')}</dt>
-          <dd className="tabular mt-1 text-2xl font-bold">
+          <dd className="tabular mt-1 text-3xl font-bold sm:text-4xl">
             {formatNumber(stats.donorCount, locale)}
           </dd>
         </div>
-        <div className="px-6 py-5 text-center sm:text-left">
+        <div>
           <dt className="text-sm text-muted-foreground">{t('statDonations')}</dt>
-          <dd className="tabular mt-1 text-2xl font-bold">
+          <dd className="tabular mt-1 text-3xl font-bold sm:text-4xl">
             {formatNumber(stats.donationCount, locale)}
           </dd>
         </div>
       </dl>
-      <p className="border-t px-6 py-2.5 text-center text-xs text-muted-foreground">
-        {t('heroStatsNote')}
-      </p>
+      <p className="mt-3 text-xs text-muted-foreground">{t('heroStatsNote')}</p>
     </div>
   );
 }

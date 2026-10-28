@@ -2,33 +2,38 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Quote } from 'lucide-react';
 
+/** Full-width photo with the foundation's story set over it. */
 export function Stories() {
   const t = useTranslations('landing');
   return (
-    <section className="container py-16 sm:py-24">
-      <div className="grid overflow-hidden rounded-xl border bg-card shadow-card lg:grid-cols-2">
-        <div className="relative min-h-64 bg-primary-soft">
-          {/* Placeholder — replace public/images/stories/story-placeholder.svg with a real photo. */}
-          <Image
-            src="/images/stories/story-placeholder.svg"
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            className="object-cover"
-          />
-        </div>
-        <div className="flex flex-col justify-center p-8 sm:p-12">
-          <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+    <section className="container py-20 sm:py-28">
+      <figure className="relative isolate flex min-h-[34rem] items-end overflow-hidden rounded-2xl text-white shadow-lift lg:items-center">
+        {/* Placeholder (see public/images/landing/README.md) — swap for a photo of the foundation's own work. */}
+        <Image
+          src="/images/landing/06.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          className="-z-20 object-cover"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/60 to-black/10 lg:bg-gradient-to-r lg:from-black/90 lg:via-black/60 lg:to-transparent"
+        />
+        <div className="max-w-2xl p-8 sm:p-12 lg:p-16">
+          <p className="text-sm font-semibold uppercase tracking-wider text-emerald-300">
             {t('storiesTitle')}
           </p>
-          <Quote className="mt-5 size-8 text-primary/40" aria-hidden />
-          <blockquote className="mt-3 text-balance text-xl font-semibold sm:text-2xl">
+          <Quote className="mt-6 size-10 text-emerald-300/70" aria-hidden />
+          <blockquote className="mt-4 text-balance text-2xl font-semibold leading-snug sm:text-3xl lg:text-4xl">
             {t('storyQuote')}
           </blockquote>
-          <p className="mt-3 text-sm text-muted-foreground">— {t('storyAttribution')}</p>
-          <p className="mt-6 text-muted-foreground">{t('storyBody')}</p>
+          <figcaption className="mt-4 text-sm text-white/70">— {t('storyAttribution')}</figcaption>
+          <p className="mt-8 max-w-xl border-l-2 border-emerald-400/60 pl-4 text-white/80">
+            {t('storyBody')}
+          </p>
         </div>
-      </div>
+      </figure>
     </section>
   );
 }

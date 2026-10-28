@@ -3,13 +3,16 @@ import { getPublicStats, type PublicStats } from '@/lib/stats';
 import { logger } from '@/lib/logger';
 import { toAppLocale } from '@/lib/format';
 import { Hero } from '@/features/landing/hero';
+import { Intro } from '@/features/landing/intro';
 import { Causes } from '@/features/landing/causes';
+import { Impact } from '@/features/landing/impact';
 import { HowItWorks } from '@/features/landing/how-it-works';
 import { People } from '@/features/landing/people';
 import { Events } from '@/features/landing/events';
 import { Stories } from '@/features/landing/stories';
 import { Faq } from '@/features/landing/faq';
 import { Trust } from '@/features/landing/trust';
+import { GetInvolved } from '@/features/landing/get-involved';
 import { CtaBanner } from '@/features/landing/cta-banner';
 
 // Public figures refresh at most once a minute.
@@ -37,13 +40,16 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   return (
     <>
       <Hero />
+      <Intro locale={locale} />
       <Causes stats={stats} locale={locale} />
+      <Impact locale={locale} />
       <HowItWorks />
-      <People />
-      <Events locale={locale} />
-      <Stories />
-      <Faq />
       <Trust />
+      <Stories />
+      <People locale={locale} />
+      <Events locale={locale} />
+      <GetInvolved locale={locale} />
+      <Faq />
       <CtaBanner locale={locale} />
     </>
   );

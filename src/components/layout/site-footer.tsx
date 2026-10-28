@@ -17,14 +17,17 @@ export async function SiteFooter({ locale }: { locale: string }) {
   ] as const;
 
   return (
-    <footer className="mt-16 border-t bg-muted/40">
-      <div className="container grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
-        <div className="max-w-sm">
+    // Deep-green band, matching the landing page's dark sections.
+    <footer className="relative mt-16 overflow-hidden bg-[hsl(162_45%_9%)] text-white">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-40 -top-40 size-[30rem] rounded-full bg-emerald-500/15 blur-3xl"
+      />
+      <div className="container relative grid grid-cols-2 gap-x-8 gap-y-12 pb-12 pt-16 sm:pt-20 lg:grid-cols-[3fr_1fr_1fr]">
+        <div className="col-span-2 max-w-md lg:col-span-1">
           <Logo href={`/${locale}`} name={appName} />
-          <p className="mt-4 text-sm text-muted-foreground">{t('tagline')}</p>
-          <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
-            <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-            {t('paymentNote')}
+          <p className="mt-5 text-balance text-xl font-semibold leading-snug sm:text-2xl">
+            {t('tagline')}
           </p>
         </div>
         <FooterColumn title={t('explore')}>
@@ -42,10 +45,14 @@ export async function SiteFooter({ locale }: { locale: string }) {
           ))}
         </FooterColumn>
       </div>
-      <div className="border-t">
-        <p className="container py-5 text-xs text-muted-foreground">
-          {t('copyright', { year: new Date().getFullYear(), appName })}
-        </p>
+      <div className="relative border-t border-white/10">
+        <div className="container flex flex-col gap-3 py-6 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
+          <p>{t('copyright', { year: new Date().getFullYear(), appName })}</p>
+          <p className="flex items-start gap-2 sm:items-center">
+            <ShieldCheck className="size-4 shrink-0 text-emerald-300" aria-hidden />
+            {t('paymentNote')}
+          </p>
+        </div>
       </div>
     </footer>
   );
@@ -54,8 +61,8 @@ export async function SiteFooter({ locale }: { locale: string }) {
 function FooterColumn({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-sm font-semibold">{title}</p>
-      <ul className="mt-3 flex flex-col gap-2">{children}</ul>
+      <p className="text-xs font-semibold uppercase tracking-wider text-emerald-300">{title}</p>
+      <ul className="mt-5 flex flex-col gap-3">{children}</ul>
     </div>
   );
 }
@@ -63,10 +70,7 @@ function FooterColumn({ title, children }: { title: string; children: React.Reac
 function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <li>
-      <Link
-        href={href}
-        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
+      <Link href={href} className="text-base text-white/70 transition-colors hover:text-white">
         {children}
       </Link>
     </li>
