@@ -8,7 +8,7 @@ import { Tilt } from './tilt';
 export function CtaBanner({ locale }: { locale: string }) {
   const t = useTranslations('landing');
   return (
-    <section className="container pb-12 pt-4">
+    <section className="container pb-12 pt-16 sm:pt-20">
       <Tilt
         max={3}
         className="isolate overflow-hidden rounded-2xl px-6 py-16 text-white shadow-lift sm:px-12 sm:py-20 lg:px-16"

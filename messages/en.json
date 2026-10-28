@@ -108,9 +108,6 @@
     "trust3Body": "Your dashboard shows every donation you made and its status.",
     "ctaTitle": "Give what you can. We'll take it the rest of the way.",
     "ctaBody": "It takes about three minutes.",
-    "introEyebrow": "DRPS Batch-19 Foundation",
-    "introBody": "We are former students of DRPS. Together we turn small, regular gifts into school fees, medicine and emergency relief for classmates, teachers and neighbours.",
-    "introHowLink": "See how it works",
     "impactEyebrow": "Your impact",
     "impactTitle": "What your gift can do",
     "impactLead": "A few examples of what a single donation pays for.",
@@ -137,7 +134,8 @@
     "peopleJoinTitle": "Want to help run it?",
     "peopleJoinBody": "Every batchmate is welcome to join the committee and volunteer.",
     "eventsPrev": "Previous event",
-    "eventsNext": "Next event"
+    "eventsNext": "Next event",
+    "partnersLabel": "In collaboration with"
   },
   "about": {
     "title": "About us",

@@ -21,9 +21,9 @@ export function Stories() {
           className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/60 to-black/10 lg:bg-gradient-to-r lg:from-black/90 lg:via-black/60 lg:to-transparent"
         />
         <div className="max-w-2xl p-8 sm:p-12 lg:p-16">
-          <p className="text-sm font-semibold uppercase tracking-wider text-emerald-300">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-emerald-300">
             {t('storiesTitle')}
-          </p>
+          </h2>
           <Quote className="mt-6 size-10 text-emerald-300/70" aria-hidden />
           <blockquote className="mt-4 text-balance text-2xl font-semibold leading-snug sm:text-3xl lg:text-4xl">
             {t('storyQuote')}

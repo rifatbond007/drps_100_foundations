@@ -2,15 +2,5 @@
 
 This directory contains static assets served from `/`.
 
-- `images/` — uploaded/imported images (gitignored except for `.gitkeep`)
-- `favicon.ico` — **TODO**: add a real 32×32 favicon (currently Next will 404 on favicon requests)
-
-To add a favicon:
-
-1. Place a 32×32 `.ico` file at `./favicon.ico`
-2. Update `<link rel="icon">` in `src/app/layout.tsx` if you want a different path
-
-Recommended sources for an open-license favicon:
-
-- https://favicon.io/
-- https://realfavicongenerator.net/
+- `images/` — site images: `hero/`, `landing/`, `people/`, `partners/` (each folder has a README with sources and what to replace), plus `logo.png`
+- Favicon and app icons live in `src/app/` (`favicon.ico`, `icon.png`, `apple-icon.png`), generated from `images/logo.png`. Next.js adds the `<link rel="icon">` tags automatically; regenerate the three files if the logo changes.

@@ -3,7 +3,7 @@ import { getPublicStats, type PublicStats } from '@/lib/stats';
 import { logger } from '@/lib/logger';
 import { toAppLocale } from '@/lib/format';
 import { Hero } from '@/features/landing/hero';
-import { Intro } from '@/features/landing/intro';
+import { Partners } from '@/features/landing/partner-marquee';
 import { Causes } from '@/features/landing/causes';
 import { Impact } from '@/features/landing/impact';
 import { HowItWorks } from '@/features/landing/how-it-works';
@@ -40,7 +40,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   return (
     <>
       <Hero />
-      <Intro locale={locale} />
+      <Partners />
       <Causes stats={stats} locale={locale} />
       <Impact locale={locale} />
       <HowItWorks />
