@@ -15,6 +15,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NextRequest } from 'next/server';
+import { Prisma } from '@prisma/client';
 
 const mocks = vi.hoisted(() => ({
   requireActiveUser: vi.fn(),
@@ -109,7 +110,7 @@ describe('POST /api/donations/[id]/submit-trx', () => {
     expect(mocks.prisma.donation.update).not.toHaveBeenCalled();
   });
 
-  it('returns 400 when TrxID collides with another donation', async () => {
+  it('returns 409 TRX_ALREADY_USED when the unique index rejects the TrxID', async () => {
     mocks.requireActiveUser.mockResolvedValueOnce({
       user: { id: 'u1', role: 'USER', languagePref: 'BN' },
     });
@@ -121,11 +122,38 @@ describe('POST /api/donations/[id]/submit-trx', () => {
       senderPhone: null,
       bkashTransactionId: null,
     });
-    mocks.prisma.donation.findFirst.mockResolvedValueOnce({ id: 'd-other' });
+    mocks.prisma.donation.update.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: 'test',
+      })
+    );
 
     const res = await POST(buildReq(VALID), { params: Promise.resolve({ id: 'd1' }) });
-    expect(res.status).toBe(400);
-    expect(mocks.prisma.donation.update).not.toHaveBeenCalled();
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe('TRX_ALREADY_USED');
+  });
+
+  it('does not pre-check other donations (a rejected TrxID may be resubmitted)', async () => {
+    mocks.requireActiveUser.mockResolvedValueOnce({
+      user: { id: 'u1', role: 'USER', languagePref: 'BN' },
+    });
+    mocks.prisma.donation.findUnique.mockResolvedValueOnce({
+      id: 'd1',
+      userId: 'u1',
+      status: 'PENDING',
+      trxId: null,
+      senderPhone: null,
+      bkashTransactionId: null,
+    });
+    mocks.prisma.donation.update.mockResolvedValueOnce({
+      id: 'd1',
+      status: 'PENDING',
+      trxId: 'ABC123XYZ',
+      senderPhone: '01712345678',
+    });
+    await POST(buildReq(VALID), { params: Promise.resolve({ id: 'd1' }) });
+    expect(mocks.prisma.donation.findFirst).not.toHaveBeenCalled();
   });
 
   it('happy path: persists TrxID + phone, audit-logs prefix only', async () => {
@@ -152,7 +180,8 @@ describe('POST /api/donations/[id]/submit-trx', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data.trxId).toBe('TRX12345');
-    expect(body.data.redirectUrl).toContain('/donate/pending');
+    // The client builds the pending URL from its current locale.
+    expect(body.data.redirectUrl).toBeUndefined();
 
     expect(mocks.prisma.donation.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -173,5 +202,20 @@ describe('POST /api/donations/[id]/submit-trx', () => {
         }),
       })
     );
+  });
+});
+
+describe('malformed input', () => {
+  it('returns 400 on malformed JSON', async () => {
+    mocks.requireActiveUser.mockResolvedValueOnce({
+      user: { id: 'u1', role: 'USER', email: 'u@x.y', languagePref: 'BN' },
+    });
+    const bad = new Request('http://localhost/api/donations/d1/submit-trx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{bad',
+    }) as unknown as NextRequest;
+    const res = await POST(bad, { params: Promise.resolve({ id: 'd1' }) });
+    expect(res.status).toBe(400);
   });
 });

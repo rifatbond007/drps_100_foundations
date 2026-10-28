@@ -1,27 +1,21 @@
-import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { DonationsReviewTable } from '@/components/admin/DonationsReviewTable';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { PageHeader } from '@/components/ui/page-header';
+import { ReviewQueue } from '@/features/admin/review-queue';
 
-/**
- * /admin/donations — review queue for manually-submitted bKash TrxIDs.
- * The page just hosts the table component; the table handles its own
- * header + filter row.
- */
-export default async function AdminDonationsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'admin.donations' });
+  return { title: t('title') };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations('admin.donations');
-
+  const t = await getTranslations({ locale, namespace: 'admin.donations' });
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
-      </header>
-      <DonationsReviewTable />
-    </div>
+    <>
+      <PageHeader title={t('title')} description={t('subtitle')} />
+      <ReviewQueue />
+    </>
   );
 }

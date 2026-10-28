@@ -11,6 +11,10 @@ const mocks = vi.hoisted(() => ({
       findUnique: vi.fn(),
       update: vi.fn(),
     },
+    donation: {
+      aggregate: vi.fn(),
+      count: vi.fn(),
+    },
   },
   logSecurityEvent: vi.fn().mockResolvedValue(undefined),
   rateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 99, resetAt: new Date() }),
@@ -31,7 +35,7 @@ vi.mock('@/lib/rate-limit', () => ({
   },
 }));
 
-import { PATCH } from '@/app/api/users/profile/route';
+import { GET, PATCH } from '@/app/api/users/profile/route';
 import { UnauthorizedError } from '@/lib/errors';
 
 beforeEach(() => {
@@ -113,5 +117,35 @@ describe('PATCH /api/users/profile', () => {
     });
     const res = await PATCH(req);
     expect(res.status).toBe(401);
+  });
+});
+
+describe('GET /api/users/profile', () => {
+  it('returns approved totals and the pending count', async () => {
+    mocks.requireActiveUser.mockResolvedValueOnce({ user: { id: 'u1' } });
+    mocks.prisma.user.findUnique.mockResolvedValueOnce({
+      id: 'u1',
+      email: 'u@x.y',
+      name: 'U',
+      avatarUrl: null,
+      phone: null,
+      role: 'USER',
+      languagePref: 'BN',
+      profileCompleted: true,
+      createdAt: new Date('2026-01-01'),
+      lastLoginAt: null,
+    });
+    mocks.prisma.donation.aggregate.mockResolvedValueOnce({
+      _count: { _all: 2 },
+      _sum: { amount: '700' },
+    });
+    mocks.prisma.donation.count.mockResolvedValueOnce(1);
+
+    const res = await GET();
+    const body = await res.json();
+    expect(body.data).toMatchObject({ donationCount: 2, totalDonated: '700', pendingCount: 1 });
+    expect(mocks.prisma.donation.count).toHaveBeenCalledWith({
+      where: { userId: 'u1', status: 'PENDING' },
+    });
   });
 });

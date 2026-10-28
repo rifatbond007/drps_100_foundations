@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — UI redesign and cleanup (2026-10-28)
+
+- Redesigned every page on a new design system (tokens, dark mode, card-based
+  layouts, app shell for donors and admins). Landing page shows live,
+  approved-only totals from `GET /api/public/stats`.
+- Restructured `src/` into `app` (routes) · `components/{ui,layout}` ·
+  `features/*` · `hooks` · `lib`; removed dead components, routes and
+  unused dependencies.
+- Signed-out visitors to protected pages now land on `/{locale}/login?callbackUrl=…`
+  and return there after sign-in.
+
+### Fixed
+
+- bKash receiver number on the submit page now comes from the server env.
+- One active donation per TrxID (partial unique index); concurrent
+  approve/reject can no longer both succeed; idempotency key is reused on retry.
+- Malformed JSON / query params return 400 instead of 500; only 5xx errors
+  are written to the audit log; Redis no longer throws at import.
+- Admin report buckets use Asia/Dhaka time; `/api/health?deep=1` no longer
+  leaks driver error text; nested `<html>` removed.
+
+### Deployment note
+
+- Run `pnpm db:check-duplicate-trx` against production **before**
+  `prisma migrate deploy`. The new `Donation_trxId_active_key` index fails to
+  create if two active donations share a TrxID; resolve those rows first.
+
 ### Added
 
 - Comprehensive planning documentation (`docs/`)

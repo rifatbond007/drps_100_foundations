@@ -339,7 +339,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // prior interrupted sign-in) but its `Account` row is missing.
       allowDangerousEmailAccountLinking: true,
       authorization: {
-        params: { prompt: 'consent', access_type: 'offline', response_type: 'code' },
+        params: { access_type: 'offline', response_type: 'code' },
       },
     }),
   ],

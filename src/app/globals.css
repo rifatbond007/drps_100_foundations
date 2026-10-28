@@ -3,74 +3,81 @@
 @tailwind utilities;
 
 /*
- * Design tokens.
+ * Design tokens (HSL triplets, consumed as hsl(var(--x))).
  *
- * The palette is intentionally small and intentional — Bangladesh-foundation
- * green (primary), warm off-white paper, soft ink, mustard for admin,
- * bKash pink only on payment surfaces. Each role has a single representative
- * colour; everything else is grey-on-paper.
- *
- * HSL is used so any tool that reads hsl(var(--primary)) can tweak the
- * value in one place.
+ * Roles:
+ *   primary       emerald — actions, links, active states
+ *   primary-soft  pale emerald tint for highlight surfaces and icon chips
+ *   bkash         bKash pink — ONLY the pay/submit button and the bKash
+ *                 instruction card
+ *   success / warning / destructive — donation status
+ * Everything else is neutral.
  */
 @layer base {
   :root {
-    /* Surfaces */
-    --background: 36 26% 96%;          /* paper #FBF9F4 */
-    --foreground: 162 30% 9%;          /* ink #0E1B17 */
-    --card: 0 0% 100%;                /* white card on paper */
-    --card-foreground: 162 30% 9%;
-    --secondary: 36 18% 92%;           /* slightly darker than paper */
-    --secondary-foreground: 162 30% 9%;
-    --muted: 36 18% 92%;
-    --muted-foreground: 162 12% 38%;
-    --accent: 36 18% 92%;
-    --accent-foreground: 162 30% 9%;
+    --background: 150 20% 99%;
+    --foreground: 160 25% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 160 25% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 160 25% 10%;
+    --muted: 150 15% 96%;
+    --muted-foreground: 160 8% 40%;
+    --border: 150 12% 90%;
+    --input: 150 12% 86%;
+    --ring: 160 84% 30%;
 
-    /* Borders — hairline rules */
-    --border: 36 14% 84%;
-    --input: 36 14% 84%;
-    --ring: 162 80% 26%;              /* emerald focus */
+    --primary: 160 84% 30%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 152 60% 95%;
+    --primary-soft-foreground: 160 84% 22%;
 
-    /* Foundation green */
-    --primary: 162 80% 26%;           /* emerald #0E7A5A */
-    --primary-foreground: 36 26% 98%;
-
-    /* bKash — payment surfaces only */
-    --bkash: 332 88% 48%;             /* bKash pink #E2136E */
+    --bkash: 332 88% 48%;
     --bkash-foreground: 0 0% 100%;
+    --bkash-soft: 332 90% 97%;
 
-    /* Status */
-    --destructive: 0 72% 42%;
+    --success: 152 70% 34%;
+    --success-soft: 152 60% 94%;
+    --warning: 35 92% 42%;
+    --warning-soft: 42 100% 94%;
+    --destructive: 0 72% 48%;
     --destructive-foreground: 0 0% 100%;
-
-    /* Admin — mustard */
-    --admin: 36 75% 45%;              /* mustard #C98B1A */
-    --admin-foreground: 36 26% 98%;
+    --destructive-soft: 0 86% 96%;
+    --info: 210 80% 45%;
+    --info-soft: 210 90% 96%;
   }
 
   .dark {
-    --background: 162 30% 8%;
-    --foreground: 36 18% 94%;
-    --card: 162 28% 11%;
-    --card-foreground: 36 18% 94%;
-    --secondary: 162 24% 14%;
-    --secondary-foreground: 36 18% 94%;
-    --muted: 162 24% 14%;
-    --muted-foreground: 162 12% 64%;
-    --accent: 162 24% 14%;
-    --accent-foreground: 36 18% 94%;
-    --border: 162 18% 22%;
-    --input: 162 18% 22%;
-    --ring: 162 60% 42%;
-    --primary: 162 60% 42%;
-    --primary-foreground: 162 30% 9%;
-    --bkash: 332 80% 56%;
+    --background: 160 25% 7%;
+    --foreground: 150 15% 94%;
+    --card: 160 20% 10%;
+    --card-foreground: 150 15% 94%;
+    --popover: 160 20% 11%;
+    --popover-foreground: 150 15% 94%;
+    --muted: 160 15% 14%;
+    --muted-foreground: 150 8% 64%;
+    --border: 160 12% 18%;
+    --input: 160 12% 22%;
+    --ring: 158 64% 45%;
+
+    --primary: 158 64% 45%;
+    --primary-foreground: 160 30% 6%;
+    --primary-soft: 160 40% 14%;
+    --primary-soft-foreground: 152 60% 75%;
+
+    --bkash: 332 80% 58%;
     --bkash-foreground: 0 0% 100%;
-    --destructive: 0 60% 50%;
-    --destructive-foreground: 0 0% 98%;
-    --admin: 36 75% 52%;
-    --admin-foreground: 162 30% 9%;
+    --bkash-soft: 332 40% 16%;
+
+    --success: 152 55% 50%;
+    --success-soft: 152 35% 15%;
+    --warning: 40 90% 58%;
+    --warning-soft: 40 40% 15%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-soft: 0 40% 16%;
+    --info: 210 80% 65%;
+    --info-soft: 210 40% 16%;
   }
 }
 
@@ -78,14 +85,29 @@
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: 'rlig' 1, 'calt' 1, 'tnum' 1;
+    line-height: 1.65;
   }
-  /* Hind Siliguri ships Latin + Bengali in one file so a single
-   * font-family works for both — no per-locale swap needed. */
-  body {
-    font-family: var(--font-hind), system-ui, sans-serif;
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply tracking-tight;
+    line-height: 1.2;
+  }
+  /* Bengali glyphs have taller ascenders/matras — give headings room. */
+  :lang(bn) h1,
+  :lang(bn) h2,
+  :lang(bn) h3,
+  :lang(bn) h4 {
+    line-height: 1.35;
+  }
+  ::selection {
+    @apply bg-primary/20;
   }
 }
 
@@ -93,9 +115,18 @@
   .text-balance {
     text-wrap: balance;
   }
-  /* Register rules — a hairline divider with a touch of breathing room,
-   * used between rows in tables and lists instead of card chrome. */
-  .rule {
-    @apply border-border;
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

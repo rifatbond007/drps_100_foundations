@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { cn, formatBDT } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatBDT } from '@/lib/format';
 
 describe('cn', () => {
   it('merges class names', () => {
@@ -19,14 +20,14 @@ describe('formatBDT', () => {
   it('formats whole numbers in English locale', () => {
     const result = formatBDT('1000', 'en');
     expect(result).toMatch(/1[,.]?000/);
-    expect(result).toContain('BDT');
+    expect(result).toContain('৳');
   });
 
   it('formats decimal values in English locale (rounds to whole number)', () => {
     // BDT doesn't use paisa — function rounds to integer
     const result = formatBDT('1000.50', 'en');
     expect(result).toMatch(/1[,.]?0(0[1-9]|0[1-9]\d)/); // either 1000 or rounded
-    expect(result).toContain('BDT');
+    expect(result).toContain('৳');
   });
 
   it('formats Bangla locale (default)', () => {

@@ -6,6 +6,7 @@
  * admin operations on other users go through /api/admin/users/*.
  */
 import { z } from 'zod';
+import { BD_PHONE_REGEX } from '@/lib/validation/common';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, requireActiveUser } from '@/lib/auth/session';
 import { ok, fail } from '@/lib/api/helpers';
@@ -21,7 +22,7 @@ const UpdateProfileSchema = z
       .trim()
       .min(11)
       .max(20)
-      .regex(/^(\+?880|0)1[3-9]\d{8}$/, 'Invalid Bangladesh phone number')
+      .regex(BD_PHONE_REGEX, 'Invalid Bangladesh phone number')
       .optional(),
     avatarUrl: z
       .string()
@@ -61,11 +62,14 @@ export async function GET() {
 
     // H-fix: \`donationCount\`/\`totalDonated\` aren't columns on User.
     // Compute them via aggregation so the route stays type-safe.
-    const donationAgg = await prisma.donation.aggregate({
-      where: { userId: session.user.id, status: 'SUCCESS' },
-      _count: { _all: true },
-      _sum: { amount: true },
-    });
+    const [donationAgg, pendingCount] = await Promise.all([
+      prisma.donation.aggregate({
+        where: { userId: session.user.id, status: 'SUCCESS' },
+        _count: { _all: true },
+        _sum: { amount: true },
+      }),
+      prisma.donation.count({ where: { userId: session.user.id, status: 'PENDING' } }),
+    ]);
 
     return ok({
       id: user.id,
@@ -80,6 +84,7 @@ export async function GET() {
       lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
       donationCount: donationAgg._count._all,
       totalDonated: donationAgg._sum.amount?.toString() ?? '0',
+      pendingCount,
     });
   } catch (error) {
     return fail(error);

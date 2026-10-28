@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const deep = url.searchParams.get('deep') === '1';
 
-  const services: Record<string, { ok: boolean; latencyMs?: number; error?: string }> = {};
+  const services: Record<string, { ok: boolean; latencyMs?: number }> = {};
 
   if (deep) {
     // Postgres
@@ -25,8 +25,9 @@ export async function GET(request: Request) {
     try {
       await prisma.$queryRaw`SELECT 1`;
       services.postgres = { ok: true, latencyMs: Date.now() - pgStart };
-    } catch (e) {
-      services.postgres = { ok: false, error: (e as Error).message };
+    } catch {
+      // Raw driver errors can carry hosts/credentials — never echo them.
+      services.postgres = { ok: false };
     }
 
     // Redis
@@ -34,8 +35,8 @@ export async function GET(request: Request) {
     try {
       const pong = await redis.ping();
       services.redis = { ok: pong === 'PONG', latencyMs: Date.now() - redisStart };
-    } catch (e) {
-      services.redis = { ok: false, error: (e as Error).message };
+    } catch {
+      services.redis = { ok: false };
     }
   }
 

@@ -17,13 +17,6 @@
 
 export const BKASH_RECEIVER_NUMBER = process.env.BKASH_RECEIVER_NUMBER ?? '01720058533';
 
-/** Display label for the bKash payment instructions shown on /donate. */
-export const PAYMENT_INSTRUCTIONS = {
-  method: 'bKash (Personal)',
-  number: BKASH_RECEIVER_NUMBER,
-  referenceHint: 'Use your name or "donation" as the reference',
-} as const;
-
 /**
  * Pseudo gateway identifier persisted on Donation.paymentMethod. Keeps
  * the column non-null so admin reports don't have to handle "unknown"

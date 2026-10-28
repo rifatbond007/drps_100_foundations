@@ -19,13 +19,13 @@
  * /donate/pending?id=... which shows the receipt number + the
  * estimated review window.
  */
-import { z } from 'zod';
 import { type NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireActiveUser } from '@/lib/auth/session';
-import { ok, fail } from '@/lib/api/helpers';
+import { ok, fail, parseJsonBody } from '@/lib/api/helpers';
 import { logSecurityEvent } from '@/lib/audit';
-import { NotFoundError, ForbiddenError, ValidationError } from '@/lib/errors';
+import { Prisma } from '@prisma/client';
+import { ConflictError, NotFoundError, ForbiddenError, ValidationError } from '@/lib/errors';
 import { submitTrxSchema } from '@/lib/validation/donation';
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -37,13 +37,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       throw new ValidationError('Invalid donation id');
     }
 
-    let body: z.infer<typeof submitTrxSchema>;
-    try {
-      body = submitTrxSchema.parse(await request.json());
-    } catch (error) {
-      if (error instanceof z.ZodError) return fail(error);
-      throw error;
-    }
+    const body = await parseJsonBody(request, submitTrxSchema);
 
     const donation = await prisma.donation.findUnique({
       where: { id },
@@ -73,25 +67,28 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       throw new ValidationError(`Donation is ${donation.status} — cannot submit TrxID`);
     }
 
-    // Pre-check TrxID uniqueness. The schema also has @unique so this is
-    // a friendly error path; the DB constraint is the real guard.
-    const existingTrx = await prisma.donation.findFirst({
-      where: { trxId: body.trxId },
-      select: { id: true },
-    });
-    if (existingTrx && existingTrx.id !== id) {
-      throw new ValidationError('This TrxID is already associated with another donation');
-    }
-
-    const updated = await prisma.donation.update({
-      where: { id },
-      data: {
-        trxId: body.trxId,
-        senderPhone: body.senderPhone,
-        trxSubmittedAt: new Date(),
-      },
-      select: { id: true, status: true, trxId: true, senderPhone: true },
-    });
+    // TrxID uniqueness is enforced by the partial unique index
+    // "Donation_trxId_active_key" (ignores FAILED/CANCELLED rows, so a
+    // rejected TrxID can be resubmitted). A violation surfaces as P2002.
+    const updated = await prisma.donation
+      .update({
+        where: { id },
+        data: {
+          trxId: body.trxId,
+          senderPhone: body.senderPhone,
+          trxSubmittedAt: new Date(),
+        },
+        select: { id: true, status: true, trxId: true, senderPhone: true },
+      })
+      .catch((error: unknown) => {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          throw new ConflictError(
+            'This TrxID is already used by another donation',
+            'TRX_ALREADY_USED'
+          );
+        }
+        throw error;
+      });
 
     await logSecurityEvent({
       action: 'DONATION_TRX_SUBMITTED',
@@ -110,7 +107,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       status: updated.status,
       trxId: updated.trxId,
       senderPhone: updated.senderPhone,
-      redirectUrl: `/${session.user.languagePref === 'EN' ? 'en' : 'bn'}/donate/pending?id=${updated.id}`,
     });
   } catch (error) {
     return fail(error);

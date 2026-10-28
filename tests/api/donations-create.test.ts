@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => ({
     user: {
       findUnique: vi.fn(),
     },
+    $transaction: vi.fn(),
   },
   redis: {
     get: vi.fn().mockResolvedValue(null),
@@ -54,7 +55,6 @@ vi.mock('@/lib/logger', () => ({
 // the dependency.
 vi.mock('@/lib/payment', () => ({
   PAYMENT_METHOD: 'manual_bkash',
-  PAYMENT_INSTRUCTIONS: { method: 'bKash (Personal)', number: '01616413419', referenceHint: '' },
 }));
 
 import { POST } from '@/app/api/donations/create/route';
@@ -78,6 +78,7 @@ function buildReq(body: unknown): NextRequest {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.redis.get.mockResolvedValue(null);
+  mocks.prisma.$transaction.mockImplementation((fn: (tx: unknown) => unknown) => fn(mocks.prisma));
 });
 
 afterEach(() => {
@@ -104,6 +105,11 @@ describe('POST /api/donations/create', () => {
       user: { id: 'u1', role: 'USER', profileCompleted: false, languagePref: 'BN' },
     });
     mocks.prisma.donation.create.mockResolvedValueOnce({ id: 'd1', amount: '500' });
+    mocks.prisma.donation.update.mockResolvedValueOnce({
+      id: 'd1',
+      amount: '500',
+      purpose: 'GENERAL_FUND',
+    });
 
     const res = await POST(buildReq(VALID_BODY));
     expect(res.status).toBe(200);
@@ -137,6 +143,11 @@ describe('POST /api/donations/create', () => {
       user: { id: 'u1', role: 'USER', profileCompleted: true, languagePref: 'BN' },
     });
     mocks.prisma.donation.create.mockResolvedValueOnce({ id: 'd1', amount: '500' });
+    mocks.prisma.donation.update.mockResolvedValueOnce({
+      id: 'd1',
+      amount: '500',
+      purpose: 'GENERAL_FUND',
+    });
 
     const res = await POST(buildReq(VALID_BODY));
     expect(res.status).toBe(200);
@@ -164,6 +175,10 @@ describe('POST /api/donations/create', () => {
         data: { bkashPaymentId: 'd1' },
       })
     );
+    // Create + payment-id update happen in one transaction.
+    expect(mocks.prisma.$transaction).toHaveBeenCalledTimes(1);
+    // Idempotency cache is scoped to the user.
+    expect(mocks.redis.get).toHaveBeenCalledWith(`idem:donation:u1:${VALID_BODY.idempotencyKey}`);
     // Audit log fired.
     expect(mocks.logSecurityEvent).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'DONATION_INITIATED', userId: 'u1' })
@@ -189,5 +204,20 @@ describe('POST /api/donations/create', () => {
 describe('Error shape parity', () => {
   it('ForbiddenError is an Error subclass (parity with previous suite)', () => {
     expect(new ForbiddenError('x')).toBeInstanceOf(Error);
+  });
+});
+
+describe('malformed input', () => {
+  it('returns 400 on malformed JSON', async () => {
+    mocks.requireActiveUser.mockResolvedValueOnce({
+      user: { id: 'u1', role: 'USER', email: 'u@x.y', languagePref: 'BN' },
+    });
+    const bad = new Request('http://localhost/api/donations/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{bad',
+    }) as unknown as NextRequest;
+    const res = await POST(bad);
+    expect(res.status).toBe(400);
   });
 });

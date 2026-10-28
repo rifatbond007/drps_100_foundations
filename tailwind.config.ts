@@ -1,91 +1,61 @@
 import type { Config } from 'tailwindcss';
 import tailwindcssAnimate from 'tailwindcss-animate';
 
+const token = (name: string) => `hsl(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
   darkMode: 'class',
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     container: {
       center: true,
-      padding: '1.25rem',
-      screens: {
-        '2xl': '1200px',
-      },
+      padding: { DEFAULT: '1rem', sm: '1.5rem' },
+      screens: { '2xl': '1200px' },
     },
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
-        // Foundation green — used sparingly for primary actions and active
-        // states. HSL keeps a single hue family so all surfaces share one
-        // colour story without us hand-tuning each shade.
+        border: token('border'),
+        input: token('input'),
+        ring: token('ring'),
+        background: token('background'),
+        foreground: token('foreground'),
+        card: { DEFAULT: token('card'), foreground: token('card-foreground') },
+        popover: { DEFAULT: token('popover'), foreground: token('popover-foreground') },
+        muted: { DEFAULT: token('muted'), foreground: token('muted-foreground') },
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: token('primary'),
+          foreground: token('primary-foreground'),
+          soft: token('primary-soft'),
+          'soft-foreground': token('primary-soft-foreground'),
         },
-        // Surface-tinted secondary — the "muted" feel of the page chrome
-        // (footer, sidebar surface, account cards). Off-paper so it reads
-        // as a quieter plane.
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-        },
-        // Reserved for payment surfaces only — never for chrome.
-        // Distinct hue so the donor's eye finds the money path at a glance.
         bkash: {
-          DEFAULT: 'hsl(var(--bkash))',
-          foreground: 'hsl(var(--bkash-foreground))',
+          DEFAULT: token('bkash'),
+          foreground: token('bkash-foreground'),
+          soft: token('bkash-soft'),
         },
+        success: { DEFAULT: token('success'), soft: token('success-soft') },
+        warning: { DEFAULT: token('warning'), soft: token('warning-soft') },
+        info: { DEFAULT: token('info'), soft: token('info-soft') },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
-        },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
-        card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
-        },
-        // Admin chrome — mustard. Gives /admin/* a distinct, trustworthy
-        // tone separate from donor-facing pages, without resorting to a
-        // different primary.
-        admin: {
-          DEFAULT: 'hsl(var(--admin))',
-          foreground: 'hsl(var(--admin-foreground))',
+          DEFAULT: token('destructive'),
+          foreground: token('destructive-foreground'),
+          soft: token('destructive-soft'),
         },
       },
       borderRadius: {
-        // Tight corners. The pages are register-style — no rounded cards
-        // stacked on rounded cards. Inputs/buttons get a hint (6px) but
-        // everything else sits on the grid.
-        lg: '6px',
-        md: '4px',
-        sm: '2px',
+        xl: '20px',
+        lg: '16px',
+        md: '12px',
+        sm: '8px',
+      },
+      boxShadow: {
+        card: '0 1px 2px hsl(160 20% 10% / 0.04), 0 4px 16px hsl(160 20% 10% / 0.06)',
+        lift: '0 2px 4px hsl(160 20% 10% / 0.05), 0 12px 32px hsl(160 20% 10% / 0.10)',
       },
       fontFamily: {
-        // Single family — Hind Siliguri ships both Latin and Bengali in
-        // one font file so headlines, body, and numerals all share the
-        // same metrics.
         sans: ['var(--font-hind)', 'system-ui', 'sans-serif'],
-        serif: ['var(--font-hind)', 'system-ui', 'serif'],
       },
-      // One orchestrated entrance — the body fades in once. No scattered
-      // fade-and-slide on every section.
       keyframes: {
-        'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
         'accordion-down': {
           from: { height: '0' },
           to: { height: 'var(--radix-accordion-content-height)' },
@@ -94,11 +64,20 @@ const config: Config = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        'progress-fill': {
+          from: { transform: 'scaleX(0)' },
+          to: { transform: 'scaleX(1)' },
+        },
+        marquee: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
+        },
       },
       animation: {
-        'fade-in': 'fade-in 0.4s ease-out',
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'progress-fill': 'progress-fill 0.9s cubic-bezier(0.22, 1, 0.36, 1) both',
+        marquee: 'marquee 40s linear infinite',
       },
     },
   },

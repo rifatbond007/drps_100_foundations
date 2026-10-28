@@ -1,11 +1,5 @@
 const createNextIntlPlugin = require('next-intl/plugin');
-const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
-
-// TODO(monitoring-agent): wrap with `withSentryConfig` once @sentry/nextjs is configured.
-// const { withSentryConfig } = require('@sentry/nextjs');
-
-// TODO(perf-agent): wrap with bundle analyzer when running `ANALYZE=true pnpm build`.
-// const withBundleAnalyzer = require('@next/bundle-analyzer')({ enabled: process.env.ANALYZE === 'true' });
+const withNextIntl = createNextIntlPlugin('./src/lib/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -43,7 +37,7 @@ const nextConfig = {
   },
 
   experimental: {
-    optimizePackageImports: ['lucide-react', 'date-fns'],
+    optimizePackageImports: ['lucide-react'],
   },
 
   // Transpile some packages that ship untranspiled
@@ -51,4 +45,3 @@ const nextConfig = {
 };
 
 module.exports = withNextIntl(nextConfig);
-// module.exports = withBundleAnalyzer(withSentryConfig(withNextIntl(nextConfig), { hideSourceMaps: true, disableLogger: true }));

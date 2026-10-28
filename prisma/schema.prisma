@@ -151,6 +151,11 @@ model Donation {
   // ── Manual payment submission fields ──
   // The TrxID the donor typed in after sending money to our personal
   // bKash number. Populated by /api/donations/[id]/submit-trx.
+  // Unique among active rows via the raw-SQL partial index
+  // "Donation_trxId_active_key" on UPPER("trxId") (migration 20261028000000).
+  // ⚠️ Prisma can't model this index. If `prisma migrate dev` ever generates
+  // `DROP INDEX "Donation_trxId_active_key"`, delete that line from the
+  // migration. `pnpm db:check-duplicate-trx` reports whether the index exists.
   trxId              String?
   // bKash phone number the donor sent FROM (verified by admin against
   // the bKash app). Same validation as User.phone.

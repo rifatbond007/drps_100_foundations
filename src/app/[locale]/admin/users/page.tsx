@@ -1,22 +1,21 @@
-import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { UsersTable } from '@/components/admin/UsersTable';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { PageHeader } from '@/components/ui/page-header';
+import { UsersTable } from '@/features/admin/users-table';
 
-/**
- * /admin/users — admin user list.
- * Hosts the table component, which carries its own header inside.
- */
-export default async function AdminUsersPage({ params }: { params: Promise<{ locale: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'admin.users' });
+  return { title: t('title') };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations('admin.users');
-
+  const t = await getTranslations({ locale, namespace: 'admin.users' });
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
-      </header>
+    <>
+      <PageHeader title={t('title')} description={t('subtitle')} />
       <UsersTable />
-    </div>
+    </>
   );
 }
